@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Rahat1994\SparkCommerce\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class SparkCommerceCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'sparkcommerce';
 
     public $description = 'My command';
 
