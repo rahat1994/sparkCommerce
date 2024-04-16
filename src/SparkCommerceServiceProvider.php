@@ -10,11 +10,11 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
 use Livewire\Features\SupportTesting\Testable;
+use Rahat1994\SparkCommerce\Commands\SparkCommerceCommand;
+use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Rahat1994\SparkCommerce\Commands\SparkCommerceCommand;
-use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 
 class SparkCommerceServiceProvider extends PackageServiceProvider
 {
