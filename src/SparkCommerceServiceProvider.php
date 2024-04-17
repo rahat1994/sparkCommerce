@@ -148,7 +148,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_sparkcommerce_table',
+            'create_sc_products_table',
         ];
     }
 }
