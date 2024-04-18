@@ -3,7 +3,7 @@
 namespace Rahat1994\SparkCommerce\Models;
 use Illuminate\Database\Eloquent\Model;
 use Rahat1994\SparkCommerce\Models\ScProductVariation;
-class ScProduct extends Model
+class SCProduct extends Model
 {
     /**
      * Get the table associated with the model.

@@ -4,7 +4,7 @@ namespace Rahat1994\SparkCommerce;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-
+use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 class SparkCommercePlugin implements Plugin
 {
     public function getId(): string
@@ -14,6 +14,7 @@ class SparkCommercePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
+        $panel->resources([ProductResource::class]);
     }
 
     public function boot(Panel $panel): void

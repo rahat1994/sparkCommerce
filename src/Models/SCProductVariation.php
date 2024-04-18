@@ -3,7 +3,7 @@
 namespace Rahat1994\SparkCommerce\Models;
 use Illuminate\Database\Eloquent\Model;
 use Rahat1994\SparkCommerce\Models\ScProduct;
-class ScProductVariation extends Model
+class SCProductVariation extends Model
 {
 
     /**
