@@ -1,8 +1,9 @@
 <?php
 
 namespace Rahat1994\SparkCommerce\Models;
+
 use Illuminate\Database\Eloquent\Model;
-use Rahat1994\SparkCommerce\Models\ScProductVariation;
+
 class SCProduct extends Model
 {
     /**
