@@ -1,11 +1,11 @@
 <?php
 
 namespace Rahat1994\SparkCommerce\Models;
+
 use Illuminate\Database\Eloquent\Model;
-use Rahat1994\SparkCommerce\Models\ScProduct;
+
 class SCProductVariation extends Model
 {
-
     /**
      * Get the table associated with the model.
      *

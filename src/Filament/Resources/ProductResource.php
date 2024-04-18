@@ -3,15 +3,17 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use Filament\Resources\Resource;
-use Rahat1994\SparkCommerce\Models\SCProduct;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
+use Filament\Tables\Table;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
+use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
+use Rahat1994\SparkCommerce\Models\SCProduct;
+
 class ProductResource extends Resource
 {
     protected static ?string $model = SCProduct::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getModelLabel(): string
@@ -42,7 +44,7 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('name'),
             ])
             ->filters([
                 //
@@ -67,5 +69,4 @@ class ProductResource extends Resource
             'edit' => EditProduct::route('/{record}/edit'),
         ];
     }
-
 }
