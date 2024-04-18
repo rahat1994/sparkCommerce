@@ -1,11 +1,11 @@
 <?php
 
 namespace Rahat1994\SparkCommerce\Models;
+
 use Illuminate\Database\Eloquent\Model;
-use Rahat1994\SparkCommerce\Models\ScProduct;
+
 class SCAttribute extends Model
 {
-
     protected $fillable = ['product_id', 'name', 'value'];
 
     protected $casts = [
@@ -13,6 +13,7 @@ class SCAttribute extends Model
         'name' => 'string',
         'value' => 'array',
     ];
+
     /**
      * Get the table associated with the model.
      *
