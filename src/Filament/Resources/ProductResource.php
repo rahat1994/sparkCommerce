@@ -64,7 +64,7 @@ class ProductResource extends Resource
                 TextInput::make('name')
                     ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
                 RichEditor::make('description')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description'))
+                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
             ])->columns(1);
     }
 

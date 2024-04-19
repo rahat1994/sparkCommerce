@@ -2,10 +2,10 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 
+use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
-use Filament\Actions;
 
 class ListProducts extends ListRecords
 {

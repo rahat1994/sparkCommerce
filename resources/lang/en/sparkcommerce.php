@@ -11,7 +11,7 @@ return [
             'creation_form' => [
                 'product_name' => 'Product Name',
                 'description' => 'Description',
-            ]
+            ],
         ],
     ],
 ];
