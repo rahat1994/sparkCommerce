@@ -8,6 +8,10 @@ return [
             'model_plural_label' => 'Products',
             'navigation_group' => 'Products',
             'navigation' => 'All Products',
+            'creation_form' => [
+                'product_name' => 'Product Name',
+                'description' => 'Description',
+            ]
         ],
     ],
 ];

@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
+use Filament\Actions;
 
 class ListProducts extends ListRecords
 {
@@ -13,7 +14,7 @@ class ListProducts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            //
+            Actions\CreateAction::make(),
         ];
     }
 

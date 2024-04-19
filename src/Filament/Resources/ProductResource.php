@@ -2,6 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -52,6 +55,17 @@ class ProductResource extends Resource
             ->searchable(true)
             ->actions([])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
+                RichEditor::make('description')
+                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description'))
+            ])->columns(1);
     }
 
     public static function getRelations(): array
