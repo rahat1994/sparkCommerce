@@ -2,6 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -64,8 +65,21 @@ class ProductResource extends Resource
                 TextInput::make('name')
                     ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
                 RichEditor::make('description')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description'))
+                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
+                self::getProductDimensionFields(),
+
             ])->columns(1);
+    }
+
+    public static function getProductDimensionFields()
+    {
+        return Fieldset::make('product_dimensions')
+            ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.fieldset_name'))
+            ->schema([
+                TextInput::make('width')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.weight')),
+                TextInput::make('height')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.height')),
+                TextInput::make('width')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.width')),
+            ])->columns(3);
     }
 
     public static function getRelations(): array
