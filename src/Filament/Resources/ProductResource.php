@@ -100,7 +100,7 @@ class ProductResource extends Resource
                 self::getVariationsTab(),
                 self::getAdvancedTab(),
 
-                self::getMoreOptionsTab()
+                self::getMoreOptionsTab(),
 
             ]);
     }
@@ -152,7 +152,7 @@ class ProductResource extends Resource
                                     )->collapsible(),
 
                             ]),
-                ])->collapsible(),
+                    ])->collapsible(),
             ]);
     }
 
@@ -214,8 +214,6 @@ class ProductResource extends Resource
             //
         ];
     }
-
-
 
     public static function getPages(): array
     {
