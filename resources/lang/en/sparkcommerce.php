@@ -16,7 +16,7 @@ return [
                     'fieldset_name' => 'Product Dimensions',
                     'height' => 'Height',
                     'weight' => 'Weight',
-                    'width' => 'Width'
+                    'width' => 'Width',
                 ],
             ],
         ],
