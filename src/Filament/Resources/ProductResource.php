@@ -67,7 +67,6 @@ class ProductResource extends Resource
                 RichEditor::make('description')
                     ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
                 self::getProductDimensionFields(),
-
             ])->columns(1);
     }
 

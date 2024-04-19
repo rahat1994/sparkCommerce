@@ -11,13 +11,14 @@ return [
             'creation_form' => [
                 'product_name' => 'Product Name',
                 'description' => 'Description',
+
                 'product_dimension' => [
                     'fieldset_name' => 'Product Dimensions',
                     'height' => 'Height',
                     'weight' => 'Weight',
                     'width' => 'Width'
                 ],
-            ]
+            ],
         ],
     ],
 ];
