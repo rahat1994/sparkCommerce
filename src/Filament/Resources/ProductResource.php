@@ -16,12 +16,10 @@ use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use Nette\Utils\Html;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
 use Rahat1994\SparkCommerce\Models\SCProduct;
-use Filament\Forms\Get;
 
 class ProductResource extends Resource
 {
@@ -101,6 +99,7 @@ class ProductResource extends Resource
                 self::getAttributesTab(),
                 self::getVariationsTab(),
                 self::getAdvancedTab(),
+
                 self::getMoreOptionsTab()
 
             ]);
@@ -123,6 +122,7 @@ class ProductResource extends Resource
                     ->content(new HtmlString('<p>Coming Soon</p>')),
             ]);
     }
+
     public static function getPricingTab(): Tab
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.pricing'))
@@ -136,9 +136,6 @@ class ProductResource extends Resource
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.attributes'))
             ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-
                 Repeater::make('product_attributes')
                     ->label('Product Attributes')
                     ->schema([
@@ -155,8 +152,7 @@ class ProductResource extends Resource
                                     )->collapsible(),
 
                             ]),
-                    ])->collapsible(),
-
+                ])->collapsible(),
             ]);
     }
 
@@ -195,7 +191,7 @@ class ProductResource extends Resource
                 Placeholder::make('notice')
                     ->content(new HtmlString('<p>Needs work like woocommerce</p>')),
                 Section::make('Inventory')
-                    ->description("Settings for inventory")
+                    ->description('Settings for inventory')
                     ->schema([
                         TextInput::make('stock_quantity')
                             ->label('Stock Quantity')->numeric(),
