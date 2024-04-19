@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
@@ -101,67 +102,94 @@ class ProductResource extends Resource
                 self::getVariationsTab(),
                 self::getAdvancedTab(),
                 self::getMoreOptionsTab()
-                
+
             ]);
     }
 
-    public static function getMoreOptionsTab(): Tab{
+    public static function getMoreOptionsTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.more_option'))
-        ->schema([
-            Placeholder::make('Info')
-                ->content(new HtmlString('<p>Coming Soon</p>')),
-        ]);
+            ->schema([
+                Placeholder::make('Info')
+                    ->content(new HtmlString('<p>Coming Soon</p>')),
+            ]);
     }
 
-    public static function getAdvancedTab(): Tab{
+    public static function getAdvancedTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.advanced'))
-        ->schema([
-            Placeholder::make('Info')
-                ->content(new HtmlString('<p>Coming Soon</p>')),
-        ]);
+            ->schema([
+                Placeholder::make('Info')
+                    ->content(new HtmlString('<p>Coming Soon</p>')),
+            ]);
     }
-    public static function getPricingTab(): Tab{
+    public static function getPricingTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.pricing'))
-        ->schema([
-            Placeholder::make('Info')
-                ->content(new HtmlString('<p>Coming Soon</p>')),
-        ]);
+            ->schema([
+                Placeholder::make('Info')
+                    ->content(new HtmlString('<p>Coming Soon</p>')),
+            ]);
     }
 
-    public static function getAttributesTab(): Tab{
+    public static function getAttributesTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.attributes'))
-        ->schema([
-            Placeholder::make('Info')
-                ->content(new HtmlString('<p>Coming Soon</p>')),
-        ]);
+            ->schema([
+                Placeholder::make('Info')
+                    ->content(new HtmlString('<p>Coming Soon</p>')),
+
+                Repeater::make('product_attributes')
+                    ->label('Product Attributes')
+                    ->schema([
+                        Fieldset::make('product_attributes')
+                            ->label('Product Attributes')
+                            ->schema([
+                                TextInput::make('attribute_name')
+                                    ->label('Attribute Name'),
+                                Repeater::make('attribute_values')
+                                    ->label('Attribute Values')
+                                    ->simple(
+                                        TextInput::make('attribute_value')
+                                            ->label('Attribute Value'),
+                                    )->collapsible(),
+
+                            ]),
+                    ])->collapsible(),
+
+            ]);
     }
 
-    public static function getVariationsTab(): Tab{
+    public static function getVariationsTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.variations'))
-        ->schema([
-            Placeholder::make('Info')
-                ->content(new HtmlString('<p>Coming Soon</p>')),
-        ]);
+            ->schema([
+                Placeholder::make('Info')
+                    ->content(new HtmlString('<p>Coming Soon</p>')),
+            ]);
     }
 
-    public static function getLinkedProductsTab(): Tab{
+    public static function getLinkedProductsTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.linked_products'))
-        ->schema([
-            Placeholder::make('Info')
-                ->content(new HtmlString('<p>Coming Soon</p>')),
-        ]);
+            ->schema([
+                Placeholder::make('Info')
+                    ->content(new HtmlString('<p>Coming Soon</p>')),
+            ]);
     }
 
-    public static function getShippingTab(): Tab{
+    public static function getShippingTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.shipping'))
-        ->schema([
-            self::getProductDimensionFields(),
-        ]);
+            ->schema([
+                self::getProductDimensionFields(),
+            ]);
     }
 
-    public static function getInventoryTab(): Tab{
+    public static function getInventoryTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.inventory'))
-        ->schema([                            
+            ->schema([
                 TextInput::make('sku')
                     ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.sku')),
                 Placeholder::make('notice')
@@ -181,7 +209,7 @@ class ProductResource extends Resource
                         TextInput::make('low_stock_threshold')
                             ->label('Low stock threshold')->numeric(),
                     ]),
-                ]);
+            ]);
     }
 
     public static function getRelations(): array
@@ -190,6 +218,8 @@ class ProductResource extends Resource
             //
         ];
     }
+
+
 
     public static function getPages(): array
     {
