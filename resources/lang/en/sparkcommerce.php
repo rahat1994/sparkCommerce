@@ -11,7 +11,7 @@ return [
             'creation_form' => [
                 'product_name' => 'Product Name',
                 'description' => 'Description',
-                "sku" => "SKU",
+                'sku' => 'SKU',
                 'product_dimension' => [
                     'fieldset_name' => 'Product Dimensions',
                     'height' => 'Height',
@@ -19,8 +19,8 @@ return [
                     'width' => 'Width',
                     'length' => 'Length',
                 ],
-                "tabs_section" => [
-                    "tabs" =>[
+                'tabs_section' => [
+                    'tabs' => [
                         'inventory' => 'Inventory',
                         'linked_products' => 'Linked Products',
                         'pricing' => 'Pricing',
@@ -29,11 +29,11 @@ return [
                         'attributes' => 'Attributes',
                         'variations' => 'Variations',
                         'advanced' => 'Advanced',
-                        "more_option" => 'More Options',
+                        'more_option' => 'More Options',
                     ],
-                    
+
                 ],
-                
+
             ],
         ],
     ],
