@@ -2,13 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Filament\Actions\Action;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Builder;
-use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
@@ -27,7 +23,6 @@ use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use phpDocumentor\Reflection\Types\Void_;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -154,13 +149,13 @@ class ProductResource extends Resource
                         Fieldset::make('product_attributes')
                             ->label('Product Attributes')
                             ->schema([
-                                CheckboxList::make("visible_on_the_product_page")
+                                CheckboxList::make('visible_on_the_product_page')
                                     ->options([
-                                        "visible_on_the_product_page" => "Visible on the product page",
-                                        'used_for_variations' => "Used for varaitions"
+                                        'visible_on_the_product_page' => 'Visible on the product page',
+                                        'used_for_variations' => 'Used for varaitions',
                                     ])
                                     ->default(['visible_on_the_product_page', 'used_for_variations'])
-                                    ->label("Visible on the product page")->columnSpan(2),
+                                    ->label('Visible on the product page')->columnSpan(2),
                                 TextInput::make('attribute_name')
                                     ->label('Attribute Name'),
                                 Repeater::make('attribute_values')
@@ -186,20 +181,20 @@ class ProductResource extends Resource
                     return [Placeholder::make('Info')
                         ->content(new HtmlString('<p>Please add attributes</p>'))];
                 } else {
-                    return array_merge([Fieldset::make("Create Variations")->schema(
+                    return array_merge([Fieldset::make('Create Variations')->schema(
                         [Select::make('generate_varaitions')
-                            ->label("Create Variations")
+                            ->label('Create Variations')
                             ->options([
-                                'generate_variations_from_attributes' => "Generate Variations from Attributes",
-                                'create_variations_manually' => "Create Variations manually",
+                                'generate_variations_from_attributes' => 'Generate Variations from Attributes',
+                                'create_variations_manually' => 'Create Variations manually',
                             ])->live(onBlur: false), Actions::make([
-                            FormAction::make('star')
-                                ->icon('heroicon-m-star')
-                                ->requiresConfirmation()
-                                ->action(function (Set $set, $state) {
-                                    $set('price', $state);
-                                }),
-                        ])->verticalAlignment(VerticalAlignment::End)]
+                                FormAction::make('star')
+                                    ->icon('heroicon-m-star')
+                                    ->requiresConfirmation()
+                                    ->action(function (Set $set, $state) {
+                                        $set('price', $state);
+                                    }),
+                            ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
             });
@@ -209,29 +204,30 @@ class ProductResource extends Resource
     {
 
         return [
-            Section::make("Variations")
+            Section::make('Variations')
                 ->schema(function (Get $get) {
                     $generate_variations = $get('generate_varaitions');
                     // dd($generate_variations);
-                    if ($generate_variations == null) return [];
-                    else if ($generate_variations == 'create_variations_manually') {
+                    if ($generate_variations == null) {
+                        return [];
+                    } elseif ($generate_variations == 'create_variations_manually') {
                         return [Placeholder::make('Info')
                             ->content(new HtmlString('<p>Generate Manually</p>'))];
                     } else {
                         return [
                             Repeater::make('product_variations')
-                                ->label("Product variations")
+                                ->label('Product variations')
                                 ->schema([
                                     Fieldset::make('variation')
                                         ->label('Variation')
                                         ->schema([
-                                            CheckboxList::make("visible_on_the_product_page")
+                                            CheckboxList::make('visible_on_the_product_page')
                                                 ->options([
-                                                    "visible_on_the_product_page" => "Visible on the product page",
-                                                    'used_for_variations' => "Used for varaitions"
+                                                    'visible_on_the_product_page' => 'Visible on the product page',
+                                                    'used_for_variations' => 'Used for varaitions',
                                                 ])
                                                 ->default(['visible_on_the_product_page', 'used_for_variations'])
-                                                ->label("Visible on the product page")->columnSpan(2),
+                                                ->label('Visible on the product page')->columnSpan(2),
                                             TextInput::make('sku')
                                                 ->label('SKU')->columnSpan(2),
                                             TextInput::make('regular_price'),
@@ -244,11 +240,11 @@ class ProductResource extends Resource
                                             RichEditor::make('description')
                                                 ->label('Description')->columnSpan(2),
 
-                                        ])
+                                        ]),
                                 ]),
                         ];
                     }
-                })
+                }),
         ];
     }
 
