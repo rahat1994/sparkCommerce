@@ -2,6 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Actions\Action;
+use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
@@ -18,7 +21,9 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -181,12 +186,21 @@ class ProductResource extends Resource
                     return [Placeholder::make('Info')
                         ->content(new HtmlString('<p>Please add attributes</p>'))];
                 } else {
-                    return array_merge([Select::make('generate_varaitions')
-                        ->label("Create Variations")
-                        ->options([
-                            'generate_variations_from_attributes' => "Generate Variations from Attributes",
-                            'create_variations_manually' => "Create Variations manually",
-                        ])->live(onBlur: false)], self::getVariationsRepeaterField());
+                    return array_merge([Fieldset::make("Create Variations")->schema(
+                        [Select::make('generate_varaitions')
+                            ->label("Create Variations")
+                            ->options([
+                                'generate_variations_from_attributes' => "Generate Variations from Attributes",
+                                'create_variations_manually' => "Create Variations manually",
+                            ])->live(onBlur: false), Actions::make([
+                            FormAction::make('star')
+                                ->icon('heroicon-m-star')
+                                ->requiresConfirmation()
+                                ->action(function (Set $set, $state) {
+                                    $set('price', $state);
+                                }),
+                        ])->verticalAlignment(VerticalAlignment::End)]
+                    )], self::getVariationsRepeaterField());
                 }
             });
     }
