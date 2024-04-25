@@ -6,6 +6,9 @@ use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Split;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
@@ -18,6 +21,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Forms\Record;
+use Filament\Forms\Components\Component;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Columns\TextColumn;
@@ -76,11 +81,19 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
-                RichEditor::make('description')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
-                self::getProductDataSection(),
+                Split::make([
+                    Group::make([
+                        TextInput::make('name')
+                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
+                        RichEditor::make('description')
+                            ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
+                        self::getProductDataSection(),
+                    ]),
+                    Section::make([
+                        Toggle::make('is_published'),
+                        Toggle::make('is_featured'),
+                    ])->grow(false),
+                ])->from('md')
             ])->columns(1);
     }
 
@@ -170,6 +183,47 @@ class ProductResource extends Resource
             ]);
     }
 
+    public static function variationCombinations($arrays, $i=0){
+        
+        if (!isset($arrays[$i])) {
+            return array();
+        }
+        if ($i == count($arrays) - 1) {
+            return $arrays[$i];
+        }
+    
+        // get combinations from subsequent arrays
+        $tmp = self::variationCombinations(array_values($arrays), $i + 1);
+    
+        $result = array();
+    
+        // concat each array from tmp with each element from $arrays[$i]
+        foreach ($arrays[$i] as $v) {
+            foreach ($tmp as $t) {
+                $result[] = is_array($t) ? 
+                    array_merge(array($v), $t) :
+                    array(
+                        'title' => $v . ' ' . $t,
+                        'sku' => $v . ' ' . $t,
+                    );
+            }
+        }
+    
+        return $result;
+    }
+
+    public static function generateVariations($data){
+        
+
+        $variations =  array_map(function($attribute){
+            return array_map(function($value) use ($attribute){
+                return $attribute['attribute_name'] . ' ' . $value['attribute_value'];
+            }, $attribute['attribute_values']);
+        }, $data);
+
+        return self::variationCombinations(array_values($variations));
+    }
+
     public static function getVariationsTab(): Tab
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.variations'))
@@ -187,12 +241,11 @@ class ProductResource extends Resource
                             ->options([
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
-                            ])->live(onBlur: false), Actions::make([
-                                FormAction::make('star')
-                                    ->icon('heroicon-m-star')
-                                    ->requiresConfirmation()
-                                    ->action(function (Set $set, $state) {
-                                        $set('price', $state);
+                            ]), Actions::make([
+                                FormAction::make('Select')
+                                    ->icon('heroicon-m-bars-3')
+                                    ->action(function (Get $get,Set $set, $state) {
+                                        $set('product_variations', self::generateVariations($get("product_attributes")));
                                     }),
                             ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
@@ -217,6 +270,8 @@ class ProductResource extends Resource
                         return [
                             Repeater::make('product_variations')
                                 ->label('Product variations')
+                                ->collapsible()
+                                ->collapsed()
                                 ->schema([
                                     Fieldset::make('variation')
                                         ->label('Variation')
@@ -241,7 +296,9 @@ class ProductResource extends Resource
                                                 ->label('Description')->columnSpan(2),
 
                                         ]),
-                                ]),
+                                ])->itemLabel(
+                                    fn (array $state): ?string => $state['title'] ?? null
+                                ),
                         ];
                     }
                 }),
