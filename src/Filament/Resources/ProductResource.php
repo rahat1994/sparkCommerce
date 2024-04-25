@@ -202,10 +202,7 @@ class ProductResource extends Resource
             foreach ($tmp as $t) {
                 $result[] = is_array($t) ? 
                     array_merge(array($v), $t) :
-                    array(
-                        'title' => $v . ' ' . $t,
-                        'sku' => $v . ' ' . $t,
-                    );
+                    array($v , $t,);
             }
         }
     
@@ -213,15 +210,22 @@ class ProductResource extends Resource
     }
 
     public static function generateVariations($data){
-        
 
         $variations =  array_map(function($attribute){
             return array_map(function($value) use ($attribute){
-                return $attribute['attribute_name'] . ' ' . $value['attribute_value'];
+                return $attribute['attribute_name'] . ': ' . $value['attribute_value'];
             }, $attribute['attribute_values']);
         }, $data);
 
-        return self::variationCombinations(array_values($variations));
+        $repeater_value = array_map(function($attributes){
+            $values = implode(' ', $attributes);
+
+            return [
+                'title' => $values,
+                'sku' => $values,
+            ];
+        },self::variationCombinations(array_values($variations)));
+        return $repeater_value;
     }
 
     public static function getVariationsTab(): Tab
