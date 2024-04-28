@@ -14,12 +14,10 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -97,26 +95,26 @@ class ProductResource extends Resource
                     Section::make('Publish')->schema([
                         Placeholder::make('Status'),
                         Placeholder::make('Visibility'),
-                        Placeholder::make('Publish immediately')
+                        Placeholder::make('Publish immediately'),
                     ])->grow(false),
                     Section::make('Product Image')->schema([
-                        FileUpload::make("product_image")
+                        FileUpload::make('product_image')
                             ->hiddenLabel()
-                            ->image()
+                            ->image(),
                     ])->grow(false),
                     Section::make('Product gallery')->schema([
                         FileUpload::make('product_image_gallery')
                             ->multiple()
                             ->reorderable()
                             ->appendFiles()
-                            ->hiddenLabel()
+                            ->hiddenLabel(),
                     ])->grow(false),
                     Section::make('Product categories')->schema([
                         Placeholder::make('Product categories'),
                     ])->grow(false),
                     Section::make('Product tags')->schema([
                         TagsInput::make('product_tags')
-                            ->label('Product Tags')
+                            ->label('Product Tags'),
                     ])->grow(false),
                 ]),
             ])->columns(4);
@@ -215,7 +213,7 @@ class ProductResource extends Resource
     public static function variationCombinations($arrays, $i = 0)
     {
 
-        if (!isset($arrays[$i])) {
+        if (! isset($arrays[$i])) {
             return [];
         }
         if ($i == count($arrays) - 1) {
@@ -278,12 +276,12 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                            FormAction::make('Select')
-                                ->icon('heroicon-m-bars-3')
-                                ->action(function (Get $get, Set $set, $state) {
-                                    $set('product_variations', self::generateVariations($get('product_attributes')));
-                                }),
-                        ])->verticalAlignment(VerticalAlignment::End)]
+                                FormAction::make('Select')
+                                    ->icon('heroicon-m-bars-3')
+                                    ->action(function (Get $get, Set $set, $state) {
+                                        $set('product_variations', self::generateVariations($get('product_attributes')));
+                                    }),
+                            ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
             });
