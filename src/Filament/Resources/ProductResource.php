@@ -6,6 +6,7 @@ use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
@@ -16,6 +17,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -79,20 +81,45 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                Split::make([
-                    Group::make([
-                        TextInput::make('name')
-                            ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
-                        RichEditor::make('description')
-                            ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
-                        self::getProductDataSection(),
-                    ]),
-                    Section::make([
-                        Toggle::make('is_published'),
-                        Toggle::make('is_featured'),
+
+                Group::make([
+                    TextInput::make('name')
+                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
+                    RichEditor::make('description')
+                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
+                    Select::make('product_type')->options([
+                        'simple' => 'Simple',
+                        'variable' => 'Variable',
+                    ])->default('simple')->label('Product Type'),
+                    self::getProductDataSection(),
+                ])->columnSpan(3),
+                Group::make([
+                    Section::make('Publish')->schema([
+                        Placeholder::make('Status'),
+                        Placeholder::make('Visibility'),
+                        Placeholder::make('Publish immediately')
                     ])->grow(false),
-                ])->from('md'),
-            ])->columns(1);
+                    Section::make('Product Image')->schema([
+                        FileUpload::make("product_image")
+                            ->hiddenLabel()
+                            ->image()
+                    ])->grow(false),
+                    Section::make('Product gallery')->schema([
+                        FileUpload::make('product_image_gallery')
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
+                            ->hiddenLabel()
+                    ])->grow(false),
+                    Section::make('Product categories')->schema([
+                        Placeholder::make('Product categories'),
+                    ])->grow(false),
+                    Section::make('Product tags')->schema([
+                        TagsInput::make('product_tags')
+                            ->label('Product Tags')
+                    ])->grow(false),
+                ]),
+            ])->columns(4);
     }
 
     public static function getProductDimensionFields()
@@ -117,7 +144,6 @@ class ProductResource extends Resource
                 self::getAttributesTab(),
                 self::getVariationsTab(),
                 self::getAdvancedTab(),
-
                 self::getMoreOptionsTab(),
 
             ]);
@@ -177,14 +203,19 @@ class ProductResource extends Resource
                                     )->collapsible(),
 
                             ]),
-                    ])->collapsible(),
+                    ])
+                    ->collapsible()
+                    ->collapsed()
+                    ->itemLabel(
+                        fn (array $state): ?string => $state['attribute_name'] ?? null
+                    ),
             ]);
     }
 
     public static function variationCombinations($arrays, $i = 0)
     {
 
-        if (! isset($arrays[$i])) {
+        if (!isset($arrays[$i])) {
             return [];
         }
         if ($i == count($arrays) - 1) {
@@ -247,12 +278,12 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                                FormAction::make('Select')
-                                    ->icon('heroicon-m-bars-3')
-                                    ->action(function (Get $get, Set $set, $state) {
-                                        $set('product_variations', self::generateVariations($get('product_attributes')));
-                                    }),
-                            ])->verticalAlignment(VerticalAlignment::End)]
+                            FormAction::make('Select')
+                                ->icon('heroicon-m-bars-3')
+                                ->action(function (Get $get, Set $set, $state) {
+                                    $set('product_variations', self::generateVariations($get('product_attributes')));
+                                }),
+                        ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
             });
@@ -281,15 +312,22 @@ class ProductResource extends Resource
                                     Fieldset::make('variation')
                                         ->label('Variation')
                                         ->schema([
-                                            CheckboxList::make('visible_on_the_product_page')
+                                            Group::make([
+                                                FileUpload::make('variation_image')
+                                                    ->image(),
+                                                TextInput::make('sku')
+                                                    ->label('SKU'),
+                                            ])->columnSpanFull(),
+                                            CheckboxList::make('variation_options')
                                                 ->options([
-                                                    'visible_on_the_product_page' => 'Visible on the product page',
-                                                    'used_for_variations' => 'Used for varaitions',
+                                                    'enabled' => 'Enabled',
+                                                    'downloadable' => 'Downloadable',
+                                                    'virtual' => 'Virtual',
+                                                    // 'manage_stock' => 'Manage Stock',
                                                 ])
-                                                ->default(['visible_on_the_product_page', 'used_for_variations'])
+                                                ->default('enabled')
                                                 ->label('Visible on the product page')->columnSpan(2),
-                                            TextInput::make('sku')
-                                                ->label('SKU')->columnSpan(2),
+
                                             TextInput::make('regular_price'),
                                             TextInput::make('sale_price'),
                                             Select::make('stock_status')
@@ -297,6 +335,8 @@ class ProductResource extends Resource
                                                     'instock' => 'In Stock',
                                                     'outofstock' => 'Out of Stock',
                                                 ])->default('instock'),
+
+                                            self::getProductDimensionFields(),
                                             RichEditor::make('description')
                                                 ->label('Description')->columnSpan(2),
 
@@ -306,7 +346,7 @@ class ProductResource extends Resource
                                 ),
                         ];
                     }
-                }),
+                })->hidden(fn (Get $get) => $get('generate_varaitions') == null),
         ];
     }
 
