@@ -88,7 +88,7 @@ class ProductResource extends Resource
                     Select::make('product_type')->options([
                         'simple' => 'Simple',
                         'variable' => 'Variable',
-                    ])->default('simple')->label('Product Type'),
+                    ])->default('simple')->label('Product Type')->live(),
                     self::getProductDataSection(),
                 ])->columnSpan(3),
                 Group::make([
@@ -284,7 +284,7 @@ class ProductResource extends Resource
                             ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
-            });
+            })->hidden(fn (Get $get) => $get('product_type') == 'simple');
     }
 
     public static function getVariationsRepeaterField()
