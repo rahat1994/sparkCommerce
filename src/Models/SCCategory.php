@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SCCategory extends Model
 {
-    protected $fillable = ['name', 'user_id'];
+    protected $fillable = ['name', 'user_id', 'parent_id'];
 
     protected $casts = [
         'name' => 'string',
@@ -20,11 +20,16 @@ class SCCategory extends Model
      */
     public function getTable()
     {
-        return config('sparkcommerce.table_prefix') . 'category';
+        return config('sparkcommerce.table_prefix') . 'product_categories';
     }
 
     public function product()
     {
         // return $this->hasManyThrough(ScProduct::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(SCCategory::class, 'parent_id');
     }
 }

@@ -5,6 +5,7 @@ return [
     'resource' => [
         'product' => [
             'model_label' => 'Product',
+            'icon' => 'heroicon-o-rectangle-stack',
             'model_plural_label' => 'Products',
             'navigation_group' => 'Products',
             'navigation' => 'All Products',
@@ -34,6 +35,17 @@ return [
 
                 ],
 
+            ],
+        ],
+        'category' => [
+            'model_label' => 'Category',
+            'model_plural_label' => 'Categories',
+            'navigation_group' => 'Products',
+            'navigation' => 'Categories',
+            'creation_form' => [
+                'name' => 'Name',
+                'description' => 'Description',
+                'parent_category' => 'Parent Category',
             ],
         ],
     ],

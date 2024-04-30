@@ -150,6 +150,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
         return [
             'create_sc_products_table',
             'create_sc_attributes_table',
+            'create_sc_categories_table',
         ];
     }
 }

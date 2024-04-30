@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\CategoryResource\Pages;
+namespace Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
 
-use App\Filament\Resources\CategoryResource;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
