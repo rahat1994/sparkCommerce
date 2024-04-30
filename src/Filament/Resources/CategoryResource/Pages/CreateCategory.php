@@ -2,9 +2,8 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
 
-
-use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
 use Filament\Resources\Pages\CreateRecord;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
 
 class CreateCategory extends CreateRecord
 {
