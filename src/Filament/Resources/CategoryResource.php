@@ -82,7 +82,7 @@ class CategoryResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('parent_id')
-                    ->relationship('parent', 'name')
+                    ->relationship('parent', 'name')   
                     ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category'))                   
                     ->query(function (Builder $query, BaseFilter $filter) {
                         $state = $filter->getState();
@@ -95,6 +95,7 @@ class CategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
