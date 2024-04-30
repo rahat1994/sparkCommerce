@@ -6,7 +6,9 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -64,6 +66,7 @@ class CategoryResource extends Resource
                 
             ]);
     }
+    
 
     public static function table(Table $table): Table
     {
@@ -78,9 +81,17 @@ class CategoryResource extends Resource
                     ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category')),
             ])
             ->filters([
-                SelectFilter::make('parent')
+                SelectFilter::make('parent_id')
                     ->relationship('parent', 'name')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category')),
+                    ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category'))                   
+                    ->query(function (Builder $query, BaseFilter $filter) {
+                        $state = $filter->getState();
+                        if(isset($state['value']) && $state['value'] != null ){
+                            return $query->where('parent_id',$filter->getState());
+                        }
+                        return $query;
+                    }),
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

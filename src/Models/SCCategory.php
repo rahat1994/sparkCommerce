@@ -30,6 +30,11 @@ class SCCategory extends Model
 
     public function parent()
     {
-        return $this->belongsTo(SCCategory::class, 'parent_id');
+        return $this->belongsTo(SCCategory::class, 'parent_id', 'id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(SCCategory::class, 'parent_id', 'id');
     }
 }
