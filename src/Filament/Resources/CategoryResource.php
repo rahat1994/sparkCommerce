@@ -68,8 +68,7 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         // TODO: Fix the filtering and searching
-        // TODO: Fix how the categories are loaded in the table. They should be loaded in a tree structure.
-        // 
+               // TODO: Fix how the categories are loaded in the table.   // 
         return $table
             ->columns([
                 TextColumn::make('name')
