@@ -2,9 +2,8 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages;
 
-use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
 
 class CreateReview extends CreateRecord
 {

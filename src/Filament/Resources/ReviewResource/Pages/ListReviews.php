@@ -2,9 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages;
 
-use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
 
 class ListReviews extends ListRecords
 {

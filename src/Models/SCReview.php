@@ -3,11 +3,10 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Tags\HasTags;
 
 class SCReview extends Model
 {
-    protected $fillable = ['name','slug','type', 'order_column'];
+    protected $fillable = ['name', 'slug', 'type', 'order_column'];
 
     /**
      * Get the table associated with the model.
