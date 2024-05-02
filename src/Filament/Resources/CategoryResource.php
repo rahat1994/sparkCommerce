@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Filters\SelectFilter;
@@ -63,7 +64,7 @@ class CategoryResource extends Resource
                     ->placeholder(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category')),
                 Hidden::make('user_id')
                     ->default(auth()->id()),
-                
+
             ]);
     }
     
@@ -71,7 +72,7 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         // TODO: Fix the filtering and searching
-               // TODO: Fix how the categories are loaded in the table.   // 
+        // TODO: Fix how the categories are loaded in the table.   //
         return $table
             ->columns([
                 TextColumn::make('name')
