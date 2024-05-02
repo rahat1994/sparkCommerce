@@ -21,7 +21,7 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = SCCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-bars-4';
 
     public static function getModelLabel(): string
     {

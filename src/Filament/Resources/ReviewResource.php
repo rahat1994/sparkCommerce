@@ -2,9 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource\RelationManagers;
-use Rahat1994\SparkCommerce\Models\SCTag;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages;
+
+use App\Models\Review;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,34 +12,35 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Rahat1994\SparkCommerce\Models\SCReview;
 
-class TagResource extends Resource
+class ReviewResource extends Resource
 {
-    protected static ?string $model = SCTag::class;
+    protected static ?string $model = SCReview::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationIcon = 'heroicon-o-star';
 
     public static function getModelLabel(): string
     {
-        return __('sparkcommerce::sparkcommerce.resource.tag.model_label');
+        return __('sparkcommerce::sparkcommerce.resource.review.model_label');
         // return __('filament-user-activity::user-activity.resource.model_label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('sparkcommerce::sparkcommerce.resource.tag.model_plural_label');
+        return __('sparkcommerce::sparkcommerce.resource.review.model_plural_label');
         // return __('filament-user-activity::user-activity.resource.model_plural_label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('sparkcommerce::sparkcommerce.resource.tag.navigation_group');
+        return __('sparkcommerce::sparkcommerce.resource.review.navigation_group');
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('sparkcommerce::sparkcommerce.resource.tag.navigation');
+        return __('sparkcommerce::sparkcommerce.resource.review.navigation');
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
     public static function form(Form $form): Form
@@ -79,9 +80,9 @@ class TagResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTags::route('/'),
-            'create' => Pages\CreateTag::route('/create'),
-            'edit' => Pages\EditTag::route('/{record}/edit'),
+            'index' => Pages\ListReviews::route('/'),
+            'create' => Pages\CreateReview::route('/create'),
+            'edit' => Pages\EditReview::route('/{record}/edit'),
         ];
     }
 }

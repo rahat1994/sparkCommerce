@@ -58,5 +58,15 @@ return [
                 'description' => 'Description',
             ],
         ],
+        'review' => [
+            'model_label' => 'Review',
+            'model_plural_label' => 'Reviews',
+            'navigation_group' => 'Products',
+            'navigation' => 'Reviews',
+            'creation_form' => [
+                'name' => 'Name',
+                'description' => 'Description',
+            ],
+        ],
     ],
 ];

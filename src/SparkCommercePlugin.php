@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
 use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 
@@ -21,6 +22,7 @@ class SparkCommercePlugin implements Plugin
             ProductResource::class,
             CategoryResource::class,
             TagResource::class,
+            ReviewResource::class,
         ]);
     }
 
