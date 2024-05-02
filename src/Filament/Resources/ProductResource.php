@@ -30,6 +30,7 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProdu
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
 use Rahat1994\SparkCommerce\Models\SCProduct;
+use Filament\Forms\Components\SpatieTagsInput;
 
 class ProductResource extends Resource
 {
@@ -113,7 +114,7 @@ class ProductResource extends Resource
                         Placeholder::make('Product categories'),
                     ])->grow(false),
                     Section::make('Product tags')->schema([
-                        TagsInput::make('product_tags')
+                        SpatieTagsInput::make('product_tags')
                             ->label('Product Tags'),
                     ])->grow(false),
                 ]),

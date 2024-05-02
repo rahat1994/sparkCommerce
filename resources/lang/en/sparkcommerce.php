@@ -48,5 +48,15 @@ return [
                 'parent_category' => 'Parent Category',
             ],
         ],
+        'tag' => [
+            'model_label' => 'Tag',
+            'model_plural_label' => 'Tags',
+            'navigation_group' => 'Products',
+            'navigation' => 'Tags',
+            'creation_form' => [
+                'name' => 'Name',
+                'description' => 'Description',
+            ],
+        ],
     ],
 ];
