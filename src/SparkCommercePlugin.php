@@ -6,6 +6,7 @@ use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 
 class SparkCommercePlugin implements Plugin
 {
@@ -18,7 +19,8 @@ class SparkCommercePlugin implements Plugin
     {
         $panel->resources([
             ProductResource::class,
-            CategoryResource::class
+            CategoryResource::class,
+            TagResource::class,
         ]);
     }
 
