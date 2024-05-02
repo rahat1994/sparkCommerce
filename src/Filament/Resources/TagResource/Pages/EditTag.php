@@ -2,9 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
 
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 
 class EditTag extends EditRecord
 {

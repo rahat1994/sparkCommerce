@@ -3,7 +3,6 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Tags\HasTags;
 
 class SCProduct extends Model
 {

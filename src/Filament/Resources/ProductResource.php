@@ -14,9 +14,9 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -30,7 +30,6 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProdu
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
 use Rahat1994\SparkCommerce\Models\SCProduct;
-use Filament\Forms\Components\SpatieTagsInput;
 
 class ProductResource extends Resource
 {

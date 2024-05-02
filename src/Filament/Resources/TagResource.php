@@ -2,16 +2,12 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource\RelationManagers;
-use Rahat1994\SparkCommerce\Models\SCTag;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
+use Rahat1994\SparkCommerce\Models\SCTag;
 
 class TagResource extends Resource
 {
@@ -42,6 +38,7 @@ class TagResource extends Resource
         return __('sparkcommerce::sparkcommerce.resource.tag.navigation');
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
+
     public static function form(Form $form): Form
     {
         return $form
