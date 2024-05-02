@@ -2,8 +2,8 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
 
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 use Filament\Resources\Pages\CreateRecord;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 
 class CreateTag extends CreateRecord
 {

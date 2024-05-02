@@ -2,11 +2,10 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
 
-
-use Filament\Resources\Components\Tab;
-use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
 use Filament\Actions;
+use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
 
 class ListCategories extends ListRecords
 {

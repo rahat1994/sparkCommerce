@@ -5,16 +5,15 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\BaseFilter;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\BaseFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 
 class CategoryResource extends Resource
@@ -67,7 +66,6 @@ class CategoryResource extends Resource
 
             ]);
     }
-    
 
     public static function table(Table $table): Table
     {
@@ -83,13 +81,14 @@ class CategoryResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('parent_id')
-                    ->relationship('parent', 'name')   
-                    ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category'))                   
+                    ->relationship('parent', 'name')
+                    ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category'))
                     ->query(function (Builder $query, BaseFilter $filter) {
                         $state = $filter->getState();
-                        if(isset($state['value']) && $state['value'] != null ){
-                            return $query->where('parent_id',$filter->getState());
+                        if (isset($state['value']) && $state['value'] != null) {
+                            return $query->where('parent_id', $filter->getState());
                         }
+
                         return $query;
                     }),
 
