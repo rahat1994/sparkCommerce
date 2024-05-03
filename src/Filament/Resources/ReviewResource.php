@@ -2,16 +2,11 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages;
-
-use App\Models\Review;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCReview;
 
 class ReviewResource extends Resource
@@ -43,6 +38,7 @@ class ReviewResource extends Resource
         return __('sparkcommerce::sparkcommerce.resource.review.navigation');
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
+
     public static function form(Form $form): Form
     {
         return $form
