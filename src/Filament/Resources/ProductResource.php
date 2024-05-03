@@ -378,7 +378,7 @@ class ProductResource extends Resource
                     ->schema([
                         TextInput::make('stock_quantity')
                             ->label('Stock Quantity')->numeric(),
-                        Radio::make('allow_backorders')
+                        Radio::make('should_allow_backorders')
                             ->label('Allow backorders?')
                             ->options([
                                 'do_not_allow' => 'Do not allow',

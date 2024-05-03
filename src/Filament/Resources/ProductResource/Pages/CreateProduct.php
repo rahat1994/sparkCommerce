@@ -12,6 +12,7 @@ class CreateProduct extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // dd($data);
-        // return $data;
+        $data['slug'] = \Str::slug($data['name']);
+        return $data;
     }
 }

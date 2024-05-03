@@ -3,9 +3,34 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Tags\HasTags;
 
 class SCProduct extends Model
 {
+
+    use HasTags;
+
+    protected $casts = [
+        'product_attributes' => 'array',
+    ];
+
+    protected $fillable = [
+        "name",
+        "description",
+        "product_type",
+        'slug',
+        "sku",
+        "stock_quantity",
+        "allow_backorders",
+        "low_stock_threshold",
+        "weight",
+        "height",
+        "width",
+        "length",
+        "product_attributes"
+    ];
+
+    
     /**
      * Get the table associated with the model.
      *
