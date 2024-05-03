@@ -29,8 +29,9 @@ use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
-use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkCommerce\Forms\Components\CategoriesField;
+use Rahat1994\SparkCommerce\Models\SCProduct;
+
 class ProductResource extends Resource
 {
     protected static ?string $model = SCProduct::class;

@@ -13,6 +13,7 @@ class CreateProduct extends CreateRecord
     {
         // dd($data);
         $data['slug'] = \Str::slug($data['name']);
+
         return $data;
     }
 }

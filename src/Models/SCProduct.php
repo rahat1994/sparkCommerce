@@ -7,7 +7,6 @@ use Spatie\Tags\HasTags;
 
 class SCProduct extends Model
 {
-
     use HasTags;
 
     protected $casts = [
@@ -15,22 +14,21 @@ class SCProduct extends Model
     ];
 
     protected $fillable = [
-        "name",
-        "description",
-        "product_type",
+        'name',
+        'description',
+        'product_type',
         'slug',
-        "sku",
-        "stock_quantity",
-        "allow_backorders",
-        "low_stock_threshold",
-        "weight",
-        "height",
-        "width",
-        "length",
-        "product_attributes"
+        'sku',
+        'stock_quantity',
+        'allow_backorders',
+        'low_stock_threshold',
+        'weight',
+        'height',
+        'width',
+        'length',
+        'product_attributes',
     ];
 
-    
     /**
      * Get the table associated with the model.
      *
