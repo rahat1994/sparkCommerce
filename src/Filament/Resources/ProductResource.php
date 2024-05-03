@@ -30,7 +30,7 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProdu
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
 use Rahat1994\SparkCommerce\Models\SCProduct;
-
+use Rahat1994\SparkCommerce\Forms\Components\CategoriesField;
 class ProductResource extends Resource
 {
     protected static ?string $model = SCProduct::class;
@@ -110,8 +110,9 @@ class ProductResource extends Resource
                             ->hiddenLabel(),
                     ])->grow(false),
                     Section::make('Product categories')->schema([
-                        Placeholder::make('Product categories'),
-                    ])->grow(false),
+                        CategoriesField::make('product_categories')
+                            ->label('Product'),
+                    ]),
                     Section::make('Product tags')->schema([
                         SpatieTagsInput::make('product_tags')
                             ->label('Product Tags'),
