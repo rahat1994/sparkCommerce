@@ -1,52 +1,67 @@
-<x-dynamic-component
-    :component="$getFieldWrapperView()"
-    :field="$field"
->
-    <div x-data="{ state: $wire.$entangle('{{ $getStatePath() }}') }">
-        <ul id="myUL">
-            <li><input type="checkbox"><span >Beverages</span>
-                <ul class="nested ps-4">
-                <li><input type="checkbox">Water</li>
-                <li><input type="checkbox">Coffee</li>
-                <li><input type="checkbox"><span >Tea</span>
-                    <ul class="ps-8">
-                    <li><input type="checkbox">Black Tea</li>
-                    <li><input type="checkbox">White Tea</li>
-                    <li><input type="checkbox"><span >Green Tea</span>
-                        <ul class="nested ps-12">
-                        <li><input type="checkbox">Sencha</li>
-                        <li><input type="checkbox">Gyokuro</li>
-                        <li><input type="checkbox">Matcha</li>
-                        <li><input type="checkbox">Pi Lo Chun</li>
-                        </ul>
-                    </li>
-                    </ul>
-                </li>  
-                </ul>
-            </li>
-        </ul>
+@php
+    $gridDirection = 'column';
+    $isBulkToggleable = false;
+    $isDisabled = false;
+    $isSearchable = false;
+    $statePath = $getStatePath();
+    // dd($this->getId().$statePath);
+    // return;
+@endphp
+
+
+<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
+    <div
+        x-data=""
+        x-init=""
+    >
+        <x-filament::grid
+            :default="$getColumns('default')"
+            :sm="$getColumns('sm')"
+            :md="$getColumns('md')"
+            :lg="$getColumns('lg')"
+            :xl="$getColumns('xl')"
+            :two-xl="$getColumns('2xl')"
+            :direction="$gridDirection"
+            :x-show="$isSearchable ? 'visibleCheckboxListOptions.length' : null"
+            :attributes="
+                \Filament\Support\prepare_inherited_attributes($attributes)
+                    ->merge($getExtraAttributes(), escape: false)
+                    ->class([
+                        'fi-fo-checkbox-list gap-4',
+                        '-mt-4' => $gridDirection === 'column',
+                    ])
+            "
+        >
+            @forelse ($getOptions() as $value => $label)
+                <div
+                    wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.options.{{ $value }}"
+                    @class([
+                        'break-inside-avoid pt-2' => $gridDirection === 'column',
+                    ])
+                >
+                    <label
+                        class="fi-fo-checkbox-list-option-label flex gap-x-3"
+                    >
+                        <x-filament::input.checkbox
+                            :valid="! $errors->has($statePath)"
+                        />
+
+                        <div class="grid text-sm">
+                            <span
+                                class="fi-fo-checkbox-list-option-label overflow-hidden break-words font-medium text-gray-950 dark:text-white"
+                            >
+                                {{ $label['name'] }}
+                            </span>
+                        </div>
+                    </label>
+                </div>
+            @empty
+                <div
+                    wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.empty"
+                ></div>
+            @endforelse
+        </x-filament::grid>
+        <br />
+        @include('sparkcommerce::forms.components.add-categories')
     </div>
-
-<script>
-    var toggler = document.getElementsByClassName("caret");
-    var i;
-
-    for (i = 0; i < toggler.length; i++) {
-    toggler[i].addEventListener("click", function() {
-        this.parentElement.querySelector(".nested").classList.toggle("active");
-        this.classList.toggle("caret-down");
-    });
-    }
-</script>
-<style>
-    ul, #myUL {
-        list-style-type: none;
-    }
-
-    #myUL {
-        margin: 0;
-        padding: 0;
-    }
-</style>
-
 </x-dynamic-component>

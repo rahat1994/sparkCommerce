@@ -4,6 +4,7 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
@@ -30,6 +31,7 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProdu
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
 use Rahat1994\SparkCommerce\Forms\Components\CategoriesField;
+use Rahat1994\SparkCommerce\Models\SCCategory;
 use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class ProductResource extends Resource
@@ -112,7 +114,8 @@ class ProductResource extends Resource
                     ])->grow(false),
                     Section::make('Product categories')->schema([
                         CategoriesField::make('product_categories')
-                            ->label('Product'),
+                            ->hiddenLabel()
+                            ->categories(SCCategory::all()->toArray()),
                     ]),
                     Section::make('Product tags')->schema([
                         SpatieTagsInput::make('product_tags')
@@ -215,7 +218,7 @@ class ProductResource extends Resource
     public static function variationCombinations($arrays, $i = 0)
     {
 
-        if (! isset($arrays[$i])) {
+        if (!isset($arrays[$i])) {
             return [];
         }
         if ($i == count($arrays) - 1) {
@@ -266,7 +269,7 @@ class ProductResource extends Resource
             ->schema(function (Get $get) {
 
                 $attributes = array_values($get('product_attributes'));
-                // dd($attributes);
+
                 if (count($attributes) > 0 && $attributes[0]['attribute_name'] == null) {
                     return [Placeholder::make('Info')
                         ->content(new HtmlString('<p>Please add attributes</p>'))];
@@ -278,12 +281,12 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                                FormAction::make('Select')
-                                    ->icon('heroicon-m-bars-3')
-                                    ->action(function (Get $get, Set $set, $state) {
-                                        $set('product_variations', self::generateVariations($get('product_attributes')));
-                                    }),
-                            ])->verticalAlignment(VerticalAlignment::End)]
+                            FormAction::make('Select')
+                                ->icon('heroicon-m-bars-3')
+                                ->action(function (Get $get, Set $set, $state) {
+                                    $set('product_variations', self::generateVariations($get('product_attributes')));
+                                }),
+                        ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
             })->hidden(fn (Get $get) => $get('product_type') == 'simple');
