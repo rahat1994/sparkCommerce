@@ -23,6 +23,7 @@ class CategoriesField extends Field
     {
         // dd($categories);
         $this->categories = $categories;
+
         return $this;
     }
 
@@ -59,9 +60,9 @@ class CategoriesField extends Field
                                 'label' => 'Subsubcategory 2',
                                 'value' => 'subsubcategory-2',
                             ],
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
 
             [
@@ -84,10 +85,10 @@ class CategoriesField extends Field
                                 'label' => 'Subsubcategory 2',
                                 'value' => 'subsubcategory-2',
                             ],
-                        ]
+                        ],
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }
