@@ -3,10 +3,12 @@
 namespace Rahat1994\SparkCommerce\Forms\Components;
 
 use Closure;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Concerns\HasExtraInputAttributes as ConcernsHasExtraInputAttributes;
 use Filament\Forms\Components\Field;
 use Illuminate\Contracts\Support\Arrayable;
 
-class CategoriesField extends Field
+class CategoriesField extends CheckboxList
 {
     // Referencing views from my own package.
     protected string $view = 'sparkcommerce::forms.components.categories-field';
@@ -37,58 +39,10 @@ class CategoriesField extends Field
         return $options;
     }
 
-    public function getCategories(): array
+    public function getParent($index): string
     {
-        return [
-            [
-                'label' => 'All Categories',
-                'value' => 'category-1',
-                'children' => [
-                    [
-                        'label' => 'Subcategory 1',
-                        'value' => 'subcategory-1',
-                    ],
-                    [
-                        'label' => 'Subcategory 2',
-                        'value' => 'subcategory-2',
-                        'children' => [
-                            [
-                                'label' => 'Subsubcategory 1',
-                                'value' => 'subsubcategory-1',
-                            ],
-                            [
-                                'label' => 'Subsubcategory 2',
-                                'value' => 'subsubcategory-2',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
+        if ($index === null) return '';
 
-            [
-                'label' => 'All Categories 2',
-                'value' => 'category-1',
-                'children' => [
-                    [
-                        'label' => 'Subcategory 1',
-                        'value' => 'subcategory-1',
-                    ],
-                    [
-                        'label' => 'Subcategory 2',
-                        'value' => 'subcategory-2',
-                        'children' => [
-                            [
-                                'label' => 'Subsubcategory 1',
-                                'value' => 'subsubcategory-1',
-                            ],
-                            [
-                                'label' => 'Subsubcategory 2',
-                                'value' => 'subsubcategory-2',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
+        return ' (' . $this->getOptions()[$index]['name'] . ')';
     }
 }
