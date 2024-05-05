@@ -3,9 +3,8 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Number;
-use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 use Illuminate\Support\Str;
+use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 
 class CreateProduct extends CreateRecord
@@ -33,6 +32,7 @@ class CreateProduct extends CreateRecord
         $this->data['product_categories'] = array_unique($this->data['product_categories']);
 
         $this->dispatch('category-created', id: $category->id);
+
         return $category;
     }
 }

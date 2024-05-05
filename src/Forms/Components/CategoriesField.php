@@ -4,8 +4,6 @@ namespace Rahat1994\SparkCommerce\Forms\Components;
 
 use Closure;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Concerns\HasExtraInputAttributes as ConcernsHasExtraInputAttributes;
-use Filament\Forms\Components\Field;
 use Illuminate\Contracts\Support\Arrayable;
 
 class CategoriesField extends CheckboxList
@@ -41,7 +39,9 @@ class CategoriesField extends CheckboxList
 
     public function getParent($index): string
     {
-        if ($index === null) return '';
+        if ($index === null) {
+            return '';
+        }
 
         return ' (' . $this->getOptions()[$index]['name'] . ')';
     }
