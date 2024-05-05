@@ -14,7 +14,25 @@
             categories: <?=json_encode($categories)?>,
             state: $wire.$entangle("{{ $getStatePath() }}")
         }'
-        x-init="console.log(state)"
+        x-init="
+            let categoriesContainer = document.getElementById('category_checkboxes');
+
+            categories.forEach(category => {
+                let checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = category.id;
+                checkbox.value = category.id;
+
+                checkbox.setAttribute('x-model', 'state');
+
+                let label = document.createElement('label');
+                label.htmlFor = category.id;
+                label.appendChild(document.createTextNode(category.name));
+
+                categoriesContainer.appendChild(checkbox);
+                categoriesContainer.appendChild(label);
+            });
+        "
     >
         <x-filament::grid
             :default="$getColumns('default')"
@@ -34,35 +52,9 @@
                     ])
             "
         >
-            @forelse ($getOptions() as $value => $label)
-                <div
-                    wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.options.{{ $value }}"
-                    @class([
-                        'break-inside-avoid pt-2' => $gridDirection === 'column',
-                    ])
-                >
-                    <label
-                        class="fi-fo-checkbox-list-option-label flex gap-x-3"
-                    >
-                        <x-filament::input.checkbox
-                            :valid="! $errors->has($statePath)"
-                            x-model="state"
-                        />
+        <div id="category_checkboxes">
 
-                        <div class="grid text-sm">
-                            <span
-                                class="fi-fo-checkbox-list-option-label overflow-hidden break-words font-medium text-gray-950 dark:text-white"
-                            >
-                                {{ $label['name'] }}
-                            </span>
-                        </div>
-                    </label>
-                </div>
-            @empty
-                <div
-                    wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.empty"
-                ></div>
-            @endforelse
+        </div>
         </x-filament::grid>
         <br />
         @include('sparkcommerce::forms.components.add-categories')
