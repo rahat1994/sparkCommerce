@@ -4,15 +4,17 @@
     $isDisabled = false;
     $isSearchable = false;
     $statePath = $getStatePath();
-    // dd($this->getId().$statePath);
-    // return;
+    $categories = $getOptions();
 @endphp
 
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     <div
-        x-data=""
-        x-init=""
+        x-data='{
+            categories: <?=json_encode($categories)?>,
+            state: $wire.$entangle("{{ $getStatePath() }}")
+        }'
+        x-init="console.log(state)"
     >
         <x-filament::grid
             :default="$getColumns('default')"
@@ -44,6 +46,7 @@
                     >
                         <x-filament::input.checkbox
                             :valid="! $errors->has($statePath)"
+                            x-model="state"
                         />
 
                         <div class="grid text-sm">
