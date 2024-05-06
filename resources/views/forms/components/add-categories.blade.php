@@ -73,7 +73,14 @@ $options = $getOptions();
 
             <x-filament::loading-indicator x-show="formProcessing" class="h-5 w-5" />
         </div>
+        
+        <x-filament::link
+            x-on:click="showForm = !showForm"
+            x-show="!showForm"
+            tag="button"
+        >
+            + Add New Category
+        </x-filament::link>
 
-
-        <a class="pt-4" x-on:click="showForm = !showForm" x-show="!showForm">+ Add New Category</a>
+        <!-- <a class="pt-4" x-on:click="" ></a> -->
     </div>
