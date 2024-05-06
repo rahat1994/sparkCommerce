@@ -21,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Columns\TextColumn;
@@ -99,13 +100,14 @@ class ProductResource extends Resource
                         Placeholder::make('Visibility'),
                         Placeholder::make('Publish immediately'),
                     ])->grow(false),
+                    
                     Section::make('Product Image')->schema([
-                        FileUpload::make('product_image')
+                        SpatieMediaLibraryFileUpload::make('product_image')
                             ->hiddenLabel()
                             ->image(),
                     ])->grow(false),
                     Section::make('Product gallery')->schema([
-                        FileUpload::make('product_image_gallery')
+                        SpatieMediaLibraryFileUpload::make('product_image_gallery')
                             ->multiple()
                             ->reorderable()
                             ->appendFiles()

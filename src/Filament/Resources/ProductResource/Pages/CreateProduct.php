@@ -21,6 +21,12 @@ class CreateProduct extends CreateRecord
 
     public function saveCategory($categoryName, $parentId)
     {
+
+        // TODO: inplement try/catch block.
+        // TODO: implement validation for category name and parent id.
+        // TODO: Handle the case when the category already exists.
+        // TODO: Handle the case when there are no category to be assigned as parent_id
+        
         $category = new SCCategory();
 
         $category->name = $categoryName;
