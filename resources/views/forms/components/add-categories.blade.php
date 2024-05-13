@@ -43,6 +43,7 @@ $options = $getOptions();
                         ], escape: false)
                 "
                 >
+                    <option value="null">Select parent category</option>
                     @foreach($options as $value => $label)
                         <option value="{{$value}}">{{$label['name']}}</option>
                     @endforeach

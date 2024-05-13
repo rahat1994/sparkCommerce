@@ -87,11 +87,10 @@
                     <div
                         wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.empty"
                     ></div>
+                    <p>No Categories created</p>
                 @endforelse
             </x-filament::grid>
         </div>
-
-        <br />
         @include('sparkcommerce::forms.components.add-categories')
     </div>
 </x-dynamic-component>

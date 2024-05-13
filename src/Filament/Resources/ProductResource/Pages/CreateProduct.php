@@ -19,7 +19,7 @@ class CreateProduct extends CreateRecord
         return $data;
     }
 
-    public function saveCategory($categoryName, $parentId)
+    public function saveCategory($categoryName = null, $parentId = null)
     {
 
         // TODO: inplement try/catch block.
