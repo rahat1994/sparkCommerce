@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         $productsTable = strval(config("sparkcommerce.table_prefix"))."products";
-        
+
         Schema::create($productsTable, function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger("user_id")->nullable(); // creator
@@ -18,9 +18,8 @@ return new class extends Migration
             $table->string('slug');
             $table->decimal('price', 8, 2)->nullable(); // price can be null for variable products
             $table->string('sku')->nullable();
-
+            $table->decimal('stock_quantity', 8, 2)->nullable();
             $table->boolean('manage_product_stock')->default(0);
-            $table->integer('stock_quantity')->default(0);
             $table->string('should_allow_backorders')->nullable();
             $table->integer('low_stock_threshold')->nullable();
             $table->text('description')->nullable();

@@ -8,6 +8,11 @@ class SCTag extends Model
 {
     protected $fillable = ['name', 'slug', 'type', 'order_column'];
 
+    // add a cast of name from string to array
+    protected $casts = [
+        'name' => 'array',
+    ];
+
     /**
      * Get the table associated with the model.
      *
