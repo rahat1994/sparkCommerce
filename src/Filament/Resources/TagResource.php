@@ -5,10 +5,8 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\SpatieTagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Lang;
 use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCTag;
 
@@ -55,7 +53,7 @@ class TagResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->formatStateUsing(fn (string $state): string => $state)
+                    ->formatStateUsing(fn (string $state): string => $state),
             ])
             ->filters([
                 //
