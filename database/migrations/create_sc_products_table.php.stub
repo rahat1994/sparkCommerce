@@ -48,12 +48,12 @@ return new class extends Migration
             $table->string('width')->nullable();
             $table->string('length')->nullable();
             $table->timestamps();
-            $table->foreign('product_id')->references('id')->on($productsTable)->onDelete('cascade');
         });
     }
 
     public function down(){
-        Schema::dropIfExists(strval(config("sparkcommerce.table_prefix"))."products");
+
         Schema::dropIfExists(strval(config("sparkcommerce.table_prefix"))."product_variations");
+        Schema::dropIfExists(strval(config("sparkcommerce.table_prefix"))."products");
     }
 };

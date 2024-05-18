@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce\Commands;
 use Illuminate\Console\Command;
 use Rahat1994\SparkCommerce\SparkCommerceServiceProvider;
 use Spatie\Tags\TagsServiceProvider;
+use Spatie\MediaLibrary\MediaLibraryServiceProvider;
 
 class SparkCommercePublishMigrations extends Command
 {
@@ -22,6 +23,12 @@ class SparkCommercePublishMigrations extends Command
         $this->call('vendor:publish', [
             '--provider' => TagsServiceProvider::class,
             '--tag' => 'tags-migrations',
+        ]);
+
+
+        $this->call('vendor:publish', [
+            '--provider' => MediaLibraryServiceProvider::class,
+            '--tag' => 'medialibrary-migrations',
         ]);
 
         $this->info('All migrations have been published successfully.');

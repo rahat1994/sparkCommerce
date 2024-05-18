@@ -14,6 +14,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\SpatieTagsInput;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
@@ -100,12 +101,12 @@ class ProductResource extends Resource
                         Placeholder::make('Publish immediately'),
                     ])->grow(false),
                     Section::make('Product Image')->schema([
-                        FileUpload::make('product_image')
+                        SpatieMediaLibraryFileUpload::make('product_image')
                             ->hiddenLabel()
                             ->image(),
                     ])->grow(false),
                     Section::make('Product gallery')->schema([
-                        FileUpload::make('product_image_gallery')
+                        SpatieMediaLibraryFileUpload::make('product_image_gallery')
                             ->multiple()
                             ->reorderable()
                             ->appendFiles()
@@ -217,7 +218,7 @@ class ProductResource extends Resource
     public static function variationCombinations($arrays, $i = 0)
     {
 
-        if (! isset($arrays[$i])) {
+        if (!isset($arrays[$i])) {
             return [];
         }
         if ($i == count($arrays) - 1) {
@@ -280,12 +281,12 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                                FormAction::make('Select')
-                                    ->icon('heroicon-m-bars-3')
-                                    ->action(function (Get $get, Set $set, $state) {
-                                        $set('product_variations', self::generateVariations($get('product_attributes')));
-                                    }),
-                            ])->verticalAlignment(VerticalAlignment::End)]
+                            FormAction::make('Select')
+                                ->icon('heroicon-m-bars-3')
+                                ->action(function (Get $get, Set $set, $state) {
+                                    $set('product_variations', self::generateVariations($get('product_attributes')));
+                                }),
+                        ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
             })->hidden(fn (Get $get) => $get('product_type') == 'simple');
