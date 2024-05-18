@@ -218,7 +218,7 @@ class ProductResource extends Resource
     public static function variationCombinations($arrays, $i = 0)
     {
 
-        if (!isset($arrays[$i])) {
+        if (! isset($arrays[$i])) {
             return [];
         }
         if ($i == count($arrays) - 1) {
@@ -281,12 +281,12 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                            FormAction::make('Select')
-                                ->icon('heroicon-m-bars-3')
-                                ->action(function (Get $get, Set $set, $state) {
-                                    $set('product_variations', self::generateVariations($get('product_attributes')));
-                                }),
-                        ])->verticalAlignment(VerticalAlignment::End)]
+                                FormAction::make('Select')
+                                    ->icon('heroicon-m-bars-3')
+                                    ->action(function (Get $get, Set $set, $state) {
+                                        $set('product_variations', self::generateVariations($get('product_attributes')));
+                                    }),
+                            ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
             })->hidden(fn (Get $get) => $get('product_type') == 'simple');
