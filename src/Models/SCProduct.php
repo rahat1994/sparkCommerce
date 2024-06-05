@@ -8,7 +8,8 @@ use Spatie\Tags\HasTags;
 
 class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
 {
-    use HasTags, InteractsWithMedia;
+    use HasTags;
+    use InteractsWithMedia;
 
     protected $casts = [
         'product_attributes' => 'array',
