@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class SCReview extends Model
 {
-    protected $fillable = ['name', 'slug', 'type', 'order_column'];
+    protected $fillable = [
+        'product_id', 
+        'title', 
+        'content', 
+        'rating'
+    ];
 
     /**
      * Get the table associated with the model.
@@ -15,6 +20,6 @@ class SCReview extends Model
      */
     public function getTable()
     {
-        return 'tags';
+        return config('sparkcommerce.table_prefix') . config('sparkcommerce.product_reviews_table_name');
     }
 }

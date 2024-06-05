@@ -7,4 +7,5 @@ return [
     'product_variants_table_name' => 'product_variations',
     'product_categories_table_name' => 'product_categories',
     'product_attributes_table_name' => 'product_attributes',
+    'product_reviews_table_name' => 'product_reviews',
 ];
