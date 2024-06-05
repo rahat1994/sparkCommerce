@@ -3,11 +3,12 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
-class SCProduct extends Model
+class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
 {
-    use HasTags;
+    use HasTags, InteractsWithMedia;
 
     protected $casts = [
         'product_attributes' => 'array',
