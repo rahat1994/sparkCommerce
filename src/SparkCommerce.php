@@ -2,6 +2,4 @@
 
 namespace Rahat1994\SparkCommerce;
 
-class SparkCommerce
-{
-}
+class SparkCommerce {}
