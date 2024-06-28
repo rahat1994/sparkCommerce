@@ -20,6 +20,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
         'description',
         'product_type',
         'slug',
+        'price',
         'sku',
         'stock_quantity',
         'allow_backorders',
