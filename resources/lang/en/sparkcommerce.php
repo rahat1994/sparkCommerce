@@ -13,6 +13,8 @@ return [
                 'product_name' => 'Product Name',
                 'description' => 'Description',
                 'sku' => 'SKU',
+                'regular_price' => 'Regular Price',
+                'sale_price' => 'Sale Price',
                 'product_dimension' => [
                     'fieldset_name' => 'Product Dimensions',
                     'height' => 'Height',
@@ -22,6 +24,7 @@ return [
                 ],
                 'tabs_section' => [
                     'tabs' => [
+                        'general' => 'General',
                         'inventory' => 'Inventory',
                         'linked_products' => 'Linked Products',
                         'pricing' => 'Pricing',

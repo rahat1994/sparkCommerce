@@ -82,7 +82,6 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-
                 Group::make([
                     TextInput::make('name')
                         ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
@@ -141,6 +140,7 @@ class ProductResource extends Resource
     {
         return Tabs::make('product_data')
             ->tabs([
+                self::getGeneralTab(),
                 self::getInventoryTab(),
                 self::getShippingTab(),
                 self::getLinkedProductsTab(),
@@ -148,7 +148,6 @@ class ProductResource extends Resource
                 self::getVariationsTab(),
                 self::getAdvancedTab(),
                 self::getMoreOptionsTab(),
-
             ]);
     }
 
@@ -368,6 +367,18 @@ class ProductResource extends Resource
             ->schema([
                 self::getProductDimensionFields(),
             ]);
+    }
+
+    public static function getGeneralTab(): Tab{
+        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.general'))
+                ->schema([
+                    TextInput::make('regular_price')
+                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.regular_price'))
+                        ->numeric(),
+                    TextInput::make('sale_price')
+                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.sale_price'))
+                        ->numeric(),
+                ]);
     }
 
     public static function getInventoryTab(): Tab
