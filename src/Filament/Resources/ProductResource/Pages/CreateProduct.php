@@ -17,12 +17,7 @@ class CreateProduct extends CreateRecord
         $data['slug'] = Str::slug($data['name']);
         $data['user_id'] = auth()->user()->id;
         $data['price'] = $data['regular_price'];
-
-        // if(isset($data['sale_price'])){
-        //     $data['meta'] = json_encode([
-        //         'sale_price' => $data['sale_price']
-        //     ]);
-        // }
+        
         return $data;
     }
 

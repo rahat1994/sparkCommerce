@@ -369,16 +369,17 @@ class ProductResource extends Resource
             ]);
     }
 
-    public static function getGeneralTab(): Tab{
+    public static function getGeneralTab(): Tab
+    {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.general'))
-                ->schema([
-                    TextInput::make('regular_price')
-                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.regular_price'))
-                        ->numeric(),
-                    TextInput::make('sale_price')
-                        ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.sale_price'))
-                        ->numeric(),
-                ]);
+            ->schema([
+                TextInput::make('regular_price')
+                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.regular_price'))
+                    ->numeric(),
+                TextInput::make('sale_price')
+                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.sale_price'))
+                    ->numeric(),
+            ]);
     }
 
     public static function getInventoryTab(): Tab
