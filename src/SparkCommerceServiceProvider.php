@@ -58,7 +58,9 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+    }
 
     public function packageBooted(): void
     {
@@ -150,6 +152,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
             'create_sc_attributes_table',
             'create_sc_categories_table',
             'create_sc_reviews_table',
+            'create_sc_category_products_table',
         ];
     }
 }

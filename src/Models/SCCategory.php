@@ -20,7 +20,7 @@ class SCCategory extends Model
      */
     public function getTable()
     {
-        return config('sparkcommerce.table_prefix') . 'product_categories';
+        return config('sparkcommerce.table_prefix') . config('sparkcommerce.categories_table_name');
     }
 
     public function product()

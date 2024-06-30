@@ -43,6 +43,7 @@ $options = $getOptions();
                         ], escape: false)
                 "
                 >
+                    <option > </option>
                     @foreach($options as $value => $label)
                         <option value="{{$value}}">{{$label['name']}}</option>
                     @endforeach
@@ -73,7 +74,7 @@ $options = $getOptions();
 
             <x-filament::loading-indicator x-show="formProcessing" class="h-5 w-5" />
         </div>
-        
+
         <x-filament::link
             x-on:click="showForm = !showForm"
             x-show="!showForm"

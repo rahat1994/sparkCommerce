@@ -30,6 +30,10 @@ class SparkCommercePublishMigrations extends Command
             '--tag' => 'medialibrary-migrations',
         ]);
 
+        $this->call('vendor:publish', [
+            '--tag' => 'laravel-cart-migrations',
+        ]);
+
         $this->info('All migrations have been published successfully.');
 
         return self::SUCCESS;
