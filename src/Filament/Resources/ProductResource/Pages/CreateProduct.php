@@ -12,6 +12,7 @@ use Rahat1994\SparkCommerce\Models\SCCategory;
 class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
+
     protected array $product_categories = [];
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -25,6 +26,7 @@ class CreateProduct extends CreateRecord
             $this->product_categories = $data['product_categories'];
             // unset($data['product_categories']);
         }
+
         return $data;
     }
 
@@ -40,7 +42,7 @@ class CreateProduct extends CreateRecord
     public function assignCategoryToProduct($categoryId, $recordId)
     {
         DB::table(
-            strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.category_product_table_name"))
+            strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.category_product_table_name'))
         )->insert([
             'category_id' => $categoryId,
             'product_id' => $recordId,

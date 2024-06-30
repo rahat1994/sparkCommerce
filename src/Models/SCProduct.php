@@ -51,7 +51,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
 
     public function categories()
     {
-        return $this->belongsToMany(SCCategory::class, config('sparkcommerce.table_prefix') . config("sparkcommerce.category_product_table_name"), 'product_id', 'category_id');
+        return $this->belongsToMany(SCCategory::class, config('sparkcommerce.table_prefix') . config('sparkcommerce.category_product_table_name'), 'product_id', 'category_id');
     }
 
     public function variations()
