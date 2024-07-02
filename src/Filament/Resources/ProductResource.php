@@ -24,6 +24,8 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\VerticalAlignment;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -33,8 +35,7 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProduct
 use Rahat1994\SparkCommerce\Forms\Components\CategoriesField;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 use Rahat1994\SparkCommerce\Models\SCProduct;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
+
 class ProductResource extends Resource
 {
     protected static ?string $model = SCProduct::class;
