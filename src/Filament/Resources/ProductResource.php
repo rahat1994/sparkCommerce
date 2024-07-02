@@ -33,7 +33,8 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProduct
 use Rahat1994\SparkCommerce\Forms\Components\CategoriesField;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 use Rahat1994\SparkCommerce\Models\SCProduct;
-
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 class ProductResource extends Resource
 {
     protected static ?string $model = SCProduct::class;
@@ -74,7 +75,14 @@ class ProductResource extends Resource
                 //
             ])
             ->searchable(true)
-            ->actions([])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+                // Action::make('Edit')
+                //     ->icon('heroicon-o-pencil')
+                //     ->url(fn ($record): string => route('products.edit', $record))
+                //     ->openUrlInNewTab()
+            ])
             ->defaultSort('created_at', 'desc');
     }
 
@@ -101,11 +109,13 @@ class ProductResource extends Resource
                     ])->grow(false),
                     Section::make('Product Image')->schema([
                         SpatieMediaLibraryFileUpload::make('product_image')
+                            ->collection('product_image')
                             ->hiddenLabel()
                             ->image(),
                     ])->grow(false),
                     Section::make('Product gallery')->schema([
                         SpatieMediaLibraryFileUpload::make('product_image_gallery')
+                            ->collection('product_image_gallery')
                             ->multiple()
                             ->reorderable()
                             ->appendFiles()
