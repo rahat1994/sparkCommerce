@@ -8,7 +8,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class SCCategory extends Model implements \Spatie\MediaLibrary\HasMedia
 {
-
     use InteractsWithMedia;
     use Sluggable;
 
@@ -33,8 +32,8 @@ class SCCategory extends Model implements \Spatie\MediaLibrary\HasMedia
     {
         return [
             'slug' => [
-                'source' => 'name'
-            ]
+                'source' => 'name',
+            ],
         ];
     }
 
