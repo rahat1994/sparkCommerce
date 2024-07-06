@@ -6,11 +6,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
 {
     use HasTags;
     use InteractsWithMedia;
+    use Sluggable;
 
     protected $casts = [
         'product_attributes' => 'array',
@@ -33,6 +35,22 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
         'length',
         'product_attributes',
     ];
+
+
+
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
+    }
 
     /**
      * Get the table associated with the model.

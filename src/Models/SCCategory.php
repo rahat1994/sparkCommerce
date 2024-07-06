@@ -2,10 +2,16 @@
 
 namespace Rahat1994\SparkCommerce\Models;
 
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class SCCategory extends Model
+class SCCategory extends Model implements \Spatie\MediaLibrary\HasMedia
 {
+
+    use InteractsWithMedia;
+    use Sluggable;
+
     protected $fillable = ['name', 'user_id', 'parent_id'];
 
     protected $casts = [
@@ -21,6 +27,15 @@ class SCCategory extends Model
     public function getTable()
     {
         return config('sparkcommerce.table_prefix') . config('sparkcommerce.categories_table_name');
+    }
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
     }
 
     public function product()

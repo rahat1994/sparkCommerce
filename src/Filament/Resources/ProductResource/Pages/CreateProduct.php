@@ -18,7 +18,7 @@ class CreateProduct extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // dd($this->record->id);
-        $data['slug'] = Str::slug($data['name']);
+        // $data['slug'] = Str::slug($data['name']);
         $data['user_id'] = auth()->user()->id;
         $data['price'] = $data['regular_price'];
 
