@@ -8,7 +8,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCOrder;
-use Rahat1994\SparkCommerce\Models\SCReview;
 
 class OrderResource extends Resource
 {

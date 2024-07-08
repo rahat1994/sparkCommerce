@@ -3,10 +3,10 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use App\Models\User;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
-use Cviebrock\EloquentSluggable\Sluggable;
 
 class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
 {
@@ -36,19 +36,15 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
         'product_attributes',
     ];
 
-
-
     /**
      * Return the sluggable configuration array for this model.
-     *
-     * @return array
      */
     public function sluggable(): array
     {
         return [
             'slug' => [
-                'source' => 'name'
-            ]
+                'source' => 'name',
+            ],
         ];
     }
 
