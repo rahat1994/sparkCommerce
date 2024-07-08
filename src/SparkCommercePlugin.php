@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
+use Rahat1994\SparkCommerce\Filament\Resources\OrderResource;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
 use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
@@ -23,10 +24,13 @@ class SparkCommercePlugin implements Plugin
             CategoryResource::class,
             TagResource::class,
             ReviewResource::class,
+            OrderResource::class,
         ]);
     }
 
-    public function boot(Panel $panel): void {}
+    public function boot(Panel $panel): void
+    {
+    }
 
     public static function make(): static
     {

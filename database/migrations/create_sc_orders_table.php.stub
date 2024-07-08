@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        $productsTable = strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.orders_table_name"));
+        $ordersTableName = strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.orders_table_name"));
 
-        Schema::create($productsTable, function (Blueprint $table) {
+        Schema::create($ordersTableName, function (Blueprint $table) {
             $table->id();
             $table->json("items")->nullable();
             $table->json("shipping_address")->nullable();
