@@ -10,4 +10,5 @@ return [
     'product_reviews_table_name' => 'product_reviews',
     'category_product_table_name' => 'category_product',
     'orders_table_name' => 'orders',
+    'anonymous_carts_table_name' => 'anonymous_carts',
 ];

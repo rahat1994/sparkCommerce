@@ -71,5 +71,11 @@ return [
                 'description' => 'Description',
             ],
         ],
+        'order' => [
+            'model_label' => 'Order',
+            'model_plural_label' => 'Orders',
+            'navigation_group' => 'Sparkcommerce',
+            'navigation' => 'orders',
+        ],
     ],
 ];
