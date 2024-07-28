@@ -3,12 +3,13 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use App\Models\User;
+use Binafy\LaravelCart\Cartable;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
-class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
+class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 {
     use HasTags;
     use InteractsWithMedia;
@@ -35,6 +36,11 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia
         'length',
         'product_attributes',
     ];
+
+    public function getPrice(): int
+    {
+        return $this->price;
+    }
 
     /**
      * Return the sluggable configuration array for this model.

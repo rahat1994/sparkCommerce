@@ -6,7 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class SCOrder extends Model
 {
-    protected $fillable = [];
+    protected $fillable = [
+        'items',
+        'shipping_address',
+        'billing_address',
+        'shipping_method',
+        'total_amount',
+        'tracking_number',
+        'transaction_id',
+        'discount',
+        'user_id',
+        'order_number',
+        'status',
+        'payment_status',
+        'shipping_status',
+        'payment_method',
+        'vendor_id'
+    ];
+
+    protected $casts = [
+        'items' => 'array'
+    ];
 
     /**
      * Get the table associated with the model.
@@ -15,6 +35,6 @@ class SCOrder extends Model
      */
     public function getTable()
     {
-        return config('sparkcommerce.table_prefix') . config('sparkcommerce.product_reviews_table_name');
+        return config('sparkcommerce.table_prefix') . config('sparkcommerce.orders_table_name');
     }
 }
