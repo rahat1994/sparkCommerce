@@ -21,11 +21,11 @@ class SCOrder extends Model
         'payment_status',
         'shipping_status',
         'payment_method',
-        'vendor_id'
+        'vendor_id',
     ];
 
     protected $casts = [
-        'items' => 'array'
+        'items' => 'array',
     ];
 
     /**
