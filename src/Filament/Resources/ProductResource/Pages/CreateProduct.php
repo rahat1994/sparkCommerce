@@ -51,7 +51,7 @@ class CreateProduct extends CreateRecord
 
     public function saveCategory($categoryName, $parentId)
     {
-        $category = new SCCategory();
+        $category = new SCCategory;
 
         $category->name = $categoryName;
         $category->parent_id = ($parentId) ? $parentId : null;

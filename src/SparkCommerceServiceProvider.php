@@ -86,7 +86,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
         }
 
         // Testing
-        Testable::mixin(new TestsSparkCommerce());
+        Testable::mixin(new TestsSparkCommerce);
     }
 
     protected function getAssetPackageName(): ?string
