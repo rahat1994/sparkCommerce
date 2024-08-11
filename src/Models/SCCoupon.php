@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class SCCoupon extends Model
 {
-
     // $table->string('coupon_code');
     // $table->string('coupon_type');
     // $table->string('coupon_amount');

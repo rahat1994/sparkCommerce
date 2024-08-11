@@ -2,11 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Faker\Provider\ar_EG\Text;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
@@ -14,10 +12,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\BaseFilter;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
@@ -70,7 +65,7 @@ class CouponResource extends Resource
                             ->schema(self::usageLimitTabContent()),
                         Tabs\Tab::make('Giveaway products')
                             ->schema([]),
-                    ])
+                    ]),
             ])->columns(1);
     }
 
@@ -80,7 +75,7 @@ class CouponResource extends Resource
             Select::make('discount_type')
                 ->options([
                     'percentage_discount' => 'Percentage Discount',
-                    'fixed_cart_discount' => 'Fixed Cart Discount'
+                    'fixed_cart_discount' => 'Fixed Cart Discount',
                 ]),
             TextInput::make('discount_amount')->numeric(),
             DatePicker::make('expiry_date'),
@@ -88,11 +83,10 @@ class CouponResource extends Resource
             CheckboxList::make('usage_limit')
                 ->options([
                     0 => 'Apply once',
-                    1 => 'Apply repeatedly'
+                    1 => 'Apply repeatedly',
                 ])->helperText(
                     new HtmlString('<br><strong>Apply once</strong>: If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.<br><br> <strong>Apply repeatedly:</strong> The coupon applies repeatedly whenever the cart is eligible or if conditions are met. ie: If you set the coupon to offer Buy 2 Get 1 then the coupon works repeatedly for Buy 4 Get 2 and so on.')
-
-                )
+                ),
         ];
     }
 
@@ -104,9 +98,9 @@ class CouponResource extends Resource
             Checkbox::make('individual_use')->helperText('Check this box if the coupon cannot be used in conjunction with other coupons.'),
             Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
 
-
         ];
     }
+
     public static function usageLimitTabContent(): array
     {
         return [
