@@ -11,4 +11,5 @@ return [
     'category_product_table_name' => 'category_product',
     'orders_table_name' => 'orders',
     'anonymous_carts_table_name' => 'anonymous_carts',
+    'coupons_table_name' => 'coupons',
 ];

@@ -77,5 +77,16 @@ return [
             'navigation_group' => 'Sparkcommerce',
             'navigation' => 'orders',
         ],
+        'coupon' => [
+            'model_label' => 'Coupon',
+            'model_plural_label' => 'Coupons',
+            'navigation_group' => 'Sparkcommerce',
+            'navigation' => 'coupons',
+            'creation_form' => [
+                'name' => 'Coupon Code',
+                'description' => 'Description',
+                'coupon_data' => 'Coupon Data',
+            ],
+        ],
     ],
 ];
