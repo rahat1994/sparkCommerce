@@ -51,4 +51,10 @@ class SCCategory extends Model implements \Spatie\MediaLibrary\HasMedia
     {
         return $this->hasMany(SCCategory::class, 'parent_id', 'id');
     }
+
+    // recursive, loads all descendants
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
+    }
 }

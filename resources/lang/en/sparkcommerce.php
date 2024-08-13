@@ -88,5 +88,19 @@ return [
                 'coupon_data' => 'Coupon Data',
             ],
         ],
+        'user' => [
+            'model_label' => 'User',
+            'model_plural_label' => 'Users',
+            'navigation_group' => 'Administration',
+            'navigation' => 'Users',
+            'creation_form' => [
+                'name' => 'Name',
+                'email' => 'Email',
+                'password' => 'Password',
+                'password_confirmation' => 'Confirm Password',
+                'meta' => 'Meta',
+                'role' => 'Role',
+            ],
+        ],
     ],
 ];
