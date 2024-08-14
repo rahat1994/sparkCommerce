@@ -3,7 +3,6 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use App\Models\User;
-use Faker\Provider\ar_EG\Text;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -12,9 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
 use Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages;
-use Rahat1994\SparkCommerce\Models\SCTag;
 use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
@@ -68,7 +65,7 @@ class UserResource extends Resource
                 Select::make('role')
                     ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.role'))
                     ->options(
-                        Role::all()->mapWithKeys(fn(Role $role): array => [$role->name => $role->name])
+                        Role::all()->mapWithKeys(fn (Role $role): array => [$role->name => $role->name])
                     )->columnSpan(2),
             ]);
     }
@@ -78,9 +75,9 @@ class UserResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->formatStateUsing(fn(string $state): string => $state),
+                    ->formatStateUsing(fn (string $state): string => $state),
                 TextColumn::make('email')
-                    ->formatStateUsing(fn(string $state): string => $state),
+                    ->formatStateUsing(fn (string $state): string => $state),
             ])
             ->filters([
                 //
