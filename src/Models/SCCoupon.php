@@ -2,6 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class SCCoupon extends Model
@@ -55,5 +56,17 @@ class SCCoupon extends Model
     public function getTable()
     {
         return 'sc_coupons';
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'coupon_user')
+            ->withPivot('usage_count')
+            ->withTimestamps();
+    }
+
+    public function isValid()
+    {
+        return $this->expires_at === null || $this->expires_at->isFuture();
     }
 }

@@ -84,8 +84,8 @@ return [
             'navigation' => 'coupons',
             'creation_form' => [
                 'name' => 'Coupon Code',
-                'description' => 'Description',
-                'coupon_data' => 'Coupon Data',
+                'coupon_type' => 'Coupon Type',
+                'coupon_amount' => 'Coupon Amount',
             ],
         ],
         'user' => [

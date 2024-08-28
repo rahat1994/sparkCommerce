@@ -5,6 +5,8 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
@@ -65,6 +67,8 @@ class CouponResource extends Resource
                             ->schema(self::usageLimitTabContent()),
                         Tabs\Tab::make('Giveaway products')
                             ->schema([]),
+                        Tabs\Tab::make('Exclusions')
+                            ->schema(self::exclusions()),
                     ]),
             ])->columns(1);
     }
@@ -72,15 +76,15 @@ class CouponResource extends Resource
     public static function generalTabContent(): array
     {
         return [
-            Select::make('discount_type')
+            Select::make('coupon_type')
                 ->options([
                     'percentage_discount' => 'Percentage Discount',
                     'fixed_cart_discount' => 'Fixed Cart Discount',
                 ]),
-            TextInput::make('discount_amount')->numeric(),
-            DatePicker::make('expiry_date'),
+            TextInput::make('coupon_amount')->numeric(),
+            DatePicker::make('end_date'),
             DatePicker::make('start_date'),
-            CheckboxList::make('usage_limit')
+            Radio::make('number_of_uses')
                 ->options([
                     0 => 'Apply once',
                     1 => 'Apply repeatedly',
@@ -93,8 +97,8 @@ class CouponResource extends Resource
     public static function usageRestrictionTabContent(): array
     {
         return [
-            TextInput::make('minimum_spend')->numeric(),
-            TextInput::make('maximum_spend')->numeric(),
+            TextInput::make('min_spend')->numeric(),
+            TextInput::make('max_spend')->numeric(),
             Checkbox::make('individual_use')->helperText('Check this box if the coupon cannot be used in conjunction with other coupons.'),
             Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
 
@@ -104,7 +108,20 @@ class CouponResource extends Resource
     public static function usageLimitTabContent(): array
     {
         return [
-            TextInput::make('usage_limit_per_coupon')->numeric()->helperText('How many times this coupon can be used before it is void.'),
+            TextInput::make('usage_limit')->numeric()->helperText('How many times this coupon can be used before it is void.'),
+            TextInput::make('usage_limit_per_user')->numeric()->helperText('How many times this coupon can be used by each user before it is void.'),
+        ];
+    }
+
+    public static function exclusions(): array
+    {
+        return [
+
+            TextInput::make('included_products')->default("{}")->readOnly(),
+            TextInput::make('excluded_products')->default("{}")->readOnly(),
+            TextInput::make('included_categories')->default("{}")->readOnly(),
+            TextInput::make('excluded_categories')->default("{}")->readOnly(),
+            TextInput::make('included_customers')->default("{}")->readOnly(),
         ];
     }
 
@@ -114,11 +131,12 @@ class CouponResource extends Resource
         // TODO: Fix how the categories are loaded in the table.   //
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('coupon_code')
                     ->searchable()
                     ->label(__('sparkcommerce::sparkcommerce.resource.coupon.creation_form.name')),
-                TextColumn::make('parent.name')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.parent_category')),
+                TextColumn::make('coupon_type')
+                    ->label(__('sparkcommerce::sparkcommerce.resource.coupon.creation_form.coupon_type')),
+                TextColumn::make('coupon_amount')
             ])
             ->filters([])
             ->actions([

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('number_of_uses')->comment('0: unlimited, 1: one time, If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.');
             $table->string('max_spend');
             $table->string('min_spend');
+            $table->boolean('individual_use')->default(0);
             $table->boolean('exclude_sale_items')->default(0);
             $table->json('included_products');
             $table->json('excluded_products');

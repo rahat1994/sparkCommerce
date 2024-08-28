@@ -12,4 +12,5 @@ return [
     'orders_table_name' => 'orders',
     'anonymous_carts_table_name' => 'anonymous_carts',
     'coupons_table_name' => 'coupons',
+    'coupon_user_table_name' => 'coupon_user',
 ];
