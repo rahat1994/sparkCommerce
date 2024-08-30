@@ -3,9 +3,7 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
@@ -117,11 +115,11 @@ class CouponResource extends Resource
     {
         return [
 
-            TextInput::make('included_products')->default("{}")->readOnly(),
-            TextInput::make('excluded_products')->default("{}")->readOnly(),
-            TextInput::make('included_categories')->default("{}")->readOnly(),
-            TextInput::make('excluded_categories')->default("{}")->readOnly(),
-            TextInput::make('included_customers')->default("{}")->readOnly(),
+            TextInput::make('included_products')->default('{}')->readOnly(),
+            TextInput::make('excluded_products')->default('{}')->readOnly(),
+            TextInput::make('included_categories')->default('{}')->readOnly(),
+            TextInput::make('excluded_categories')->default('{}')->readOnly(),
+            TextInput::make('included_customers')->default('{}')->readOnly(),
         ];
     }
 
@@ -136,7 +134,7 @@ class CouponResource extends Resource
                     ->label(__('sparkcommerce::sparkcommerce.resource.coupon.creation_form.name')),
                 TextColumn::make('coupon_type')
                     ->label(__('sparkcommerce::sparkcommerce.resource.coupon.creation_form.coupon_type')),
-                TextColumn::make('coupon_amount')
+                TextColumn::make('coupon_amount'),
             ])
             ->filters([])
             ->actions([
