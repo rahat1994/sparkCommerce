@@ -2,11 +2,15 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 
@@ -49,27 +53,24 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('id')
+                    ->label('ID'),
+                TextColumn::make('tracking_number')
+                    ->label('Tracking Number'),
+                TextColumn::make('total_amount')
+                    ->label('Order Value')
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Action::make('Confirm Order')
-                    ->label('Confirm Order')
-                    ->message('Are you sure you want to confirm this order?')
-                    ->backgroundColor('bg-green-500')
-                    ->confirmText('Yes, Confirm Order')
-                    ->cancelText('No, Keep Order')
-                    ->handler(fn (SCOrder $order) => $order->update(['status' => 'confirmed'])),
+                self::getOrderConfirmActionModal(),
                 Action::make('cancelOrder')
                     ->label('Cancel Order')
-                    ->message('Are you sure you want to cancel this order?')
-                    ->confirmText('Yes, Cancel Order')
-                    ->backgroundColor('bg-red-500')
-                    ->cancelText('No, Keep Order')
-                    ->handler(fn (SCOrder $order) => $order->delete()),
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn(SCOrder $order) => $order->delete()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -77,7 +78,28 @@ class OrderResource extends Resource
                 ]),
             ]);
     }
-
+    public static function getOrderConfirmActionModal()
+    {
+        return Action::make('Confirm Order')
+            ->form([
+                Select::make('shipping_status')
+                    ->label('Shipping Status')
+                    ->options([
+                        1 => 'Processing',
+                        2 => 'Shipped',
+                    ])
+                    ->required(),
+            ])
+            ->action(function (array $data, SCOrder $record): void {
+                // $record->author()->associate($data['authorId']);
+                // $record->save();
+            })
+            ->label('Confirm Order')
+            ->color('success')
+            ->requiresConfirmation()->modalContent(
+                fn(SCOrder $record): View => view('sparkcommerce::actions.order-confirm-modal', ['record' => $record])
+            );
+    }
     public static function getRelations(): array
     {
         return [
