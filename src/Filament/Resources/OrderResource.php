@@ -3,14 +3,13 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 
@@ -58,7 +57,7 @@ class OrderResource extends Resource
                 TextColumn::make('tracking_number')
                     ->label('Tracking Number'),
                 TextColumn::make('total_amount')
-                    ->label('Order Value')
+                    ->label('Order Value'),
             ])
             ->filters([
                 //
@@ -70,7 +69,7 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn(SCOrder $order) => $order->delete()),
+                    ->action(fn (SCOrder $order) => $order->delete()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -78,6 +77,7 @@ class OrderResource extends Resource
                 ]),
             ]);
     }
+
     public static function getOrderConfirmActionModal()
     {
         return Action::make('Confirm Order')
@@ -97,9 +97,10 @@ class OrderResource extends Resource
             ->label('Confirm Order')
             ->color('success')
             ->requiresConfirmation()->modalContent(
-                fn(SCOrder $record): View => view('sparkcommerce::actions.order-confirm-modal', ['record' => $record])
+                fn (SCOrder $record): View => view('sparkcommerce::actions.order-confirm-modal', ['record' => $record])
             );
     }
+
     public static function getRelations(): array
     {
         return [
