@@ -3,14 +3,13 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 
@@ -83,11 +82,6 @@ class OrderResource extends Resource
                 ]),
             ]);
     }
-
-    // public static function query()
-    // {
-    //     return parent::query()->orderBy('created_at', 'desc');
-    // }
 
     public static function getOrderConfirmActionModal()
     {
