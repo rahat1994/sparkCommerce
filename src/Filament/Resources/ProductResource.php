@@ -384,7 +384,7 @@ class ProductResource extends Resource
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.general'))
             ->schema([
-                TextInput::make('price')
+                TextInput::make('regular_price')
                     ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.regular_price'))
                     ->numeric(),
                 TextInput::make('sale_price')

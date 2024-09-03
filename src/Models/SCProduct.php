@@ -25,7 +25,8 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
         'description',
         'product_type',
         'slug',
-        'price',
+        'regular_price',
+        'sale_price',
         'sku',
         'stock_quantity',
         'allow_backorders',
@@ -39,7 +40,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 
     public function getPrice(): int
     {
-        return $this->price;
+        return $this->regular_price;
     }
 
     /**

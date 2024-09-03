@@ -2,11 +2,14 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 
@@ -49,33 +52,90 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('id')
+                    ->label('ID'),
+                TextColumn::make('tracking_number')
+                    ->label('Tracking Number'),
+                TextColumn::make('total_amount')
+                    ->label('Order Value'),
+                TextColumn::make('shipping_status')
+                    ->label('Shipping Status'),
+                TextColumn::make('payment_status')
+                    ->label('Payment Status'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Action::make('Confirm Order')
-                    ->label('Confirm Order')
-                    ->message('Are you sure you want to confirm this order?')
-                    ->backgroundColor('bg-green-500')
-                    ->confirmText('Yes, Confirm Order')
-                    ->cancelText('No, Keep Order')
-                    ->handler(fn (SCOrder $order) => $order->update(['status' => 'confirmed'])),
+                // Tables\Actions\EditAction::make(),
+                self::getOrderConfirmActionModal(),
                 Action::make('cancelOrder')
                     ->label('Cancel Order')
-                    ->message('Are you sure you want to cancel this order?')
-                    ->confirmText('Yes, Cancel Order')
-                    ->backgroundColor('bg-red-500')
-                    ->cancelText('No, Keep Order')
-                    ->handler(fn (SCOrder $order) => $order->delete()),
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->action(fn(SCOrder $order) => $order->delete()),
             ])
+            ->defaultSort('created_at', 'desc')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getOrderConfirmActionModal()
+    {
+        return Action::make('Confirm Order')
+            ->form([
+                Select::make('shipping_status')
+                    ->label('Shipping Status')
+                    ->options([
+                        1 => 'Processing',
+                        2 => 'Shipped',
+                    ])
+                    ->required(),
+            ])
+            ->action(function (array $data, SCOrder $record): void {
+                // $record->author()->associate($data['authorId']);
+                // $record->save();
+            })
+            ->icon('heroicon-o-information-circle')
+            ->label('Overview Order')
+            ->color('success')
+            ->requiresConfirmation()->modalContent(
+                function (SCOrder $record): View {
+                    $orderContent = self::getRowItems($record);
+
+                    return view('sparkcommerce::actions.order-confirm-modal', [
+                        'orderContent' => $orderContent,
+                    ]);
+                }
+            );
+    }
+
+    public static function getRowItems(SCOrder $order): array
+    {
+        $items = [];
+
+        foreach ($order->items as $item) {
+            $productType = $item['itemable_type'];
+            $instance = $productType::find($item['itemable_id']);
+
+            $items[] = [
+                'id' => $instance->id,
+                'name' => $instance->name,
+                'quantity' => $item['quantity'],
+                'regular_price' => $instance->regular_price,
+                'sale_price' => $instance->sale_price,
+            ];
+        }
+
+        return [
+            'id' => $order->id,
+            'tracking_number' => $order->tracking_number,
+            'total_amount' => $order->total_amount,
+            'items' => $items,
+        ];
     }
 
     public static function getRelations(): array
