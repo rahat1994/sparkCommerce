@@ -58,13 +58,17 @@ class OrderResource extends Resource
                 TextColumn::make('tracking_number')
                     ->label('Tracking Number'),
                 TextColumn::make('total_amount')
-                    ->label('Order Value')
+                    ->label('Order Value'),
+                TextColumn::make('shipping_status')
+                    ->label("Shipping Status"),
+                TextColumn::make('payment_status')
+                    ->label("Payment Status")
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
                 self::getOrderConfirmActionModal(),
                 Action::make('cancelOrder')
                     ->label('Cancel Order')
@@ -72,12 +76,19 @@ class OrderResource extends Resource
                     ->requiresConfirmation()
                     ->action(fn(SCOrder $order) => $order->delete()),
             ])
+            ->defaultSort('created_at', 'desc')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
+
+    // public static function query()
+    // {
+    //     return parent::query()->orderBy('created_at', 'desc');
+    // }
+
     public static function getOrderConfirmActionModal()
     {
         return Action::make('Confirm Order')
@@ -94,12 +105,44 @@ class OrderResource extends Resource
                 // $record->author()->associate($data['authorId']);
                 // $record->save();
             })
-            ->label('Confirm Order')
+            ->icon('heroicon-o-information-circle')
+            ->label('Overview Order')
             ->color('success')
             ->requiresConfirmation()->modalContent(
-                fn(SCOrder $record): View => view('sparkcommerce::actions.order-confirm-modal', ['record' => $record])
+                function (SCOrder $record): View {
+                    $orderContent = self::getRowItems($record);
+                    return view('sparkcommerce::actions.order-confirm-modal', [
+                        'orderContent' => $orderContent,
+                    ]);
+                }
             );
     }
+
+    public static function getRowItems(SCOrder $order): array
+    {
+        $items = [];
+
+        foreach ($order->items as $item) {
+            $productType = $item['itemable_type'];
+            $instance = $productType::find($item['itemable_id']);
+
+            $items[] = [
+                'id' => $instance->id,
+                'name' => $instance->name,
+                'quantity' => $item['quantity'],
+                'regular_price' => $instance->regular_price,
+                'sale_price' => $instance->sale_price,
+            ];
+        }
+
+        return [
+            'id' => $order->id,
+            'tracking_number' => $order->tracking_number,
+            'total_amount' => $order->total_amount,
+            'items' => $items,
+        ];
+    }
+
     public static function getRelations(): array
     {
         return [
