@@ -59,9 +59,9 @@ class OrderResource extends Resource
                 TextColumn::make('total_amount')
                     ->label('Order Value'),
                 TextColumn::make('shipping_status')
-                    ->label("Shipping Status"),
+                    ->label('Shipping Status'),
                 TextColumn::make('payment_status')
-                    ->label("Payment Status")
+                    ->label('Payment Status'),
             ])
             ->filters([
                 //
@@ -73,7 +73,7 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn(SCOrder $order) => $order->delete()),
+                    ->action(fn (SCOrder $order) => $order->delete()),
             ])
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
@@ -105,6 +105,7 @@ class OrderResource extends Resource
             ->requiresConfirmation()->modalContent(
                 function (SCOrder $record): View {
                     $orderContent = self::getRowItems($record);
+
                     return view('sparkcommerce::actions.order-confirm-modal', [
                         'orderContent' => $orderContent,
                     ]);
