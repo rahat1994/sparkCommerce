@@ -2,7 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Filament\Actions\Action;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
