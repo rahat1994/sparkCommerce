@@ -2,12 +2,13 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+// use Filament\Tables\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Forms\Components\Select;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
@@ -62,6 +63,10 @@ class OrderResource extends Resource
                     ->label('Shipping Status'),
                 TextColumn::make('payment_status')
                     ->label('Payment Status'),
+                TextColumn::make('status')
+                    ->label('Status'),
+                TextColumn::make('transaction_id')
+                    ->label('Transaction ID'),
             ])
             ->filters([
                 //
@@ -90,14 +95,17 @@ class OrderResource extends Resource
                 Select::make('shipping_status')
                     ->label('Shipping Status')
                     ->options([
-                        1 => 'Processing',
-                        2 => 'Shipped',
+                        'Processing' => 'Processing',
+                        'Shipped' => 'Shipped',
                     ])
                     ->required(),
             ])
             ->action(function (array $data, SCOrder $record): void {
-                // $record->author()->associate($data['authorId']);
-                // $record->save();
+                $record->update([
+                    'shipping_status' => $data['shipping_status'],
+                    'status' => $data['shipping_status'],
+                ]);
+
             })
             ->icon('heroicon-o-information-circle')
             ->label('Overview Order')
