@@ -99,8 +99,9 @@ class OrderResource extends Resource
             ->action(function (array $data, SCOrder $record): void {
                 $record->update([
                     'shipping_status' => $data['shipping_status'],
+                    'status' => $data['shipping_status'],
                 ]);
-                
+
             })
             ->icon('heroicon-o-information-circle')
             ->label('Overview Order')
