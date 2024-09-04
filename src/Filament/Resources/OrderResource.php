@@ -63,6 +63,8 @@ class OrderResource extends Resource
                     ->label('Shipping Status'),
                 TextColumn::make('payment_status')
                     ->label('Payment Status'),
+                TextColumn::make('status')
+                    ->label('Status'),
             ])
             ->filters([
                 //
@@ -91,8 +93,8 @@ class OrderResource extends Resource
                 Select::make('shipping_status')
                     ->label('Shipping Status')
                     ->options([
-                        1 => 'Processing',
-                        2 => 'Shipped',
+                        'Processing' => 'Processing',
+                        'Shipped' => 'Shipped',
                     ])
                     ->required(),
             ])
