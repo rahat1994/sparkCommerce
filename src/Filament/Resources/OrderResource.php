@@ -2,13 +2,13 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\TextColumn;
 // use Filament\Tables\Forms\Components\Select;
-use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
