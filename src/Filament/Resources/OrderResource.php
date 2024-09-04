@@ -65,6 +65,8 @@ class OrderResource extends Resource
                     ->label('Payment Status'),
                 TextColumn::make('status')
                     ->label('Status'),
+                TextColumn::make('transaction_id')
+                    ->label('Transaction ID'),
             ])
             ->filters([
                 //
