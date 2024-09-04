@@ -2,6 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\CheckboxList;
@@ -125,7 +126,7 @@ class ProductResource extends Resource
                     Section::make('Product categories')->schema([
                         CategoriesField::make('product_categories')
                             ->hiddenLabel()
-                            ->categories(SCCategory::all()->toArray()),
+                            ->categories(self::getShopCategories()),
                     ]),
                     Section::make('Product tags')->schema([
                         SpatieTagsInput::make('product_tags')
@@ -133,6 +134,20 @@ class ProductResource extends Resource
                     ])->grow(false),
                 ]),
             ])->columns(4);
+    }
+
+    public static function getShopCategories()
+    {
+        if (class_exists('SparkcommerceMultivendor')) {
+            $vendorId = Filament::getTenant();
+
+            if ($vendorId) {
+                return SCCategory::where('vendor_id', $vendorId->id)->get()->toArray();
+            }
+            // dd($vendorId);
+            // return;
+        }
+        return SCCategory::all()->toArray();
     }
 
     public static function getProductDimensionFields()
@@ -220,7 +235,7 @@ class ProductResource extends Resource
                     ->collapsible()
                     ->collapsed()
                     ->itemLabel(
-                        fn (array $state): ?string => $state['attribute_name'] ?? null
+                        fn(array $state): ?string => $state['attribute_name'] ?? null
                     ),
             ]);
     }
@@ -291,15 +306,15 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                                FormAction::make('Select')
-                                    ->icon('heroicon-m-bars-3')
-                                    ->action(function (Get $get, Set $set, $state) {
-                                        $set('product_variations', self::generateVariations($get('product_attributes')));
-                                    }),
-                            ])->verticalAlignment(VerticalAlignment::End)]
+                            FormAction::make('Select')
+                                ->icon('heroicon-m-bars-3')
+                                ->action(function (Get $get, Set $set, $state) {
+                                    $set('product_variations', self::generateVariations($get('product_attributes')));
+                                }),
+                        ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
-            })->hidden(fn (Get $get) => $get('product_type') == 'simple');
+            })->hidden(fn(Get $get) => $get('product_type') == 'simple');
     }
 
     public static function getVariationsRepeaterField()
@@ -355,11 +370,11 @@ class ProductResource extends Resource
 
                                         ]),
                                 ])->itemLabel(
-                                    fn (array $state): ?string => $state['title'] ?? null
+                                    fn(array $state): ?string => $state['title'] ?? null
                                 ),
                         ];
                     }
-                })->hidden(fn (Get $get) => $get('generate_varaitions') == null),
+                })->hidden(fn(Get $get) => $get('generate_varaitions') == null),
         ];
     }
 
