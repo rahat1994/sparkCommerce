@@ -97,8 +97,10 @@ class OrderResource extends Resource
                     ->required(),
             ])
             ->action(function (array $data, SCOrder $record): void {
-                // $record->author()->associate($data['authorId']);
-                // $record->save();
+                $record->update([
+                    'shipping_status' => $data['shipping_status'],
+                ]);
+                
             })
             ->icon('heroicon-o-information-circle')
             ->label('Overview Order')
