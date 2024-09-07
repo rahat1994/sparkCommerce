@@ -28,7 +28,7 @@ class CategoriesField extends CheckboxList
     }
 
     /**
-     * @return array<string | array<string>>
+     * @return array<T> | array<T>
      */
     public function getOptions(): array
     {
