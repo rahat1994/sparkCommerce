@@ -10,7 +10,8 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 
 class EditProduct extends EditRecord
 {
-    use CanCreateCategories, CanAttachCategories;
+    use CanAttachCategories;
+    use CanCreateCategories;
 
     public static string $resource = ProductResource::class;
 
@@ -29,6 +30,7 @@ class EditProduct extends EditRecord
         if (isset($data['product_categories'])) {
             $this->product_categories = $data['product_categories'];
         }
+
         return $data;
     }
 
