@@ -2,19 +2,10 @@
 
 namespace Rahat1994\SparkCommerce\Concerns;
 
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Support\HtmlString;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Radio;
-
 
 trait HasPrice
 {
-
-    /**
-     * @return array
-     */
     protected static function getPriceInputs(): array
     {
         return [
