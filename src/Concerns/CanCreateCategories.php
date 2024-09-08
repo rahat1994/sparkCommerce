@@ -2,14 +2,11 @@
 
 namespace Rahat1994\SparkCommerce\Concerns;
 
-use Closure;
 use Filament\Facades\Filament;
-use Illuminate\Support\Facades\DB;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 
 trait CanCreateCategories
 {
-
     public function saveCategory($categoryName, $parentId)
     {
         $category = SCCategory::create([

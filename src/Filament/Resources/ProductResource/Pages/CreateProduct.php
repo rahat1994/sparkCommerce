@@ -2,19 +2,15 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Rahat1994\SparkCommerce\Concerns\CanAttachCategories;
 use Rahat1994\SparkCommerce\Concerns\CanCreateCategories;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
-use Rahat1994\SparkCommerce\Models\SCCategory;
 
 class CreateProduct extends CreateRecord
 {
-    use CanCreateCategories, CanAttachCategories;
-
+    use CanAttachCategories;
+    use CanCreateCategories;
 
     protected static string $resource = ProductResource::class;
 
