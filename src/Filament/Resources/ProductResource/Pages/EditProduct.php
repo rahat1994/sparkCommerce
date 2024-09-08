@@ -9,6 +9,7 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 class EditProduct extends EditRecord
 {
     public static string $resource = ProductResource::class;
+
     protected array $product_categories = [];
 
     protected function getHeaderActions(): array
