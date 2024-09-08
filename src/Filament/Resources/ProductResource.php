@@ -30,6 +30,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Rahat1994\SparkCommerce\Concerns\HasInventory;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -39,6 +40,8 @@ use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class ProductResource extends Resource
 {
+    use HasInventory;
+
     protected static ?string $model = SCProduct::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-gift';
@@ -72,6 +75,8 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name'),
+                TextColumn::make('sku'),
+                TextColumn::make('regular_price'),
             ])
             ->filters([
                 //
@@ -135,14 +140,8 @@ class ProductResource extends Resource
 
     public static function getShopCategories()
     {
-        if (class_exists('SparkcommerceMultivendor')) {
-            $vendorId = Filament::getTenant();
-
-            if ($vendorId) {
-                return SCCategory::where('vendor_id', $vendorId->id)->get()->toArray();
-            }
-            // dd($vendorId);
-            // return;
+        if (class_exists('SparkcommerceMultivendor') && $vendorId = Filament::getTenant()) {
+            return SCCategory::where('vendor_id', $vendorId->id)->get()->toArray();
         }
 
         return SCCategory::all()->toArray();
@@ -150,6 +149,7 @@ class ProductResource extends Resource
 
     public static function getProductDimensionFields()
     {
+        // TODO: Add hooks to modify the array
         return Fieldset::make('product_dimensions')
             ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.fieldset_name'))
             ->schema([
@@ -162,6 +162,7 @@ class ProductResource extends Resource
 
     public static function getProductDataSection(): Tabs
     {
+        // TODO: Add hooks to modify the array
         return Tabs::make('product_data')
             ->tabs([
                 self::getGeneralTab(),
@@ -418,27 +419,7 @@ class ProductResource extends Resource
     public static function getInventoryTab(): Tab
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.inventory'))
-            ->schema([
-                TextInput::make('sku')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.sku')),
-                Placeholder::make('notice')
-                    ->content(new HtmlString('<p>Needs work like woocommerce</p>')),
-                Section::make('Inventory')
-                    ->description('Settings for inventory')
-                    ->schema([
-                        TextInput::make('stock_quantity')
-                            ->label('Stock Quantity')->numeric(),
-                        Radio::make('should_allow_backorders')
-                            ->label('Allow backorders?')
-                            ->options([
-                                'do_not_allow' => 'Do not allow',
-                                'allow_notify_customer' => 'Allow, but notify customer',
-                                'allow' => 'Allow',
-                            ])->default('do_not_allow')->inline()->inlineLabel(false),
-                        TextInput::make('low_stock_threshold')
-                            ->label('Low stock threshold')->numeric(),
-                    ]),
-            ]);
+            ->schema(self::getInventoryInputs());
     }
 
     public static function getRelations(): array
