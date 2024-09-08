@@ -115,29 +115,10 @@
                 },
                 oninit(){
                     this.$watch('state', (value) => {
-                        console.log(value);
-                        this.selectedCategories = value;
+                        this.reorganizeCategories();
                     });
 
-                    $tempState = $wire.set('{{ $getStatePath() }}', this.selectedCategories);
-                    console.log("Temp State");
-                    console.log($tempState);
-
-                    console.log(this.state);
-                    console.log(this.selectedCategories);
-                    $nextTick(() => {
-                        this.selectedCategories.forEach((category) => {
-                            console.log(category);
-
-                            // let selector = `input[value='${category}']`;
-                            // let input = document.querySelector(selector);
-                            // console.log(input);
-
-                            // if (input) {
-                            //     input.checked = true;
-                            // }
-                        });
-                    });
+                    $wire.set('{{ $getStatePath() }}', this.selectedCategories);
                     this.reorganizeCategories();
                 },
                 reorganizeCategories(){

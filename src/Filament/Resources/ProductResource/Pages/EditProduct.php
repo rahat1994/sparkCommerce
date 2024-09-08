@@ -4,12 +4,15 @@ namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Rahat1994\SparkCommerce\Concerns\CanAttachCategories;
+use Rahat1994\SparkCommerce\Concerns\CanCreateCategories;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 
 class EditProduct extends EditRecord
 {
+    use CanCreateCategories, CanAttachCategories;
+
     public static string $resource = ProductResource::class;
-    protected array $product_categories = [];
 
     protected function getHeaderActions(): array
     {
@@ -18,18 +21,19 @@ class EditProduct extends EditRecord
         ];
     }
 
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function mutateFormDataBeforeSave(array $data): array
     {
-        // dd($this->record->id);
-        // $data['slug'] = Str::slug($data['name']);
         $data['user_id'] = auth()->user()->id;
         $data['price'] = $data['regular_price'];
-        dd($data['product_categories']);
+
         if (isset($data['product_categories'])) {
             $this->product_categories = $data['product_categories'];
-            // unset($data['product_categories']);
         }
-
         return $data;
+    }
+
+    public function afterSave()
+    {
+        $this->attachCategories();
     }
 }
