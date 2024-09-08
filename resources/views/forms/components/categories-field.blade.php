@@ -4,59 +4,20 @@
     $isDisabled = false;
     $isSearchable = false;
     $statePath = $getStatePath();
-    // dd($field);
+    $selectedCategories = [];
+    // For record edit
+    if ($getRecord() != null) {
+        $selectedCategories = $getRecord()->categories->pluck('id')->toArray();
+    }
+    // dd($selectedCategories);
     // return;
 @endphp
 
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     <div
-        x-data="{
-            state: $wire.$entangle('{{ $getStatePath() }}'),
-            categorySelected(e){
-                let value = e.target.getAttribute('value');
-                state.push(value);
-            }
-        }"
-        x-init="$nextTick(() => {
-
-            const checkboxes = document.querySelectorAll('[data-category-id]');
-            const checkboxMap = {};
-
-            // Create a map of checkboxes by their ID
-            checkboxes.forEach(checkbox => {
-                const id = checkbox.getAttribute('data-category-id');
-                const parentId = checkbox.getAttribute('data-category-parent-id');
-                checkboxMap[id] = { element: checkbox, parentId: parentId, children: [] };
-            });
-
-            console.log(checkboxMap);
-            // Build the parent-child relationships
-            Object.values(checkboxMap).forEach(checkbox => {
-                if (checkbox.parentId) {
-                    checkboxMap[checkbox.parentId].children.push(checkbox);
-                }
-            });
-
-            // Function to recursively append children and apply margin
-            function appendChildren(parent, children, level) {
-                children.forEach(child => {
-                    child.element.style.marginLeft = `${level * 8}px`;
-                    parent.appendChild(child.element);
-                    appendChildren(child.element, child.children, level + 1);
-                });
-            }
-
-            // Find root elements (those without a parent) and start the reorganization
-            const rootElements = Object.values(checkboxMap).filter(checkbox => !checkbox.parentId);
-            const container = document.getElementById('checkbox-container');
-
-            rootElements.forEach(root => {
-                container.appendChild(root.element);
-                appendChildren(root.element, root.children, 1);
-            });
-
-        })"
+        x-data="categoriesField"
+        x-init="oninit"
         x-on:category-created.window="
             let value = event.detail.id;
             console.log(value);
@@ -142,4 +103,85 @@
         <br />
         @include('sparkcommerce::forms.components.add-categories')
     </div>
+
+    @script
+        <script>
+            Alpine.data('categoriesField', () => ({
+                state: $wire.$entangle('{{ $getStatePath() }}'),
+                selectedCategories: @json($selectedCategories),
+                categorySelected(e){
+                    let value = e.target.getAttribute('value');
+                    state.push(value);
+                },
+                oninit(){
+                    this.$watch('state', (value) => {
+                        console.log(value);
+                        this.selectedCategories = value;
+                    });
+
+                    $tempState = $wire.set('{{ $getStatePath() }}', this.selectedCategories);
+                    console.log("Temp State");
+                    console.log($tempState);
+
+                    console.log(this.state);
+                    console.log(this.selectedCategories);
+                    $nextTick(() => {
+                        this.selectedCategories.forEach((category) => {
+                            console.log(category);
+
+                            // let selector = `input[value='${category}']`;
+                            // let input = document.querySelector(selector);
+                            // console.log(input);
+
+                            // if (input) {
+                            //     input.checked = true;
+                            // }
+                        });
+                    });
+                    this.reorganizeCategories();
+                },
+                reorganizeCategories(){
+                    $nextTick(() => {
+
+                        const checkboxes = document.querySelectorAll('[data-category-id]');
+                        const checkboxMap = {};
+
+                        // Create a map of checkboxes by their ID
+                        checkboxes.forEach(checkbox => {
+                            const id = checkbox.getAttribute('data-category-id');
+                            const parentId = checkbox.getAttribute('data-category-parent-id');
+                            checkboxMap[id] = { element: checkbox, parentId: parentId, children: [] };
+                        });
+
+                        console.log(checkboxMap);
+                        // Build the parent-child relationships
+                        Object.values(checkboxMap).forEach(checkbox => {
+                            if (checkbox.parentId) {
+                                checkboxMap[checkbox.parentId].children.push(checkbox);
+                            }
+                        });
+
+                        // Function to recursively append children and apply margin
+                        function appendChildren(parent, children, level) {
+                            children.forEach(child => {
+                                child.element.style.marginLeft = `${level * 15}px`;
+                                parent.appendChild(child.element);
+                                appendChildren(child.element, child.children, level + 1);
+                            });
+                        }
+
+                        // Find root elements (those without a parent) and start the reorganization
+                        const rootElements = Object.values(checkboxMap).filter(checkbox => !checkbox.parentId);
+                        const container = document.getElementById('checkbox-container');
+
+                        rootElements.forEach(root => {
+                            container.appendChild(root.element);
+                            appendChildren(root.element, root.children, 1);
+                        });
+
+                    });
+                }
+            }));
+        </script>
+    @endscript
 </x-dynamic-component>

@@ -21,7 +21,6 @@ class CategoriesField extends CheckboxList
      */
     public function categories(array | Arrayable | string | Closure | null $categories): static
     {
-        // dd($categories);
         $this->categories = $categories;
 
         return $this;

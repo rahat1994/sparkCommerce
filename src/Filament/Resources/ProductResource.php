@@ -101,6 +101,7 @@ class ProductResource extends Resource
                         'simple' => 'Simple',
                         'variable' => 'Variable',
                     ])->default('simple')->label('Product Type')->live(),
+                    self::getCategoriesSection(),
                     self::getProductDataSection(),
                 ])->columnSpan(3),
                 Group::make([
@@ -123,11 +124,7 @@ class ProductResource extends Resource
                             ->appendFiles()
                             ->hiddenLabel(),
                     ])->grow(false),
-                    Section::make('Product categories')->schema([
-                        CategoriesField::make('product_categories')
-                            ->hiddenLabel()
-                            ->categories(self::getShopCategories()),
-                    ]),
+
                     Section::make('Product tags')->schema([
                         SpatieTagsInput::make('product_tags')
                             ->label('Product Tags'),
@@ -176,6 +173,15 @@ class ProductResource extends Resource
                 self::getAdvancedTab(),
                 self::getMoreOptionsTab(),
             ]);
+    }
+
+    public static function getCategoriesSection()
+    {
+        return  Section::make('Product categories')->schema([
+            CategoriesField::make('product_categories')
+                ->hiddenLabel()
+                ->categories(self::getShopCategories()),
+        ]);
     }
 
     public static function getMoreOptionsTab(): Tab
