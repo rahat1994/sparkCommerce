@@ -12,16 +12,16 @@ trait CanCreateCategories
 
     public function saveCategory($categoryName, $parentId)
     {
-        $category = new SCCategory();
+        $category = SCCategory::create([
+            'name' => $categoryName,
+            'parent_id' => $parentId ?: null,
+            'user_id' => auth()->id(),
+            'vendor_id' => Filament::getTenant()->id,
+        ]);
 
-        $category->name = $categoryName;
-        $category->parent_id = ($parentId) ? $parentId : null;
-        $category->user_id = auth()->user()->id;
-        $category->vendor_id = Filament::getTenant()->id;
-        $category->save();
-
-        $this->data['product_categories'][] = strval($category->id);
-        $this->data['product_categories'] = array_unique($this->data['product_categories']);
+        $this->data['product_categories'] = array_unique(
+            array_merge($this->data['product_categories'], [strval($category->id)])
+        );
 
         $this->dispatch('category-created', id: $category->id);
 
