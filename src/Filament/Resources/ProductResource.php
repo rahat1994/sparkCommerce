@@ -3,14 +3,9 @@
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action as FormAction;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -20,10 +15,7 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\VerticalAlignment;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -43,11 +35,12 @@ use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class ProductResource extends Resource
 {
+    use HasAttributes;
+    use HasDimension;
     use HasInventory;
     use HasPrice;
     use HasVariation;
-    use HasAttributes;
-    use HasDimension;
+
     protected static ?string $model = SCProduct::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-gift';

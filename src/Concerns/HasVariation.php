@@ -2,28 +2,26 @@
 
 namespace Rahat1994\SparkCommerce\Concerns;
 
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
-use Illuminate\Support\HtmlString;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action as FormAction;
-use Filament\Forms\Components\Tabs\Tab;
-use Filament\Support\Enums\VerticalAlignment;
 use Filament\Forms\Set;
+use Filament\Support\Enums\VerticalAlignment;
+use Illuminate\Support\HtmlString;
 
 trait HasVariation
 {
-
     public static function getVariationsRepeaterField()
     {
 
@@ -77,11 +75,11 @@ trait HasVariation
 
                                         ]),
                                 ])->itemLabel(
-                                    fn(array $state): ?string => $state['title'] ?? null
+                                    fn (array $state): ?string => $state['title'] ?? null
                                 ),
                         ];
                     }
-                })->hidden(fn(Get $get) => $get('generate_varaitions') == null),
+                })->hidden(fn (Get $get) => $get('generate_varaitions') == null),
         ];
     }
 
@@ -103,15 +101,15 @@ trait HasVariation
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                            FormAction::make('Select')
-                                ->icon('heroicon-m-bars-3')
-                                ->action(function (Get $get, Set $set, $state) {
-                                    $set('product_variations', self::generateVariations($get('product_attributes')));
-                                }),
-                        ])->verticalAlignment(VerticalAlignment::End)]
+                                FormAction::make('Select')
+                                    ->icon('heroicon-m-bars-3')
+                                    ->action(function (Get $get, Set $set, $state) {
+                                        $set('product_variations', self::generateVariations($get('product_attributes')));
+                                    }),
+                            ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
-            })->hidden(fn(Get $get) => $get('product_type') == 'simple');
+            })->hidden(fn (Get $get) => $get('product_type') == 'simple');
     }
 
     public static function generateVariations($data)

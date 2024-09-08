@@ -41,7 +41,7 @@ trait HasAttributes
                     ->collapsible()
                     ->collapsed()
                     ->itemLabel(
-                        fn(array $state): ?string => $state['attribute_name'] ?? null
+                        fn (array $state): ?string => $state['attribute_name'] ?? null
                     ),
             ]);
     }
