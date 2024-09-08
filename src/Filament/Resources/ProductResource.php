@@ -31,6 +31,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Concerns\HasInventory;
+use Rahat1994\SparkCommerce\Concerns\HasPrice;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -40,7 +41,7 @@ use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class ProductResource extends Resource
 {
-    use HasInventory;
+    use HasInventory, HasPrice;
 
     protected static ?string $model = SCProduct::class;
 
@@ -243,7 +244,7 @@ class ProductResource extends Resource
                     ->collapsible()
                     ->collapsed()
                     ->itemLabel(
-                        fn (array $state): ?string => $state['attribute_name'] ?? null
+                        fn(array $state): ?string => $state['attribute_name'] ?? null
                     ),
             ]);
     }
@@ -314,15 +315,15 @@ class ProductResource extends Resource
                                 'generate_variations_from_attributes' => 'Generate Variations from Attributes',
                                 'create_variations_manually' => 'Create Variations manually',
                             ]), Actions::make([
-                                FormAction::make('Select')
-                                    ->icon('heroicon-m-bars-3')
-                                    ->action(function (Get $get, Set $set, $state) {
-                                        $set('product_variations', self::generateVariations($get('product_attributes')));
-                                    }),
-                            ])->verticalAlignment(VerticalAlignment::End)]
+                            FormAction::make('Select')
+                                ->icon('heroicon-m-bars-3')
+                                ->action(function (Get $get, Set $set, $state) {
+                                    $set('product_variations', self::generateVariations($get('product_attributes')));
+                                }),
+                        ])->verticalAlignment(VerticalAlignment::End)]
                     )], self::getVariationsRepeaterField());
                 }
-            })->hidden(fn (Get $get) => $get('product_type') == 'simple');
+            })->hidden(fn(Get $get) => $get('product_type') == 'simple');
     }
 
     public static function getVariationsRepeaterField()
@@ -378,11 +379,11 @@ class ProductResource extends Resource
 
                                         ]),
                                 ])->itemLabel(
-                                    fn (array $state): ?string => $state['title'] ?? null
+                                    fn(array $state): ?string => $state['title'] ?? null
                                 ),
                         ];
                     }
-                })->hidden(fn (Get $get) => $get('generate_varaitions') == null),
+                })->hidden(fn(Get $get) => $get('generate_varaitions') == null),
         ];
     }
 
@@ -406,14 +407,7 @@ class ProductResource extends Resource
     public static function getGeneralTab(): Tab
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.general'))
-            ->schema([
-                TextInput::make('regular_price')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.regular_price'))
-                    ->numeric(),
-                TextInput::make('sale_price')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.sale_price'))
-                    ->numeric(),
-            ]);
+            ->schema(self::getPriceInputs());
     }
 
     public static function getInventoryTab(): Tab
