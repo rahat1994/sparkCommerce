@@ -17,7 +17,6 @@ use Filament\Forms\Get;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Support\Enums\VerticalAlignment;
 use Filament\Forms\Set;

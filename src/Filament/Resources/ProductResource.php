@@ -29,6 +29,8 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Rahat1994\SparkCommerce\Concerns\HasAttributes;
+use Rahat1994\SparkCommerce\Concerns\HasDimension;
 use Rahat1994\SparkCommerce\Concerns\HasInventory;
 use Rahat1994\SparkCommerce\Concerns\HasPrice;
 use Rahat1994\SparkCommerce\Concerns\HasVariation;
@@ -44,34 +46,11 @@ class ProductResource extends Resource
     use HasInventory;
     use HasPrice;
     use HasVariation;
-
+    use HasAttributes;
+    use HasDimension;
     protected static ?string $model = SCProduct::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-gift';
-
-    public static function getModelLabel(): string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.product.model_label');
-        // return __('filament-user-activity::user-activity.resource.model_label');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.product.model_plural_label');
-        // return __('filament-user-activity::user-activity.resource.model_plural_label');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.product.navigation_group');
-        // return __('filament-user-activity::user-activity.resource.navigation');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.product.navigation');
-        // return __('filament-user-activity::user-activity.resource.navigation');
-    }
 
     public static function table(Table $table): Table
     {
@@ -88,10 +67,6 @@ class ProductResource extends Resource
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
-                // Action::make('Edit')
-                //     ->icon('heroicon-o-pencil')
-                //     ->url(fn ($record): string => route('products.edit', $record))
-                //     ->openUrlInNewTab()
             ])
             ->defaultSort('created_at', 'desc');
     }
@@ -155,12 +130,7 @@ class ProductResource extends Resource
         // TODO: Add hooks to modify the array
         return Fieldset::make('product_dimensions')
             ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.fieldset_name'))
-            ->schema([
-                TextInput::make('weight')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.weight'))->columnSpan(3),
-                TextInput::make('height')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.height')),
-                TextInput::make('width')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.width')),
-                TextInput::make('length')->numeric()->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_dimension.length')),
-            ])->columns(3);
+            ->schema(self::getDimensionInputes())->columns(3);
     }
 
     public static function getProductDataSection(): Tabs
@@ -215,46 +185,6 @@ class ProductResource extends Resource
             ]);
     }
 
-    public static function getAttributesTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.attributes'))
-            ->schema([
-                Repeater::make('product_attributes')
-                    ->label('Product Attributes')
-                    ->schema([
-                        Fieldset::make('product_attributes')
-                            ->label('Product Attributes')
-                            ->schema([
-                                CheckboxList::make('visible_on_the_product_page')
-                                    ->options([
-                                        'visible_on_the_product_page' => 'Visible on the product page',
-                                        'used_for_variations' => 'Used for varaitions',
-                                    ])
-                                    ->default(['visible_on_the_product_page', 'used_for_variations'])
-                                    ->label('Visible on the product page')->columnSpan(2),
-                                TextInput::make('attribute_name')
-                                    ->label('Attribute Name'),
-                                Repeater::make('attribute_values')
-                                    ->label('Attribute Values')
-                                    ->simple(
-                                        TextInput::make('attribute_value')
-                                            ->label('Attribute Value'),
-                                    )->collapsible(),
-
-                            ]),
-                    ])
-                    ->collapsible()
-                    ->collapsed()
-                    ->itemLabel(
-                        fn(array $state): ?string => $state['attribute_name'] ?? null
-                    ),
-            ]);
-    }
-
-
-
-
-
     public static function getLinkedProductsTab(): Tab
     {
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.linked_products'))
@@ -298,5 +228,29 @@ class ProductResource extends Resource
             'create' => CreateProduct::route('/create'),
             'edit' => EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.product.model_label');
+        // return __('filament-user-activity::user-activity.resource.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.product.model_plural_label');
+        // return __('filament-user-activity::user-activity.resource.model_plural_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.product.navigation_group');
+        // return __('filament-user-activity::user-activity.resource.navigation');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.product.navigation');
+        // return __('filament-user-activity::user-activity.resource.navigation');
     }
 }
