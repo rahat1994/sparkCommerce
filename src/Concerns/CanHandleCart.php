@@ -6,33 +6,24 @@ use Binafy\LaravelCart\Models\Cart;
 use Binafy\LaravelCart\Models\CartItem;
 use Exception;
 use Hashids\Hashids;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log as FacadesLog;
+use Rahat1994\SparkCommerce\Models\SCAnonymousCart;
 use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkcommerceMultivendorRestRoutes\Http\Resources\SCMVProductResource;
-use Illuminate\Support\Str;
-use Rahat1994\SparkCommerce\Concerns\CanRetriveUser;
-use Rahat1994\SparkCommerce\Models\SCAnonymousCart;
-use Rahat1994\SparkCommerce\Models\SCCoupon;
-use Rahat1994\SparkCommerce\Models\SCOrder;
-use Rahat1994\SparkcommerceRestRoutes\Http\Resources\SCOrderResource;
-
 
 trait CanHandleCart
 {
-
     public function getUsersCart(int $userId)
     {
         $cart = Cart::query()->firstOrCreate(['user_id' => $userId]);
+
         return $this->loadCartWithAllItems($cart);
     }
 
     public function getAnonymousCart($refernce)
     {
-        $project = strval(config("app.name"));
+        $project = strval(config('app.name'));
         $hashIds = new Hashids($project);
         $anonymousCartId = $hashIds->decode($refernce);
         // dd($anonymousCartId);
@@ -56,7 +47,7 @@ trait CanHandleCart
                 return response()->json(
                     [
                         'message' => 'Error retrieving cart',
-                        'cart' => []
+                        'cart' => [],
                     ],
                     500
                 );
@@ -68,12 +59,13 @@ trait CanHandleCart
     {
         try {
             $cart = $this->getCartAccordingToLoginType($refernce);
+
             return response()->json(['cart' => $cart], 200);
         } catch (\Throwable $th) {
             return response()->json(
                 [
                     'message' => 'Error retrieving cart',
-                    'cart' => []
+                    'cart' => [],
                 ],
                 500
             );
@@ -85,7 +77,7 @@ trait CanHandleCart
         $request->validate([
             'slug' => 'required|string',
             'quantity' => 'required|integer|min:1',
-            'replace_existing' => 'boolean'
+            'replace_existing' => 'boolean',
         ]);
 
         $replaceExisting = is_null($request->replace_existing) ? false : true;
@@ -98,7 +90,7 @@ trait CanHandleCart
                 return response()->json(
                     [
                         'message' => 'Product not found',
-                        'cart' => []
+                        'cart' => [],
                     ],
                     404
                 );
@@ -119,7 +111,7 @@ trait CanHandleCart
                     return response()->json(
                         [
                             'message' => 'You can not add products from different vendors in the same cart',
-                            'cart' => $this->loadCartWithAllItems($cart)
+                            'cart' => $this->loadCartWithAllItems($cart),
                         ],
                         400
                     );
@@ -133,21 +125,22 @@ trait CanHandleCart
                 $cart->items()->save($cartItem);
             }
             $cart = $this->loadCartWithAllItems($cart);
+
             // dd($cart);
             return response()->json(
                 [
                     'message' => 'Product added to cart successfully',
-                    'cart' => $cart
+                    'cart' => $cart,
                 ],
                 200
             );
         } else {
-            $project = strval(config("app.name"));
+            $project = strval(config('app.name'));
             $hashIds = new Hashids($project);
 
             if (is_null($refernce)) {
 
-                $cart = new SCAnonymousCart();
+                $cart = new SCAnonymousCart;
                 $cart->cart_content = [];
                 $cart->save();
                 $refernce = $hashIds->encode($cart->id);
@@ -165,7 +158,7 @@ trait CanHandleCart
                 return response()->json(
                     [
                         'message' => 'Product not found',
-                        'cart' => []
+                        'cart' => [],
                     ],
                     404
                 );
@@ -181,6 +174,7 @@ trait CanHandleCart
             foreach ($cartItems as $key => $item) {
                 if ($item['slug'] == $product->slug) {
                     $productIndex = $key;
+
                     break;
                 }
             }
@@ -190,7 +184,7 @@ trait CanHandleCart
             } else {
                 $cartItems[] = [
                     'slug' => $product->slug,
-                    'quantity' => $request->quantity
+                    'quantity' => $request->quantity,
                 ];
             }
 
@@ -202,7 +196,7 @@ trait CanHandleCart
                 [
                     'message' => 'Product added to cart successfully',
                     'refernce' => $refernce,
-                    'cart' => $cart
+                    'cart' => $cart,
                 ],
                 200
             );
@@ -223,17 +217,18 @@ trait CanHandleCart
             $cart->removeItem($cartItem[0]);
 
             $cart = $this->loadCartWithAllItems($cart);
+
             return response()->json(
                 [
                     'message' => 'Product removed from cart successfully',
-                    'cart' => $cart
+                    'cart' => $cart,
                 ],
                 200
             );
         } else {
 
             try {
-                $project = strval(config("app.name"));
+                $project = strval(config('app.name'));
                 $hashIds = new Hashids($project);
                 $anonymousCartId = $hashIds->decode($refernce);
                 // dd($anonymousCartId);
@@ -248,7 +243,7 @@ trait CanHandleCart
                     return response()->json(
                         [
                             'message' => 'Product not found',
-                            'cart' => []
+                            'cart' => [],
                         ],
                         404
                     );
@@ -264,6 +259,7 @@ trait CanHandleCart
                 foreach ($cartItems as $key => $item) {
                     if ($item['slug'] == $product->slug) {
                         $productIndex = $key;
+
                         break;
                     }
                 }
@@ -274,7 +270,7 @@ trait CanHandleCart
                     return response()->json(
                         [
                             'message' => 'Product not found in cart',
-                            'refernce' => $refernce
+                            'refernce' => $refernce,
                         ],
                         200
                     );
@@ -288,7 +284,7 @@ trait CanHandleCart
                     [
                         'message' => 'Product removed from cart successfully',
                         'refernce' => $refernce,
-                        'cart' => $cart
+                        'cart' => $cart,
                     ],
                     200
                 );
@@ -297,7 +293,7 @@ trait CanHandleCart
                 return response()->json(
                     [
                         'message' => 'Cart not found',
-                        'cart' => []
+                        'cart' => [],
                     ],
                     404
                 );
@@ -307,7 +303,7 @@ trait CanHandleCart
 
     public function decodeAnonymousCartReferenceId($refernce)
     {
-        $project = strval(config("app.name"));
+        $project = strval(config('app.name'));
         $hashIds = new Hashids($project);
         $anonymousCartId = $hashIds->decode($refernce);
 
@@ -325,7 +321,7 @@ trait CanHandleCart
         return response()->json(
             [
                 'message' => 'Cart cleared successfully',
-                'cart' => []
+                'cart' => [],
             ],
             200
         );
@@ -381,7 +377,7 @@ trait CanHandleCart
         return response()->json(
             [
                 'message' => 'Cart associated successfully',
-                'cart' => $cart
+                'cart' => $cart,
             ],
             200
         );
@@ -406,7 +402,6 @@ trait CanHandleCart
 
         return $cartItems;
     }
-
 
     private function loadCartWithAllItems(Cart $cart)
     {

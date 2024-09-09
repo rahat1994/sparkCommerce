@@ -9,12 +9,11 @@ use Rahat1994\SparkCommerce\Models\SCCoupon;
 
 trait CanHandleCoupon
 {
-
     public function validateCoupon(Request $request)
     {
         $request->validate([
             'coupon_code' => 'required|string',
-            'reference' => 'string|sometimes'
+            'reference' => 'string|sometimes',
         ]);
         $couponData = $this->couponData($request->coupon_code);
 
@@ -24,12 +23,10 @@ trait CanHandleCoupon
 
             // now process the cart and apply the coupon
 
-
-
             return response()->json(
                 [
                     'message' => 'Coupon applied successfully',
-                    'cart' => []
+                    'cart' => [],
                 ],
                 200
             );
@@ -37,7 +34,7 @@ trait CanHandleCoupon
             return response()->json(
                 [
                     'message' => 'Invalid coupon code',
-                    'cart' => []
+                    'cart' => [],
                 ],
                 400
             );
@@ -51,6 +48,7 @@ trait CanHandleCoupon
                 ->firstOrFail();
         } catch (\Throwable $th) {
             FacadesLog::error($th->getMessage());
+
             return false;
         }
 
@@ -87,9 +85,6 @@ trait CanHandleCoupon
 
         // check the usage limit of the coupon
         $couponUsageLimit = $coupon->usage_limit;
-
-
-
 
         // check the usage limit per user of the coupon
 
