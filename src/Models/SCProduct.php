@@ -38,7 +38,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
         'product_attributes',
     ];
 
-    public function getPrice(): int
+    public function getPrice(): float
     {
         return $this->regular_price;
     }
@@ -78,5 +78,12 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
     public function variations()
     {
         return $this->hasMany(ScProductVariation::class, 'product_id', 'id');
+    }
+
+    protected static function booted(): void
+    {
+        static::creatinf(function (SCProduct $product) {
+            $product->regular_price = $product->regular_price * 100;
+        });
     }
 }
