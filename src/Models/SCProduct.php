@@ -4,6 +4,7 @@ namespace Rahat1994\SparkCommerce\Models;
 
 use App\Models\User;
 use Binafy\LaravelCart\Cartable;
+use Cknow\Money\Money;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -82,8 +83,23 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 
     protected static function booted(): void
     {
-        static::creatinf(function (SCProduct $product) {
-            $product->regular_price = $product->regular_price * 100;
+        static::creating(fn($product) => self::turnPriceIntoCents($product));
+        static::updating(fn($product) => self::turnPriceIntoCents($product));
+
+        static::retrieved(function (SCProduct $product) {
+            $product->regular_price = $product->regular_price / (int)config('sparkcommerce.decimal_value');
+            if ($product->sale_price) {
+                $product->sale_price = $product->sale_price / (int)config('sparkcommerce.decimal_value');
+            }
         });
+    }
+
+    protected static function turnPriceIntoCents(SCProduct $product)
+    {
+        $product->regular_price = $product->regular_price * (int)config('sparkcommerce.decimal_value');
+
+        if ($product->sale_price) {
+            $product->sale_price = $product->sale_price * (int)config('sparkcommerce.decimal_value');
+        }
     }
 }
