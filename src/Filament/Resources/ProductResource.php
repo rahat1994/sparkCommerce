@@ -49,7 +49,15 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->description(fn(SCProduct $record): string => substr(strip_tags($record->description), 0, 100)),
+                TextColumn::make('product_type')
+                    ->badge()->color(fn(string $state): string => match ($state) {
+                        'simple' => 'success',
+                        'variable' => 'yellow',
+                        'digital' => 'blue',
+                        'service' => 'purple',
+                    }),
                 TextColumn::make('sku'),
                 TextColumn::make('regular_price'),
             ])

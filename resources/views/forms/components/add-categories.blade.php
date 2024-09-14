@@ -13,7 +13,6 @@ $options = $getOptions();
                 this.formProcessing = true;
                 await $wire.saveCategory(this.categoryName,this.category);
                 this.formProcessing = false;
-
             }
         }"
     >
