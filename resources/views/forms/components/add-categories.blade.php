@@ -14,10 +14,8 @@ $options = $getOptions();
                 await $wire.saveCategory(this.categoryName,this.category);
                 this.formProcessing = false;
 
-                $wire.$refresh();
             }
         }"
-        x-init="console.log(showForm)"
     >
         <div x-show="showForm" x-transition>
 

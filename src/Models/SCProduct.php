@@ -38,7 +38,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
         'product_attributes',
     ];
 
-    public function getPrice(): int
+    public function getPrice(): float
     {
         return $this->regular_price;
     }
