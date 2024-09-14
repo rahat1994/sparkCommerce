@@ -21,14 +21,13 @@ class CategoriesField extends CheckboxList
      */
     public function categories(array | Arrayable | string | Closure | null $categories): static
     {
-        // dd($categories);
         $this->categories = $categories;
 
         return $this;
     }
 
     /**
-     * @return array<string | array<string>>
+     * @return array<T> | array<T>
      */
     public function getOptions(): array
     {

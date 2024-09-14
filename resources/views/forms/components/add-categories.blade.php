@@ -1,5 +1,7 @@
 @php
 $options = $getOptions();
+
+// dd($options);
 @endphp
     <div
         x-data="{
@@ -11,11 +13,8 @@ $options = $getOptions();
                 this.formProcessing = true;
                 await $wire.saveCategory(this.categoryName,this.category);
                 this.formProcessing = false;
-
-                $wire.$refresh();
             }
         }"
-        x-init="console.log(showForm)"
     >
         <div x-show="showForm" x-transition>
 
@@ -23,7 +22,7 @@ $options = $getOptions();
                 <div class="flex items-center justify-between gap-x-3 ">
                     <label class="fi-fo-field-wrp-label inline-flex items-center gap-x-3" for="data.product_type">
                         <span class="text-sm font-medium leading-6 text-gray-950 dark:text-white">
-                            Product Type
+                            Parent Category
                         </span>
                     </label>
                 </div>
@@ -45,7 +44,8 @@ $options = $getOptions();
                 >
                     <option > </option>
                     @foreach($options as $value => $label)
-                        <option value="{{$value}}">{{$label['name']}}</option>
+
+                        <option value="{{$label['id']}}">{{$label['name']}}</option>
                     @endforeach
                 </x-filament::input.select>
 
