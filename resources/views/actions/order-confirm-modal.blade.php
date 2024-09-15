@@ -9,7 +9,7 @@
         echo '<div class="col-md-9">';
         echo '<h4>' . $item['name'] . '</h4>';
         echo '<p>Quantity: ' . $item['quantity'] . '</p>';
-        echo '<p>Price: ' . $item['regular_price'] . '</p>';
+        echo '<p>Price: '. $currency . ' ' . $item['regular_price'] . '</p>';
         echo '</div>';
         echo '</div>';
         echo '<hr>';

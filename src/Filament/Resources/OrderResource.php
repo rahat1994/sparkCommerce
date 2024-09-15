@@ -11,11 +11,14 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
+use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 
 class OrderResource extends Resource
 {
+    use CanInteractWithTenant;
+
     protected static ?string $model = SCOrder::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
@@ -51,6 +54,7 @@ class OrderResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $currency = self::getTenantCurrency();
         return $table
             ->columns([
                 TextColumn::make('id')
@@ -58,7 +62,7 @@ class OrderResource extends Resource
                 TextColumn::make('tracking_number')
                     ->label('Tracking Number'),
                 TextColumn::make('total_amount')
-                    ->label('Order Value'),
+                    ->label('Order Value')->money($currency),
                 TextColumn::make('shipping_status')
                     ->label('Shipping Status'),
                 TextColumn::make('payment_status')
@@ -78,7 +82,7 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn (SCOrder $order) => $order->delete()),
+                    ->action(fn(SCOrder $order) => $order->delete()),
             ])
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
@@ -105,7 +109,6 @@ class OrderResource extends Resource
                     'shipping_status' => $data['shipping_status'],
                     'status' => $data['shipping_status'],
                 ]);
-
             })
             ->icon('heroicon-o-information-circle')
             ->label('Overview Order')
@@ -116,6 +119,7 @@ class OrderResource extends Resource
 
                     return view('sparkcommerce::actions.order-confirm-modal', [
                         'orderContent' => $orderContent,
+                        'currency' => self::getTenantCurrency()
                     ]);
                 }
             );
@@ -157,7 +161,7 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrder::route('/create'),
+            // 'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
