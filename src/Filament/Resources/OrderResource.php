@@ -55,6 +55,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         $currency = self::getTenantCurrency();
+
         return $table
             ->columns([
                 TextColumn::make('id')
@@ -82,7 +83,7 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn(SCOrder $order) => $order->delete()),
+                    ->action(fn (SCOrder $order) => $order->delete()),
             ])
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
@@ -119,7 +120,7 @@ class OrderResource extends Resource
 
                     return view('sparkcommerce::actions.order-confirm-modal', [
                         'orderContent' => $orderContent,
-                        'currency' => self::getTenantCurrency()
+                        'currency' => self::getTenantCurrency(),
                     ]);
                 }
             );
