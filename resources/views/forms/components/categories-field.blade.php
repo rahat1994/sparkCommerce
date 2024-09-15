@@ -14,21 +14,13 @@
 @endphp
 
 
-<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
+<x-dynamic-component class="category-field-component" :component="$getFieldWrapperView()" :field="$field">
     <div
         x-data="categoriesField"
         x-init="oninit"
-        x-on:category-created.window="
-            let value = event.detail.id;
-            console.log(value);
-            let selector = `input[value='${value}']`;
-            console.log(selector);
-            let input = document.querySelector(selector);
-            console.log(input);
-            if (input) {
-                input.checked = true;
-            }
-        "
+        x-on:category-created.window="categoryCreated"
+        @click.window="reorganizeCategories"
+        @category-component-refreshed.window="refreshed = $event.detail.id"
     >
         <div class="p-2 border border-gray-400 overflow-x-hidden" style="height: 10rem; overflow-y:scroll">
             <x-filament::grid
@@ -106,63 +98,140 @@
 
     @script
         <script>
+            document.addEventListener('livewire:update', () => {
+                // Your JavaScript code to run after the Livewire DOM update
+                console.log('Livewire has updated the DOM.');
+
+                // Example: Scroll a checkbox into view after Livewire DOM update
+                // const scrollableContainer = document.querySelector('.your-scrollable-container-class');
+                // const checkbox = scrollableContainer.querySelector('.your-checkbox-class');
+
+                // if (checkbox) {
+                //     checkbox.scrollIntoView({
+                //         behavior: 'smooth',
+                //         block: 'nearest',
+                //         inline: 'start'
+                //     });
+                // }
+            });
+
             Alpine.data('categoriesField', () => ({
                 state: $wire.$entangle('{{ $getStatePath() }}'),
                 selectedCategories: @json($selectedCategories),
+                refreshed: null,
                 categorySelected(e){
                     let value = e.target.getAttribute('value');
                     state.push(value);
                 },
                 oninit(){
+                    $wire.set('{{ $getStatePath() }}', this.selectedCategories);
+
                     this.$watch('state', (value) => {
+                        this.reorganizeCategoriesOnNextTick();
+                    });
+                    this.$watch('refreshed', (value) => {
+
+
+                        this.reorganizeCategories();
+                        this.scrollintoView(value);
+                    });
+                    this.reorganizeCategoriesOnNextTick();
+                },
+                reorganizeCategoriesOnNextTick(){
+                    this.$nextTick(() => {
                         this.reorganizeCategories();
                     });
-
-                    $wire.set('{{ $getStatePath() }}', this.selectedCategories);
-                    this.reorganizeCategories();
                 },
-                reorganizeCategories(){
-                    $nextTick(() => {
+                reorganizeCategories(value = null){
+                    var checkboxContainer = document.querySelector('#checkbox-container');
 
-                        const checkboxes = document.querySelectorAll('[data-category-id]');
-                        const checkboxMap = {};
+                    const checkboxes = checkboxContainer.querySelectorAll('[data-category-id]');
+                    const checkboxMap = {};
 
-                        // Create a map of checkboxes by their ID
-                        checkboxes.forEach(checkbox => {
-                            const id = checkbox.getAttribute('data-category-id');
-                            const parentId = checkbox.getAttribute('data-category-parent-id');
-                            checkboxMap[id] = { element: checkbox, parentId: parentId, children: [] };
-                        });
+                    // Create a map of checkboxes by their ID
+                    checkboxes.forEach(checkbox => {
+                        const id = checkbox.getAttribute('data-category-id');
+                        const parentId = checkbox.getAttribute('data-category-parent-id');
+                        checkboxMap[id] = { element: checkbox, parentId: parentId, children: [] };
+                    });
 
-                        console.log(checkboxMap);
-                        // Build the parent-child relationships
-                        Object.values(checkboxMap).forEach(checkbox => {
-                            if (checkbox.parentId) {
-                                checkboxMap[checkbox.parentId].children.push(checkbox);
-                            }
-                        });
-
-                        // Function to recursively append children and apply margin
-                        function appendChildren(parent, children, level) {
-                            children.forEach(child => {
-                                child.element.style.marginLeft = `${level * 15}px`;
-                                parent.appendChild(child.element);
-                                appendChildren(child.element, child.children, level + 1);
-                            });
+                    // console.log(checkboxMap);
+                    // Build the parent-child relationships
+                    Object.values(checkboxMap).forEach(checkbox => {
+                        if (checkbox.parentId) {
+                            checkboxMap[checkbox.parentId].children.push(checkbox);
                         }
+                    });
 
-                        // Find root elements (those without a parent) and start the reorganization
-                        const rootElements = Object.values(checkboxMap).filter(checkbox => !checkbox.parentId);
-                        const container = document.getElementById('checkbox-container');
-
-                        rootElements.forEach(root => {
-                            container.appendChild(root.element);
-                            appendChildren(root.element, root.children, 1);
+                    // Function to recursively append children and apply margin
+                    function appendChildren(parent, children, level) {
+                        children.forEach(child => {
+                            child.element.style.marginLeft = `${level * 15}px`;
+                            parent.appendChild(child.element);
+                            appendChildren(child.element, child.children, level + 1);
                         });
+                    }
 
+                    // Find root elements (those without a parent) and start the reorganization
+                    const rootElements = Object.values(checkboxMap).filter(checkbox => !checkbox.parentId);
+                    const container = document.getElementById('checkbox-container');
+
+                    rootElements.forEach(root => {
+                        container.appendChild(root.element);
+                        appendChildren(root.element, root.children, 1);
+                    });
+
+                },
+                categoryCreated(event){
+                    console.log(event);
+                    var container = document.querySelector('#checkbox-container');
+                    let value = event.detail.id;
+                    let selector = `[data-category-id="${value}"]`;
+                    console.log(selector);
+
+                    let element = container.querySelector(selector);
+
+                    // call reorganizeCategories after 1 sec of the doma load
+                    setTimeout(() => {
+                        this.reorganizeCategories();
+                    }, 1000);
+
+                    console.log(element);
+                    this.reorganizeCategoriesOnNextTick();
+                    // input.scrollIntoView();
+                },
+                scrollintoView(value = null){
+                    var container = document.querySelector('#checkbox-container');
+                    var input = container.querySelector('.categories:checked');
+                    input.scrollIntoView({
+                        behavior: 'smooth', // Optional: For smooth scrolling
+                        block: 'nearest',   // Makes sure the checkbox scrolls inside the container
+                        inline: 'start'
                     });
                 }
             }));
         </script>
     @endscript
+<script >
+(function() {
+    // Store the original addEventListener
+    const originalAddEventListener = window.addEventListener;
+
+    // Override it
+    window.addEventListener = function(type, listener, options) {
+
+        console.log(`Custom addEventListener: ${type}`);
+            const wrappedListener = function(event) {
+            // Your custom code
+            console.log(`Custom code before event: ${type}`);
+
+            // Call the original listener
+            listener.call(this, event);
+        };
+
+        // Call the original addEventListener
+        originalAddEventListener.call(this, type, wrappedListener, options);
+    };
+})();
+</script>
 </x-dynamic-component>

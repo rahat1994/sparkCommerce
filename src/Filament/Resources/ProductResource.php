@@ -21,6 +21,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Concerns\HasAttributes;
 use Rahat1994\SparkCommerce\Concerns\HasDimension;
 use Rahat1994\SparkCommerce\Concerns\HasInventory;
@@ -35,6 +36,7 @@ use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class ProductResource extends Resource
 {
+    use CanInteractWithTenant;
     use HasAttributes;
     use HasDimension;
     use HasInventory;
@@ -50,9 +52,9 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (SCProduct $record): string => substr(strip_tags($record->description), 0, 100)),
+                    ->description(fn(SCProduct $record): string => substr(strip_tags($record->description), 0, 100)),
                 TextColumn::make('product_type')
-                    ->badge()->color(fn (string $state): string => match ($state) {
+                    ->badge()->color(fn(string $state): string => match ($state) {
                         'simple' => 'success',
                         'variable' => 'yellow',
                         'digital' => 'blue',
@@ -89,11 +91,11 @@ class ProductResource extends Resource
                     self::getProductDataSection(),
                 ])->columnSpan(3),
                 Group::make([
-                    Section::make('Publish')->schema([
-                        Placeholder::make('Status'),
-                        Placeholder::make('Visibility'),
-                        Placeholder::make('Publish immediately'),
-                    ])->grow(false),
+                    // Section::make('Publish')->schema([
+                    //     Placeholder::make('Status'),
+                    //     Placeholder::make('Visibility'),
+                    //     Placeholder::make('Publish immediately'),
+                    // ])->grow(false),
                     Section::make('Product Image')->schema([
                         SpatieMediaLibraryFileUpload::make('product_image')
                             ->collection('product_image')

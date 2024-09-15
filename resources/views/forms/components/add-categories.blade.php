@@ -11,8 +11,14 @@ $options = $getOptions();
             formProcessing:false,
             async createNewCategory() {
                 this.formProcessing = true;
-                await $wire.saveCategory(this.categoryName,this.category);
+
+                var category = await $wire.saveCategory(this.categoryName,this.category);
+                console.log(category);
                 this.formProcessing = false;
+
+                await $wire.$refresh();
+                this.categoryName = '';
+                $dispatch('category-component-refreshed', category);
             }
         }"
     >
