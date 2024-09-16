@@ -23,7 +23,6 @@ class SparkCommercePlugin implements Plugin
         $panel->resources([
             ProductResource::class,
             CategoryResource::class,
-            TagResource::class,
             ReviewResource::class,
             OrderResource::class,
             CouponResource::class,
