@@ -49,19 +49,20 @@ class ProductResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $currency = self::getTenantCurrency();
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (SCProduct $record): string => substr(strip_tags($record->description), 0, 100)),
+                    ->description(fn(SCProduct $record): string => substr(strip_tags($record->description), 0, 100)),
                 TextColumn::make('product_type')
-                    ->badge()->color(fn (string $state): string => match ($state) {
+                    ->badge()->color(fn(string $state): string => match ($state) {
                         'simple' => 'success',
                         'variable' => 'yellow',
                         'digital' => 'blue',
                         'service' => 'purple',
                     }),
                 TextColumn::make('sku'),
-                TextColumn::make('regular_price'),
+                TextColumn::make('regular_price')->money($currency),
             ])
             ->filters([
                 //
