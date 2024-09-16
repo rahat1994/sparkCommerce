@@ -12,7 +12,7 @@ trait CanInteractWithTenant
         $currentTenant = Filament::getTenant();
         $currency = $currentTenant->meta['vendor_currency'];
 
-        if($currency==null){
+        if ($currency == null) {
             $currency = config('sparkcommerce.default_currency');
         }
 
