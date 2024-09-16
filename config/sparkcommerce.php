@@ -3,6 +3,7 @@
 // config for Rahat1994/SparkCommerce
 return [
     'decimal_value' => 100,
+    'default_currency' => 'USD',
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',
