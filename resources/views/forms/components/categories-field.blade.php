@@ -213,25 +213,5 @@
         </script>
     @endscript
 <script >
-(function() {
-    // Store the original addEventListener
-    const originalAddEventListener = window.addEventListener;
-
-    // Override it
-    window.addEventListener = function(type, listener, options) {
-
-        console.log(`Custom addEventListener: ${type}`);
-            const wrappedListener = function(event) {
-            // Your custom code
-            console.log(`Custom code before event: ${type}`);
-
-            // Call the original listener
-            listener.call(this, event);
-        };
-
-        // Call the original addEventListener
-        originalAddEventListener.call(this, type, wrappedListener, options);
-    };
-})();
 </script>
 </x-dynamic-component>
