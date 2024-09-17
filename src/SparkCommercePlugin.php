@@ -9,7 +9,6 @@ use Rahat1994\SparkCommerce\Filament\Resources\CouponResource;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
 use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource;
 
 class SparkCommercePlugin implements Plugin
 {
