@@ -19,7 +19,6 @@
         x-data="categoriesField"
         x-init="oninit"
         x-on:category-created.window="categoryCreated"
-        wire:ignore
         @click.window="reorganizeCategories"
         @category-component-refreshed.window="refreshed = $event.detail.id"
     >
