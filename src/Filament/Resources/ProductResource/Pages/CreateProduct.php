@@ -17,7 +17,6 @@ class CreateProduct extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['user_id'] = auth()->id();
-        $data['price'] = $data['regular_price'];
         $this->product_categories = $data['product_categories'] ?? null;
 
         return $data;
