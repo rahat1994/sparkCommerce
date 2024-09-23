@@ -2,7 +2,6 @@
 
 namespace Rahat1994\SparkCommerce;
 
-use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
@@ -19,6 +18,7 @@ class SparkCommercePlugin implements Plugin
     {
         $this->setPanelResource($resources);
     }
+
     public function getId(): string
     {
         return 'sparkcommerce';
@@ -30,7 +30,6 @@ class SparkCommercePlugin implements Plugin
     }
 
     public function boot(Panel $panel): void {}
-    
 
     public function setPanelResource(array $resources = []): void
     {
@@ -46,7 +45,7 @@ class SparkCommercePlugin implements Plugin
     ]): static
     {
         return app(static::class, ['resources' => $resources]);
-        
+
     }
 
     public static function get(): static

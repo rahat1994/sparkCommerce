@@ -12,7 +12,7 @@ trait CanCreateCategories
 
     public function saveCategory($categoryName, $parentId)
     {
-        $vendor =  Filament::getTenant();
+        $vendor = Filament::getTenant();
 
         $category = SCCategory::create([
             'name' => $categoryName,
@@ -20,7 +20,7 @@ trait CanCreateCategories
             'user_id' => auth()->id(),
         ]);
 
-        if($vendor){
+        if ($vendor) {
             $category->vendor_id = $vendor->id;
             $category->save();
         }
