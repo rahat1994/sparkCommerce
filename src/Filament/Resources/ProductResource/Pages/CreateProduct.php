@@ -18,7 +18,6 @@ class CreateProduct extends CreateRecord
     {
         $data['user_id'] = auth()->id();
         $this->product_categories = $data['product_categories'] ?? null;
-
         return $data;
     }
 
