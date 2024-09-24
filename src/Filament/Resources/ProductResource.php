@@ -84,6 +84,7 @@ class ProductResource extends Resource
             ->schema([
                 Group::make([
                     TextInput::make('name')
+                        ->required()
                         ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.product_name')),
                     RichEditor::make('description')
                         ->label(__('sparkcommerce::sparkcommerce.resource.product.creation_form.description')),
