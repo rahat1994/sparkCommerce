@@ -83,7 +83,7 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn(SCOrder $order) => $order->delete()),
+                    ->action(fn (SCOrder $order) => $order->delete()),
             ])
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
