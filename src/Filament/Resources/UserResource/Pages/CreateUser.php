@@ -2,7 +2,6 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages;
 
-use App\Models\User;
 use Filament\Resources\Pages\CreateRecord;
 use Rahat1994\SparkCommerce\Filament\Resources\UserResource;
 
