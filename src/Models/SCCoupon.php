@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SCCoupon extends Model
 {
-       protected $fillable = [
+    protected $fillable = [
         'coupon_code',
         'coupon_type',
         'coupon_amount',
