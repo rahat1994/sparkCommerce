@@ -15,4 +15,8 @@ return [
     'anonymous_carts_table_name' => 'anonymous_carts',
     'coupons_table_name' => 'coupons',
     'coupon_user_table_name' => 'coupon_user',
+    'coupon_included_products_table_name' => 'coupon_included_products',
+    'coupon_excluded_products_table_name' => 'coupon_excluded_products',
+    'coupon_included_categories_table_name' => 'coupon_included_categories',
+    'coupon_excluded_categories_table_name' => 'coupon_excluded_categories',
 ];
