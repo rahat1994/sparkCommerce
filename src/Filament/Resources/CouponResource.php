@@ -16,36 +16,13 @@ use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
+use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class CouponResource extends Resource
 {
     protected static ?string $model = SCCoupon::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-bars-4';
-
-    public static function getModelLabel(): string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.coupon.model_label');
-        // return __('filament-user-activity::user-activity.resource.model_label');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.coupon.model_plural_label');
-        // return __('filament-user-activity::user-activity.resource.model_plural_label');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.coupon.navigation_group');
-        // return __('filament-user-activity::user-activity.resource.navigation');
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('sparkcommerce::sparkcommerce.resource.coupon.navigation');
-        // return __('filament-user-activity::user-activity.resource.navigation');
-    }
 
     public static function form(Form $form): Form
     {
@@ -114,13 +91,22 @@ class CouponResource extends Resource
     public static function exclusions(): array
     {
         return [
+            Select::make('included_products')
+                ->label('Include products')
+                ->searchable()
+                ->getSearchResultsUsing(function (string $search) {
+                    return SCProduct::where('name', 'like', "%$search%")->limit(10)->pluck('name', 'sku')->toArray();
+                })->getOptionLabelUsing(function ($value) {
+                    return $value['name'] . ' (' . $value['sku'] . ')';
+                })->multiple(),
 
-            TextInput::make('included_products')->default('{}')->readOnly(),
-            TextInput::make('excluded_products')->default('{}')->readOnly(),
-            TextInput::make('included_categories')->default('{}')->readOnly(),
-            TextInput::make('excluded_categories')->default('{}')->readOnly(),
-            TextInput::make('included_customers')->default('{}')->readOnly(),
         ];
+
+        // TODO: Add the excluded products and categories and customers
+        // TextInput::make('excluded_products')->default('{}')->readOnly(),
+        // TextInput::make('included_categories')->default('{}')->readOnly(),
+        // TextInput::make('excluded_categories')->default('{}')->readOnly(),
+        // TextInput::make('included_customers')->default('{}')->readOnly(),
     }
 
     public static function table(Table $table): Table
@@ -162,5 +148,29 @@ class CouponResource extends Resource
             'create' => Pages\CreateCoupon::route('/create'),
             'edit' => Pages\EditCoupon::route('/{record}/edit'),
         ];
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.coupon.model_label');
+        // return __('filament-user-activity::user-activity.resource.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.coupon.model_plural_label');
+        // return __('filament-user-activity::user-activity.resource.model_plural_label');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.coupon.navigation_group');
+        // return __('filament-user-activity::user-activity.resource.navigation');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('sparkcommerce::sparkcommerce.resource.coupon.navigation');
+        // return __('filament-user-activity::user-activity.resource.navigation');
     }
 }
