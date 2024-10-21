@@ -25,8 +25,6 @@ class EditProduct extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['user_id'] = auth()->user()->id;
-        $data['price'] = $data['regular_price'];
-
         if (isset($data['product_categories'])) {
             $this->product_categories = $data['product_categories'];
         }

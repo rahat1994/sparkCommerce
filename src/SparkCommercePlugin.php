@@ -12,6 +12,13 @@ use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
 
 class SparkCommercePlugin implements Plugin
 {
+    protected array $resources = [];
+
+    final public function __construct(array $resources = [])
+    {
+        $this->setPanelResource($resources);
+    }
+
     public function getId(): string
     {
         return 'sparkcommerce';
@@ -19,20 +26,26 @@ class SparkCommercePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->resources([
-            ProductResource::class,
-            CategoryResource::class,
-            ReviewResource::class,
-            OrderResource::class,
-            CouponResource::class,
-        ]);
+        $panel->resources($this->resources);
     }
 
     public function boot(Panel $panel): void {}
 
-    public static function make(): static
+    public function setPanelResource(array $resources = []): void
     {
-        return app(static::class);
+        $this->resources = $resources;
+    }
+
+    public static function make(array $resources = [
+        ProductResource::class,
+        CategoryResource::class,
+        ReviewResource::class,
+        OrderResource::class,
+        CouponResource::class,
+    ]): static
+    {
+        return app(static::class, ['resources' => $resources]);
+
     }
 
     public static function get(): static

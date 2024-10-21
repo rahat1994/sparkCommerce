@@ -11,6 +11,10 @@ trait CanInteractWithTenant
 
         $currentTenant = Filament::getTenant();
 
+        if (! $currentTenant) {
+            return config('sparkcommerce.default_currency');
+        }
+
         $currency = array_key_exists('vendor_currency', $currentTenant->meta)
             ? $currentTenant->meta['vendor_currency']
             : config('sparkcommerce.default_currency');

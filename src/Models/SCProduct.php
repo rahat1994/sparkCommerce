@@ -19,6 +19,13 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
         'product_attributes' => 'array',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'product_attributes' => 'array',
+        ];
+    }
+
     protected $fillable = [
         'name',
         'user_id',

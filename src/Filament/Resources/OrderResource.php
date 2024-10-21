@@ -119,6 +119,7 @@ class OrderResource extends Resource
                     $orderContent = self::getRowItems($record);
 
                     return view('sparkcommerce::actions.order-confirm-modal', [
+                        'order' => $record,
                         'orderContent' => $orderContent,
                         'currency' => self::getTenantCurrency(),
                     ]);
