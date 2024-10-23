@@ -9,7 +9,9 @@ use Rahat1994\SparkCommerce\Filament\Resources\CouponResource;
 class CreateCoupon extends CreateRecord
 {
     use CanSyncResources;
+
     protected static string $resource = CouponResource::class;
+
     protected array $includedProducts = [];
 
     protected function mutateFormDataBeforeCreate(array $data): array
