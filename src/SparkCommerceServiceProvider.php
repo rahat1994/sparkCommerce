@@ -155,6 +155,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
             'create_sc_anonymous_carts_table',
             'create_sc_coupons_table',
             'create_sc_coupon_user_table',
+            'create_sc_coupon_included_products_table',
         ];
     }
 }

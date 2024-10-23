@@ -17,11 +17,6 @@ class SCCoupon extends Model
         'max_spend',
         'min_spend',
         'exclude_sale_items',
-        'included_products',
-        'excluded_products',
-        'included_categories',
-        'excluded_categories',
-        'included_customers',
         'usage_limit',
         'usage_limit_per_user',
     ];
@@ -55,7 +50,8 @@ class SCCoupon extends Model
 
     public function includedProducts()
     {
-        return $this->belongsToMany(SCProduct::class, 'coupon_included_product');
+        $tableName = config('sparkcommerce.table_prefix') . config('sparkcommerce.tables.coupon_included_product');
+        return $this->belongsToMany(SCProduct::class, $tableName, 'coupon_id', 'product_id');
     }
 
     // public function excludedProducts()

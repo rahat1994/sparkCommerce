@@ -94,11 +94,8 @@ class CouponResource extends Resource
             Select::make('included_products')
                 ->label('Include products')
                 ->searchable()
-                ->getSearchResultsUsing(function (string $search) {
-                    return SCProduct::where('name', 'like', "%$search%")->limit(10)->pluck('name', 'sku')->toArray();
-                })->getOptionLabelUsing(function ($value) {
-                    return $value['name'] . ' (' . $value['sku'] . ')';
-                })->multiple(),
+                ->relationship('includedProducts', 'name')
+                ->multiple(),
 
         ];
 

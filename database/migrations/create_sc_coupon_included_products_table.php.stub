@@ -8,8 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        $couponProductsTable = strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.coupon_included_product_table_name"));
-
+        $couponProductsTable = strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.coupon_included_products_table_name"));
         Schema::create($couponProductsTable, function (Blueprint $table) {
             $table->id();
             $table->foreignId('coupon_id');
@@ -21,7 +20,7 @@ return new class extends Migration
 
     public function down()
     {
-        $couponUserTable = strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.coupon_included_product_table_name"));
-        Schema::dropIfExists($couponUserTable);
+        $couponProductsTable = strval(config("sparkcommerce.table_prefix")) . strval(config("sparkcommerce.coupon_included_products_table_name"));
+        Schema::dropIfExists($couponProductsTable);
     }
 };
