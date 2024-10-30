@@ -16,7 +16,6 @@ use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
-use Rahat1994\SparkCommerce\Models\SCProduct;
 
 class CouponResource extends Resource
 {
