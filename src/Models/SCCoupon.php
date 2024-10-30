@@ -24,7 +24,11 @@ class SCCoupon extends Model
     // add a cast of name from string to array
     protected $casts = [
         'name' => 'array',
+        'end_data' => 'date',
+        'start_date' => 'date',
     ];
+
+    protected $with = ['includedProducts'];
 
     /**
      * Get the table associated with the model.
