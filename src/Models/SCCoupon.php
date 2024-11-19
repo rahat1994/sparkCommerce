@@ -37,7 +37,7 @@ class SCCoupon extends Model
      */
     public function getTable()
     {
-        return 'sc_coupons';
+        return config('sparkcommerce.table_prefix') . config('sparkcommerce.coupons_table_name');
     }
 
     public function users()
@@ -54,8 +54,7 @@ class SCCoupon extends Model
 
     public function includedProducts()
     {
-        $tableName = config('sparkcommerce.table_prefix') . config('sparkcommerce.tables.coupon_included_product');
-
+        $tableName = config('sparkcommerce.table_prefix') . config('sparkcommerce.coupon_included_products_table_name');
         return $this->belongsToMany(SCProduct::class, $tableName, 'coupon_id', 'product_id');
     }
 
