@@ -74,7 +74,7 @@ class CouponResource extends Resource
             TextInput::make('min_spend')->numeric(),
             TextInput::make('max_spend')->numeric(),
             Checkbox::make('individual_use')->helperText('Check this box if the coupon cannot be used in conjunction with other coupons.'),
-            Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
+            // Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
 
         ];
     }
