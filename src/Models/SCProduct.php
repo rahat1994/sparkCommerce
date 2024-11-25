@@ -82,6 +82,10 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
         return $this->belongsToMany(SCCategory::class, config('sparkcommerce.table_prefix') . config('sparkcommerce.category_product_table_name'), 'product_id', 'category_id');
     }
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
     public function variations()
     {
         return $this->hasMany(ScProductVariation::class, 'product_id', 'id');
