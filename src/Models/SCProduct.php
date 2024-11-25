@@ -86,6 +86,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
     {
         return 'slug';
     }
+
     public function variations()
     {
         return $this->hasMany(ScProductVariation::class, 'product_id', 'id');
