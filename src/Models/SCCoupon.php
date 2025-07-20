@@ -55,7 +55,6 @@ class SCCoupon extends Model
     public function includedProducts()
     {
         $tableName = config('sparkcommerce.table_prefix') . config('sparkcommerce.coupon_included_products_table_name');
-
         return $this->belongsToMany(SCProduct::class, $tableName, 'coupon_id', 'product_id');
     }
 
@@ -63,4 +62,19 @@ class SCCoupon extends Model
     // {
     //     return $this->belongsToMany(SCProduct::class, 'coupon_excluded_product');
     // }
+
+    protected static function booted(): void
+    {
+        static::creating(fn ($coupon) => self::turnPriceIntoCents($coupon));
+        static::updating(fn ($coupon) => self::turnPriceIntoCents($coupon));
+
+        static::retrieved(function (SCCoupon $coupon) {
+            $coupon->coupon_amount = $coupon->coupon_amount / (int) config('sparkcommerce.decimal_value');
+        });
+    }
+
+    protected static function turnPriceIntoCents(SCCoupon $coupon)
+    {
+        $coupon->coupon_amount = $coupon->coupon_amount * (int) config('sparkcommerce.decimal_value');
+    }
 }

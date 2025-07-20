@@ -40,9 +40,9 @@ class CouponResource extends Resource
                         Tabs\Tab::make('Usage limits')
                             ->schema(self::usageLimitTabContent()),
                         Tabs\Tab::make('Giveaway products')
-                            ->schema([]),
+                            ->schema(static::giveawayProductsTabContent()),
                         Tabs\Tab::make('Exclusions')
-                            ->schema(self::exclusions()),
+                            ->schema(static::exclusions()),
                     ]),
             ])->columns(1);
     }
@@ -58,32 +58,44 @@ class CouponResource extends Resource
             TextInput::make('coupon_amount')->numeric(),
             DatePicker::make('end_date'),
             DatePicker::make('start_date'),
-            Radio::make('number_of_uses')
-                ->options([
-                    0 => 'Apply once',
-                    1 => 'Apply repeatedly',
-                ])->helperText(
-                    new HtmlString('<br><strong>Apply once</strong>: If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.<br><br> <strong>Apply repeatedly:</strong> The coupon applies repeatedly whenever the cart is eligible or if conditions are met. ie: If you set the coupon to offer Buy 2 Get 1 then the coupon works repeatedly for Buy 4 Get 2 and so on.')
-                ),
+            // Radio::make('number_of_uses')
+            //     ->options([
+            //         0 => 'Apply once',
+            //         1 => 'Apply repeatedly',
+            //     ])->helperText(
+            //         new HtmlString('<br><strong>Apply once</strong>: If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.<br><br> <strong>Apply repeatedly:</strong> The coupon applies repeatedly whenever the cart is eligible or if conditions are met. ie: If you set the coupon to offer Buy 2 Get 1 then the coupon works repeatedly for Buy 4 Get 2 and so on.')
+            //     ),
+        ];
+    }
+
+    public static function giveawayProductsTabContent(): array
+    {
+        return [
+            Select::make('giveaway_products')
+                ->label('Giveaway products')
+                ->disabled()
+                ->searchable()
+                ->multiple(),
+
         ];
     }
 
     public static function usageRestrictionTabContent(): array
     {
         return [
-            TextInput::make('min_spend')->numeric(),
-            TextInput::make('max_spend')->numeric(),
+            TextInput::make('min_spend')->numeric()->default(0)
+                ->helperText('Minimum amount required for the coupon to be applied.'),
+            TextInput::make('max_spend')->numeric()->default(0),
             Checkbox::make('individual_use')->helperText('Check this box if the coupon cannot be used in conjunction with other coupons.'),
-            // Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
-
+            Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
         ];
     }
 
     public static function usageLimitTabContent(): array
     {
         return [
-            TextInput::make('usage_limit')->numeric()->helperText('How many times this coupon can be used before it is void.'),
-            TextInput::make('usage_limit_per_user')->numeric()->helperText('How many times this coupon can be used by each user before it is void.'),
+            TextInput::make('usage_limit')->numeric()->default(0)->helperText('How many times this coupon can be used before it is void.'),
+            TextInput::make('usage_limit_per_user')->default(0)->numeric()->helperText('How many times this coupon can be used by each user before it is void.'),
         ];
     }
 

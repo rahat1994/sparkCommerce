@@ -47,11 +47,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 
     public function getPrice(): float
     {
-        if ($this->sale_price) {
-            return $this->sale_price;
-        }
-
-        return $this->regular_price;
+        return $this->sale_price ?: $this->regular_price;
     }
 
     /**
