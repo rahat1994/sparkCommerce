@@ -16,7 +16,6 @@ use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
-use Filament\Forms\Components\Hidden;
 
 class CouponResource extends Resource
 {
@@ -61,7 +60,7 @@ class CouponResource extends Resource
             DatePicker::make('start_date'),
             Radio::make('number_of_uses')
                 ->options([
-                    0 => 'Apply once'
+                    0 => 'Apply once',
                 ])->helperText(
                     new HtmlString('<br><strong>Apply once</strong>: If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.<br><br> <strong>Apply repeatedly:</strong> The coupon applies repeatedly whenever the cart is eligible or if conditions are met. ie: If you set the coupon to offer Buy 2 Get 1 then the coupon works repeatedly for Buy 4 Get 2 and so on.')
                 )->default(0),
