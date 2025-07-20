@@ -47,6 +47,9 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 
     public function getPrice(): float
     {
+        if ($this->sale_price) {
+            return $this->sale_price;
+        }
         return $this->regular_price;
     }
 
@@ -89,8 +92,8 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 
     protected static function booted(): void
     {
-        static::creating(fn ($product) => self::turnPriceIntoCents($product));
-        static::updating(fn ($product) => self::turnPriceIntoCents($product));
+        static::creating(fn($product) => self::turnPriceIntoCents($product));
+        static::updating(fn($product) => self::turnPriceIntoCents($product));
 
         static::retrieved(function (SCProduct $product) {
             $product->regular_price = $product->regular_price / (int) config('sparkcommerce.decimal_value');

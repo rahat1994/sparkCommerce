@@ -37,4 +37,14 @@ class SCOrder extends Model
     {
         return config('sparkcommerce.table_prefix') . config('sparkcommerce.orders_table_name');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(config('auth.providers.users.model'));
+    }
+
+    public function vendor()
+    {
+        return $this->belongsTo(config('sparkcommerce.vendor_model'));
+    }
 }
