@@ -78,7 +78,7 @@ class OrderResource extends Resource
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),
-                self::getOrderConfirmActionModal(),
+                static::getOrderConfirmActionModal(),
                 Action::make('cancelOrder')
                     ->label('Cancel Order')
                     ->color('danger')
