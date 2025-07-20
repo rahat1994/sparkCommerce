@@ -37,7 +37,7 @@ class SCCoupon extends Model
      */
     public function getTable()
     {
-        return 'sc_coupons';
+        return config('sparkcommerce.table_prefix') . config('sparkcommerce.coupons_table_name');
     }
 
     public function users()

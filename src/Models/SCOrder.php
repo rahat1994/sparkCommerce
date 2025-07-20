@@ -26,6 +26,7 @@ class SCOrder extends Model
 
     protected $casts = [
         'items' => 'array',
+        'discount' => 'array',
     ];
 
     /**
