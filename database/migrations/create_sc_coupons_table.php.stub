@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();
             $table->date('start_date')->nullable();
             $table->boolean('number_of_uses')->nullable()->comment('0: unlimited, 1: one time, If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.');
+            $table->boolean('exclude_sale_items')->nullable()->comment('items that are on sale should be excluded from the coupon');
             $table->string('max_spend')->nullable();
             $table->string('min_spend')->nullable();
             $table->boolean('individual_use')->nullable()->default(0);

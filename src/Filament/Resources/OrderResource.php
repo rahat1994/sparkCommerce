@@ -79,6 +79,13 @@ class OrderResource extends Resource
             ->actions([
                 // Tables\Actions\EditAction::make(),
                 static::getOrderConfirmActionModal(),
+                Action::make('Details')
+                    ->action(fn (SCOrder $order) => $order)
+                    ->modalContent(fn (SCOrder $record) => view('sparkcommerce::actions.order-confirm-modal', [
+                        'order' => $record,
+                        'orderContent' => self::getRowItems($record),
+                        'currency' => $currency,
+                    ])),
                 Action::make('cancelOrder')
                     ->label('Cancel Order')
                     ->color('danger')
@@ -112,7 +119,7 @@ class OrderResource extends Resource
                 ]);
             })
             ->icon('heroicon-o-information-circle')
-            ->label('Overview Order')
+            ->label('Accept Order')
             ->color('success')
             ->requiresConfirmation()->modalContent(
                 function (SCOrder $record): View {
