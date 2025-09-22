@@ -63,7 +63,7 @@ class CouponResource extends Resource
                     0 => 'Apply once',
                 ])->helperText(
                     new HtmlString('<br><strong>Apply once</strong>: If cart is eligible or conditions are met, coupon applies once. ie: If you set the coupon to offer Buy 2 Get 1, you get one free product. Moving more items to the cart will not make it eligible to get more free products.<br><br> <strong>Apply repeatedly:</strong> The coupon applies repeatedly whenever the cart is eligible or if conditions are met. ie: If you set the coupon to offer Buy 2 Get 1 then the coupon works repeatedly for Buy 4 Get 2 and so on.')
-                )->default(0),
+                )->default(null),
         ];
     }
 
@@ -82,9 +82,9 @@ class CouponResource extends Resource
     public static function usageRestrictionTabContent(): array
     {
         return [
-            TextInput::make('min_spend')->numeric()->default(0)
+            TextInput::make('min_spend')->numeric()->default(null)
                 ->helperText('Minimum amount required for the coupon to be applied.'),
-            TextInput::make('max_spend')->numeric()->default(0),
+            TextInput::make('max_spend')->numeric()->default(null),
             Checkbox::make('individual_use')->helperText('Check this box if the coupon cannot be used in conjunction with other coupons.'),
             Checkbox::make('exclude_sale_items')->helperText('Check this box if the coupon cannot be used on sale items.'),
         ];
@@ -93,8 +93,8 @@ class CouponResource extends Resource
     public static function usageLimitTabContent(): array
     {
         return [
-            TextInput::make('usage_limit')->numeric()->default(0)->helperText('How many times this coupon can be used before it is void.'),
-            TextInput::make('usage_limit_per_user')->default(0)->numeric()->helperText('How many times this coupon can be used by each user before it is void.'),
+            TextInput::make('usage_limit')->numeric()->default(null)->helperText('How many times this coupon can be used before it is void.'),
+            TextInput::make('usage_limit_per_user')->default(null)->numeric()->helperText('How many times this coupon can be used by each user before it is void.'),
         ];
     }
 
