@@ -76,35 +76,36 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function getUserFields(){
+    public static function getUserFields()
+    {
         return [
-                TextInput::make('name')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.name'))
-                    ->required(),
-                TextInput::make('email')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.email'))
-                    ->email()
-                    ->unique(ignoreRecord: true)
-                    ->required(),
-                TextInput::make('password')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.password'))
-                    ->password()
-                    ->required()
-                    ->minLength(8),
-                TextInput::make('password_confirmation')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.password_confirmation'))
-                    ->password()
-                    ->same('password')
-                    ->required()
-                    ->minLength(8),
-                KeyValue::make('meta')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.meta'))->columnSpan(2),
-                Select::make('role')
-                    ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.role'))
-                    ->options(
-                        Role::all()->mapWithKeys(fn (Role $role): array => [$role->name => $role->name])
-                    )->columnSpan(2),
-            ];
+            TextInput::make('name')
+                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.name'))
+                ->required(),
+            TextInput::make('email')
+                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.email'))
+                ->email()
+                ->unique(ignoreRecord: true)
+                ->required(),
+            TextInput::make('password')
+                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.password'))
+                ->password()
+                ->required()
+                ->minLength(8),
+            TextInput::make('password_confirmation')
+                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.password_confirmation'))
+                ->password()
+                ->same('password')
+                ->required()
+                ->minLength(8),
+            KeyValue::make('meta')
+                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.meta'))->columnSpan(2),
+            Select::make('role')
+                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.role'))
+                ->options(
+                    Role::all()->mapWithKeys(fn (Role $role): array => [$role->name => $role->name])
+                )->columnSpan(2),
+        ];
     }
 
     public static function getRelations(): array
