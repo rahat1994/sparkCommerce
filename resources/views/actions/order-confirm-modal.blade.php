@@ -1,29 +1,31 @@
 <style>
     .modal-container {
         background-color: #fff;
-        padding: 30px;
+        padding: 20px;
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        margin: 0 auto;
+        margin: 0;
         font-family: Arial, sans-serif;
         color: #333;
+        width: 100%;
+        max-width: none;
     }
     .modal-header {
         text-align: center;
         border-bottom: 2px solid #007bff;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
     }
     .modal-header h2 {
         color: #007bff;
         margin: 0;
-        font-size: 28px;
+        font-size: 24px;
     }
     .order-info {
         background-color: #f8f9fa;
-        padding: 20px;
+        padding: 15px;
         border-radius: 8px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
     .order-info h3 {
         color: #495057;
@@ -47,12 +49,13 @@
     .address-section {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
+        gap: 15px;
     }
     .address-box {
-        width: 48%;
+        flex: 1;
         background-color: #f8f9fa;
-        padding: 15px;
+        padding: 12px;
         border-radius: 8px;
     }
     .address-box h4 {
@@ -62,7 +65,7 @@
         padding-bottom: 8px;
     }
     .items-section {
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
     .items-table {
         width: 100%;
@@ -71,7 +74,7 @@
     }
     .items-table th,
     .items-table td {
-        padding: 12px;
+        padding: 10px;
         text-align: left;
         border-bottom: 1px solid #dee2e6;
     }
@@ -85,9 +88,9 @@
     }
     .total-section {
         background-color: #e9ecef;
-        padding: 20px;
+        padding: 15px;
         border-radius: 8px;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
     .total-row {
         display: flex;
@@ -104,18 +107,20 @@
     }
     .footer {
         text-align: center;
-        margin-top: 30px;
-        padding-top: 20px;
+        margin-top: 20px;
+        padding-top: 15px;
         border-top: 1px solid #dee2e6;
         color: #6c757d;
         font-size: 14px;
     }
     @media (max-width: 700px) {
         .modal-container { padding: 10px; }
-        .address-section { flex-direction: column; }
-        .address-box { width: 100%; margin-bottom: 15px; }
+        .address-section { flex-direction: column; gap: 10px; }
+        .address-box { width: 100%; margin-bottom: 10px; }
         .info-row { flex-direction: column; }
         .items-table { font-size: 14px; }
+        .items-table th,
+        .items-table td { padding: 8px; }
     }
 </style>
 

@@ -81,6 +81,7 @@ class OrderResource extends Resource
                 static::getOrderConfirmActionModal(),
                 Action::make('Details')
                     ->action(fn (SCOrder $order) => $order)
+                    ->modalWidth('5xl')
                     ->modalContent(fn (SCOrder $record) => view('sparkcommerce::actions.order-confirm-modal', [
                         'order' => $record,
                         'orderContent' => self::getRowItems($record),
@@ -90,7 +91,10 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn (SCOrder $order) => $order->delete()),
+                    ->action(fn (SCOrder $order) => $order->update([
+                        'shipping_status' => 'Cancelled',
+                        'status' => 'Cancelled',
+                    ])),
             ])
             ->defaultSort('created_at', 'desc')
             ->bulkActions([
@@ -121,7 +125,11 @@ class OrderResource extends Resource
             ->icon('heroicon-o-information-circle')
             ->label('Accept Order')
             ->color('success')
-            ->requiresConfirmation()->modalContent(
+            ->requiresConfirmation()
+            ->modalWidth('7xl')
+            ->modalSubmitActionLabel('Confirm Order')
+            ->modalCancelActionLabel('Cancel')
+            ->modalContent(
                 function (SCOrder $record): View {
                     $orderContent = self::getRowItems($record);
 
