@@ -20,6 +20,7 @@ class EditProduct extends EditRecord
         if (static::hasMacro('getAdditionalHeaderActions')) {
             return $this->getAdditionalHeaderActions();
         }
+
         return [
             Actions\DeleteAction::make(),
         ];
