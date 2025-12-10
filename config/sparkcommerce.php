@@ -3,6 +3,7 @@
 // config for Rahat1994/SparkCommerce
 return [
     'decimal_value' => 100,
+    'vendor_model' => Rahat1994\SparkCommerceMultiVendor\Models\SCMVVendor::class,
     'default_currency' => 'USD',
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',

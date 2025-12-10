@@ -17,6 +17,9 @@ class EditProduct extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        if (static::hasMacro('getAdditionalHeaderActions')) {
+            return $this->getAdditionalHeaderActions();
+        }
         return [
             Actions\DeleteAction::make(),
         ];
