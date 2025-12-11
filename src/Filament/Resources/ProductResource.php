@@ -53,13 +53,12 @@ class ProductResource extends Resource
 
         if (static::hasMacro('getAdditionalActions')) {
             $actions = static::getAdditionalActions();
-        } else{
+        } else {
             $actions = [
                 EditAction::make(),
                 DeleteAction::make(),
             ];
         }
-
 
         return $table
             ->columns([
