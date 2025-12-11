@@ -10,6 +10,7 @@ use Filament\Tables\Actions\Action;
 // use Filament\Tables\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Facades\Filament;
 use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
@@ -55,24 +56,32 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         $currency = self::getTenantCurrency();
+        $isBackoffice = Filament::getCurrentPanel()?->getId() === 'backoffice';
+
+        $columns = [
+            TextColumn::make('id')
+                ->label('ID'),
+            TextColumn::make('tracking_number')
+                ->label('Tracking Number'),
+            TextColumn::make('total_amount')
+                ->label('Order Value')->money($currency),
+            TextColumn::make('shipping_status')
+                ->label('Shipping Status'),
+            TextColumn::make('payment_status')
+                ->label('Payment Status'),
+            TextColumn::make('status')
+                ->label('Status'),
+            TextColumn::make('transaction_id')
+                ->label('Transaction ID'),
+        ];
+
+        if ($isBackoffice) {
+            $columns[] = TextColumn::make('vendor.slug')
+                ->label('Vendor Slug');
+        }
 
         return $table
-            ->columns([
-                TextColumn::make('id')
-                    ->label('ID'),
-                TextColumn::make('tracking_number')
-                    ->label('Tracking Number'),
-                TextColumn::make('total_amount')
-                    ->label('Order Value')->money($currency),
-                TextColumn::make('shipping_status')
-                    ->label('Shipping Status'),
-                TextColumn::make('payment_status')
-                    ->label('Payment Status'),
-                TextColumn::make('status')
-                    ->label('Status'),
-                TextColumn::make('transaction_id')
-                    ->label('Transaction ID'),
-            ])
+            ->columns($columns)
             ->filters([
                 //
             ])

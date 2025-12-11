@@ -51,6 +51,16 @@ class ProductResource extends Resource
     {
         $currency = self::getTenantCurrency();
 
+        if (static::hasMacro('getAdditionalActions')) {
+            $actions = static::getAdditionalActions();
+        } else{
+            $actions = [
+                EditAction::make(),
+                DeleteAction::make(),
+            ];
+        }
+
+
         return $table
             ->columns([
                 TextColumn::make('name')
@@ -71,10 +81,7 @@ class ProductResource extends Resource
                 //
             ])
             ->searchable(true)
-            ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
+            ->actions($actions)
             ->defaultSort('created_at', 'desc');
     }
 
