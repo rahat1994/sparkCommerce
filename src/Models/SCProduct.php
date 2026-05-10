@@ -6,10 +6,11 @@ use App\Models\User;
 use Binafy\LaravelCart\Cartable;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Tags\HasTags;
 
-class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
+class SCProduct extends Model implements Cartable, HasMedia
 {
     use HasTags;
     use InteractsWithMedia;

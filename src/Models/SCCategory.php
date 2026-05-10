@@ -4,9 +4,10 @@ namespace Rahat1994\SparkCommerce\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class SCCategory extends Model implements \Spatie\MediaLibrary\HasMedia
+class SCCategory extends Model implements HasMedia
 {
     use InteractsWithMedia;
     use Sluggable;
