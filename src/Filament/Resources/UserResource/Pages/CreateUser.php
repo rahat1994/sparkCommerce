@@ -9,14 +9,31 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
-    public function afterCreate()
-    {
-        $data = $this->form->getState();
-        if (isset($data['role']) && $data['role'] === config('sparkcommerce-multivendor.vendor_owner_role')) {
-            // Do something
+    protected ?string $roleName = null;
 
-            $user = $this->record;
-            $user->assignRole(config('sparkcommerce-multivendor.vendor_owner_role'));
+    protected array $vendorIds = [];
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $this->roleName = $data['role'] ?? null;
+        $this->vendorIds = $data['vendor_ids'] ?? [];
+
+        unset($data['role'], $data['vendor_ids'], $data['password_confirmation'], $data['meta']);
+
+        return $data;
+    }
+
+    public function afterCreate(): void
+    {
+        if (! $this->roleName) {
+            return;
+        }
+
+        $user = $this->record;
+        $user->assignRole($this->roleName);
+
+        if ($this->roleName === config('sparkcommerce-multivendor.vendor_owner_role')) {
+            $user->vendors()->syncWithoutDetaching($this->vendorIds);
         }
     }
 }
