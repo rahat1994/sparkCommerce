@@ -88,9 +88,9 @@ trait HasVariation
         return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.variations'))
             ->schema(function (Get $get) {
 
-                $attributes = array_values($get('product_attributes'));
+                $attributes = array_values($get('product_attributes') ?? []);
 
-                if (count($attributes) > 0 && $attributes[0]['attribute_name'] == null) {
+                if (count($attributes) > 0 && blank($attributes[0]['attribute_name'] ?? null)) {
                     return [Placeholder::make('Info')
                         ->content(new HtmlString('<p>Please add attributes</p>'))];
                 } else {

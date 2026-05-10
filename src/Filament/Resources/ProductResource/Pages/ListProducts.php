@@ -13,6 +13,10 @@ class ListProducts extends ListRecords
 
     protected function getHeaderActions(): array
     {
+        if (static::hasMacro('getAdditionalHeaderActions')) {
+            return $this->getAdditionalHeaderActions();
+        }
+
         return [
             Actions\CreateAction::make(),
         ];

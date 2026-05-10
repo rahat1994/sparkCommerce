@@ -17,12 +17,14 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
 
     protected $casts = [
         'product_attributes' => 'array',
+        'supplier_metadata' => 'array',
     ];
 
     protected function casts(): array
     {
         return [
             'product_attributes' => 'array',
+            'supplier_metadata' => 'array',
         ];
     }
 
@@ -43,6 +45,7 @@ class SCProduct extends Model implements \Spatie\MediaLibrary\HasMedia, Cartable
         'width',
         'length',
         'product_attributes',
+        'supplier_metadata',
     ];
 
     public function getPrice(): float
