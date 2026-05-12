@@ -12,7 +12,7 @@ class SCCategory extends Model implements HasMedia
     use InteractsWithMedia;
     use Sluggable;
 
-    protected $fillable = ['name', 'user_id', 'parent_id'];
+    protected $fillable = ['name', 'user_id', 'parent_id', 'vendor_id'];
 
     protected $casts = [
         'name' => 'string',
