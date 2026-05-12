@@ -40,7 +40,7 @@ class SCProduct extends Model implements Cartable, HasMedia
         'sale_price',
         'sku',
         'stock_quantity',
-        'allow_backorders',
+        'should_allow_backorders',
         'low_stock_threshold',
         'weight',
         'height',
