@@ -32,6 +32,7 @@ class SCProduct extends Model implements Cartable, HasMedia
     protected $fillable = [
         'name',
         'user_id',
+        'vendor_id',
         'description',
         'product_type',
         'slug',
