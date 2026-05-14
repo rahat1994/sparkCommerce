@@ -32,6 +32,7 @@ class SCProduct extends Model implements Cartable, HasMedia
     protected $fillable = [
         'name',
         'user_id',
+        'vendor_id',
         'description',
         'product_type',
         'slug',
@@ -39,7 +40,7 @@ class SCProduct extends Model implements Cartable, HasMedia
         'sale_price',
         'sku',
         'stock_quantity',
-        'allow_backorders',
+        'should_allow_backorders',
         'low_stock_threshold',
         'weight',
         'height',
