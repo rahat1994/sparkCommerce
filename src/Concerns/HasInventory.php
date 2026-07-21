@@ -4,8 +4,8 @@ namespace Rahat1994\SparkCommerce\Concerns;
 
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\HtmlString;
 
 trait HasInventory

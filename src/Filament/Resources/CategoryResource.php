@@ -2,25 +2,30 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages\CreateCategory;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages\EditCategory;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages\ListCategories;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = SCCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-bars-4';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-4';
 
     public static function getModelLabel(): string
     {
@@ -46,10 +51,10 @@ class CategoryResource extends Resource
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label(__('sparkcommerce::sparkcommerce.resource.category.creation_form.name'))
                     ->required(),
@@ -93,13 +98,13 @@ class CategoryResource extends Resource
                     }),
 
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -114,9 +119,9 @@ class CategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
-            'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            'index' => ListCategories::route('/'),
+            'create' => CreateCategory::route('/create'),
+            'edit' => EditCategory::route('/{record}/edit'),
         ];
     }
 }

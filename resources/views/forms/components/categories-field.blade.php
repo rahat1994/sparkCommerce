@@ -23,25 +23,18 @@
         @category-component-refreshed.window="refreshed = $event.detail.id"
     >
         <div class="p-2 border border-gray-400 overflow-x-hidden" style="height: 10rem; overflow-y:scroll">
-            <x-filament::grid
-                :default="$getColumns('default')"
-                :sm="$getColumns('sm')"
-                :md="$getColumns('md')"
-                :lg="$getColumns('lg')"
-                :xl="$getColumns('xl')"
-                :two-xl="$getColumns('2xl')"
-                direction="column"
-                :x-show="$isSearchable ? 'visibleCheckboxListOptions.length' : null"
-                :attributes="
+            <div
+                @if ($isSearchable) x-show="visibleCheckboxListOptions.length" @endif
+                {{
                     \Filament\Support\prepare_inherited_attributes($attributes)
                         ->merge($getExtraAttributes(), escape: false)
                         ->merge([
                             'id' => 'checkbox-container',
                         ])
                         ->class([
-                            'fi-fo-checkbox-list gap-4',
+                            'fi-fo-checkbox-list grid grid-cols-1 gap-4',
                         ])
-                "
+                }}
             >
                 @forelse ($getOptions() as $value => $label)
                     <div
@@ -89,7 +82,7 @@
                         wire:key="{{ $this->getId() }}.{{ $statePath }}.{{ $field::class }}.empty"
                     ></div>
                 @endforelse
-            </x-filament::grid>
+            </div>
         </div>
 
         <br />

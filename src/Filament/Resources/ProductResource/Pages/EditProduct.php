@@ -2,7 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Rahat1994\SparkCommerce\Concerns\CanAttachCategories;
 use Rahat1994\SparkCommerce\Concerns\CanCreateCategories;
@@ -22,7 +22,7 @@ class EditProduct extends EditRecord
         }
 
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 

@@ -2,18 +2,20 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-// use Filament\Tables\Forms\Components\Select;
-use Filament\Tables\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
+use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\EditOrder;
+use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\ListOrders;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 
 class OrderResource extends Resource
@@ -22,7 +24,7 @@ class OrderResource extends Resource
 
     protected static ?string $model = SCOrder::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function getModelLabel(): string
     {
@@ -45,10 +47,10 @@ class OrderResource extends Resource
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -56,7 +58,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         $currency = self::getTenantCurrency();
-        $isBackoffice = Filament::getCurrentPanel()?->getId() === 'backoffice';
+        $isBackoffice = Filament::getCurrentOrDefaultPanel()?->getId() === 'backoffice';
 
         $columns = [
             TextColumn::make('id')
@@ -85,7 +87,7 @@ class OrderResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make(),
                 static::getOrderConfirmActionModal(),
                 Action::make('Details')
@@ -106,9 +108,9 @@ class OrderResource extends Resource
                     ])),
             ])
             ->defaultSort('created_at', 'desc')
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -116,7 +118,7 @@ class OrderResource extends Resource
     public static function getOrderConfirmActionModal()
     {
         return Action::make('Confirm Order')
-            ->form([
+            ->schema([
                 Select::make('shipping_status')
                     ->label('Shipping Status')
                     ->options([
@@ -186,9 +188,9 @@ class OrderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListOrders::route('/'),
+            'index' => ListOrders::route('/'),
             // 'create' => Pages\CreateOrder::route('/create'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
+            'edit' => EditOrder::route('/{record}/edit'),
         ];
     }
 }

@@ -2,19 +2,23 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages\CreateTag;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages\EditTag;
+use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages\ListTags;
 use Rahat1994\SparkCommerce\Models\SCTag;
 
 class TagResource extends Resource
 {
     protected static ?string $model = SCTag::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
 
     public static function getModelLabel(): string
     {
@@ -40,10 +44,10 @@ class TagResource extends Resource
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -58,12 +62,12 @@ class TagResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -78,9 +82,9 @@ class TagResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTags::route('/'),
-            'create' => Pages\CreateTag::route('/create'),
-            'edit' => Pages\EditTag::route('/{record}/edit'),
+            'index' => ListTags::route('/'),
+            'create' => CreateTag::route('/create'),
+            'edit' => EditTag::route('/{record}/edit'),
         ];
     }
 }

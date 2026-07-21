@@ -2,22 +2,22 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\SpatieTagsInput;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -45,7 +45,7 @@ class ProductResource extends Resource
 
     protected static ?string $model = SCProduct::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-gift';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-gift';
 
     public static function table(Table $table): Table
     {
@@ -80,14 +80,14 @@ class ProductResource extends Resource
                 //
             ])
             ->searchable(true)
-            ->actions($actions)
+            ->recordActions($actions)
             ->defaultSort('created_at', 'desc');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Group::make([
                     TextInput::make('name')
                         ->required()

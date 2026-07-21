@@ -2,9 +2,9 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages;
 
-use Filament\Actions;
-use Filament\Resources\Components\Tab;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource;
 
 class ListCoupons extends ListRecords
@@ -14,7 +14,7 @@ class ListCoupons extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 
