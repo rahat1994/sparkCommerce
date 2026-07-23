@@ -2,24 +2,16 @@
 
 namespace Rahat1994\SparkCommerce\Tests;
 
-use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
-use BladeUI\Icons\BladeIconsServiceProvider;
-use Filament\Actions\ActionsServiceProvider;
-use Filament\FilamentServiceProvider;
-use Filament\Forms\FormsServiceProvider;
-use Filament\Infolists\InfolistsServiceProvider;
-use Filament\Notifications\NotificationsServiceProvider;
-use Filament\Support\SupportServiceProvider;
-use Filament\Tables\TablesServiceProvider;
-use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Rahat1994\SparkCommerce\SparkCommerceServiceProvider;
-use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
+use Rahat1994\SparkCommerce\Tests\Fixtures\AdminPanelProvider;
+use Rahat1994\SparkCommerce\Tests\Fixtures\User;
 
 class TestCase extends Orchestra
 {
+    protected $enablesPackageDiscoveries = true;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -32,29 +24,43 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         return [
-            ActionsServiceProvider::class,
-            BladeCaptureDirectiveServiceProvider::class,
-            BladeHeroiconsServiceProvider::class,
-            BladeIconsServiceProvider::class,
-            FilamentServiceProvider::class,
-            FormsServiceProvider::class,
-            InfolistsServiceProvider::class,
-            LivewireServiceProvider::class,
-            NotificationsServiceProvider::class,
-            SupportServiceProvider::class,
-            TablesServiceProvider::class,
-            WidgetsServiceProvider::class,
             SparkCommerceServiceProvider::class,
+            AdminPanelProvider::class,
         ];
     }
 
     public function getEnvironmentSetUp($app)
     {
+        config()->set('app.key', 'base64:' . base64_encode(random_bytes(32)));
         config()->set('database.default', 'testing');
+        config()->set('auth.providers.users.model', User::class);
+    }
 
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_sparkcommerce_table.php.stub';
-        $migration->up();
-        */
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+
+        $this->runMigrationStubs([
+            __DIR__ . '/../vendor/spatie/laravel-medialibrary/database/migrations/create_media_table.php.stub',
+            __DIR__ . '/../vendor/spatie/laravel-tags/database/migrations/create_tag_tables.php.stub',
+        ]);
+
+        $provider = $this->app->getProvider(SparkCommerceServiceProvider::class);
+
+        foreach ($provider->getMigrations() as $name) {
+            $this->runMigrationStubs([__DIR__ . '/../database/migrations/' . $name . '.php.stub']);
+        }
+    }
+
+    /**
+     * @param  array<string>  $paths
+     */
+    protected function runMigrationStubs(array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                (include $path)->up();
+            }
+        }
     }
 }

@@ -143,7 +143,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
     /**
      * @return array<string>
      */
-    protected function getMigrations(): array
+    public function getMigrations(): array
     {
         return [
             'create_sc_products_table',

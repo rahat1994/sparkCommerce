@@ -2,10 +2,13 @@
 
 namespace Rahat1994\SparkCommerce\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SCOrder extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'items',
         'shipping_address',

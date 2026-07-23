@@ -3,10 +3,13 @@
 namespace Rahat1994\SparkCommerce\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SCCoupon extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'coupon_code',
         'coupon_type',

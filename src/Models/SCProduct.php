@@ -5,6 +5,7 @@ namespace Rahat1994\SparkCommerce\Models;
 use App\Models\User;
 use Binafy\LaravelCart\Cartable;
 use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -12,6 +13,7 @@ use Spatie\Tags\HasTags;
 
 class SCProduct extends Model implements Cartable, HasMedia
 {
+    use HasFactory;
     use HasTags;
     use InteractsWithMedia;
     use Sluggable;
