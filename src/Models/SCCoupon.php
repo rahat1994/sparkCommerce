@@ -27,7 +27,7 @@ class SCCoupon extends Model
     // add a cast of name from string to array
     protected $casts = [
         'name' => 'array',
-        'end_data' => 'date',
+        'end_date' => 'date',
         'start_date' => 'date',
     ];
 
@@ -45,14 +45,16 @@ class SCCoupon extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'coupon_user')
-            ->withPivot('usage_count')
+        $tableName = config('sparkcommerce.table_prefix') . config('sparkcommerce.coupon_user_table_name');
+
+        return $this->belongsToMany(config('auth.providers.users.model', User::class), $tableName)
+            ->withPivot('usage_count', 'used_at', 'meta')
             ->withTimestamps();
     }
 
-    public function isValid()
+    public function isValid(): bool
     {
-        return $this->expires_at === null || $this->expires_at->isFuture();
+        return $this->end_date === null || $this->end_date->isFuture();
     }
 
     public function includedProducts()

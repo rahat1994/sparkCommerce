@@ -44,6 +44,13 @@ class SCOrder extends Model
         return config('sparkcommerce.table_prefix') . config('sparkcommerce.orders_table_name');
     }
 
+    /**
+     * The user who placed the order.
+     *
+     * Decision: no user FKs in v1. The `user_id` columns across SparkCommerce
+     * stay `unsignedInteger` without a database foreign key constraint, so
+     * this relation is resolved by Eloquent only.
+     */
     public function user()
     {
         return $this->belongsTo(config('auth.providers.users.model'));

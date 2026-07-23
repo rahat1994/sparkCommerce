@@ -18,23 +18,17 @@ class SCProduct extends Model implements Cartable, HasMedia
     use InteractsWithMedia;
     use Sluggable;
 
-    protected $casts = [
-        'product_attributes' => 'array',
-        'supplier_metadata' => 'array',
-    ];
-
     protected function casts(): array
     {
         return [
             'product_attributes' => 'array',
-            'supplier_metadata' => 'array',
         ];
     }
 
     protected $fillable = [
         'name',
         'user_id',
-        'vendor_id',
+        'vendor_id', // column added by the multivendor package
         'description',
         'product_type',
         'slug',
@@ -42,6 +36,7 @@ class SCProduct extends Model implements Cartable, HasMedia
         'sale_price',
         'sku',
         'stock_quantity',
+        'manage_product_stock',
         'should_allow_backorders',
         'low_stock_threshold',
         'weight',
@@ -49,7 +44,7 @@ class SCProduct extends Model implements Cartable, HasMedia
         'width',
         'length',
         'product_attributes',
-        'supplier_metadata',
+        'purchase_note',
     ];
 
     public function getPrice(): float
@@ -96,7 +91,12 @@ class SCProduct extends Model implements Cartable, HasMedia
 
     public function variations()
     {
-        return $this->hasMany(ScProductVariation::class, 'product_id', 'id');
+        return $this->hasMany(SCProductVariation::class, 'product_id', 'id');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(SCReview::class, 'product_id', 'id');
     }
 
     protected static function booted(): void

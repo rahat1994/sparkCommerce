@@ -132,11 +132,22 @@ class ProductResource extends Resource
 
     public static function getShopCategories()
     {
-        if (class_exists('SparkcommerceMultivendor') && $vendorId = Filament::getTenant()) {
-            return SCCategory::where('vendor_id', $vendorId->id)->get()->toArray();
+        if (static::isMultivendorInstalled() && $tenant = Filament::getTenant()) {
+            return SCCategory::where('vendor_id', $tenant->id)->get()->toArray();
         }
 
         return SCCategory::all()->toArray();
+    }
+
+    /**
+     * Detect the multivendor package through config instead of a fragile
+     * facade-alias check: the configured vendor model must exist.
+     */
+    protected static function isMultivendorInstalled(): bool
+    {
+        $vendorModel = config('sparkcommerce.vendor_model');
+
+        return $vendorModel !== null && class_exists($vendorModel);
     }
 
     public static function getProductDimensionFields()

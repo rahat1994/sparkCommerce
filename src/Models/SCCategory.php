@@ -40,11 +40,6 @@ class SCCategory extends Model implements HasMedia
         ];
     }
 
-    public function product()
-    {
-        // return $this->hasManyThrough(ScProduct::class);
-    }
-
     public function parent()
     {
         return $this->belongsTo(SCCategory::class, 'parent_id', 'id');
