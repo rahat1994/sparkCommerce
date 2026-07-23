@@ -16,6 +16,7 @@ use Filament\Tables\Filters\BaseFilter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages\EditCategory;
 use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource\Pages\ListCategories;
@@ -23,6 +24,8 @@ use Rahat1994\SparkCommerce\Models\SCCategory;
 
 class CategoryResource extends Resource
 {
+    use HasSparkCommercePanelAccess;
+
     protected static ?string $model = SCCategory::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-4';

@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages\CreateReview;
 use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages\EditReview;
 use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages\ListReviews;
@@ -15,6 +16,8 @@ use Rahat1994\SparkCommerce\Models\SCReview;
 
 class ReviewResource extends Resource
 {
+    use HasSparkCommercePanelAccess;
+
     protected static ?string $model = SCReview::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-star';

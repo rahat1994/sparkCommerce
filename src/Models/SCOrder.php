@@ -4,6 +4,7 @@ namespace Rahat1994\SparkCommerce\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use RuntimeException;
 
 class SCOrder extends Model
 {
@@ -58,6 +59,12 @@ class SCOrder extends Model
 
     public function vendor()
     {
-        return $this->belongsTo(config('sparkcommerce.vendor_model'));
+        $vendorModel = config('sparkcommerce.vendor_model');
+
+        if ($vendorModel === null) {
+            throw new RuntimeException('sparkcommerce.vendor_model is not configured; install/configure a vendor package.');
+        }
+
+        return $this->belongsTo($vendorModel);
     }
 }

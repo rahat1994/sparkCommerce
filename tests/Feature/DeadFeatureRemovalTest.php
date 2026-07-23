@@ -1,13 +1,7 @@
 <?php
 
-use Rahat1994\SparkCommerce\Tests\Fixtures\User;
-
 it('renders the product create page without coming soon placeholder tabs', function () {
-    $this->actingAs(User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => bcrypt('password'),
-    ]));
+    $this->actingAs($this->createAdminUser());
 
     $this->get(route('filament.admin.resources.products.create'))
         ->assertSuccessful()

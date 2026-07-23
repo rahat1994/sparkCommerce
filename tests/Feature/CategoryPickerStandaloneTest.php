@@ -14,11 +14,7 @@ it('returns all categories when no multivendor package is installed', function (
 });
 
 it('renders the product create page with the category picker standalone', function () {
-    $this->actingAs(User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => bcrypt('password'),
-    ]));
+    $this->actingAs($this->createAdminUser());
 
     SCCategory::factory()->count(2)->create();
 

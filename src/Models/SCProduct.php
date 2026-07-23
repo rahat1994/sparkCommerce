@@ -2,7 +2,6 @@
 
 namespace Rahat1994\SparkCommerce\Models;
 
-use App\Models\User;
 use Binafy\LaravelCart\Cartable;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -76,7 +75,7 @@ class SCProduct extends Model implements Cartable, HasMedia
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(config('auth.providers.users.model'), 'user_id', 'id');
     }
 
     public function categories()

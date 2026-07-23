@@ -1,11 +1,34 @@
 <?php
 
-use Rahat1994\SparkCommerceMultiVendor\Models\SCMVVendor;
-
 // config for Rahat1994/SparkCommerce
 return [
     'decimal_value' => 100,
-    'vendor_model' => SCMVVendor::class,
+
+    /*
+     * Fully qualified class name of the vendor (shop) model.
+     * Null in the standalone package; set by the multivendor package.
+     */
+    'vendor_model' => null,
+
+    /*
+     * Name of the role that grants access to the SparkCommerce admin
+     * resources. The role is created by the `sc:publish-roles` command.
+     */
+    'admin_role' => 'sc_admin',
+
+    /*
+     * Optional invokable class-string that decides panel access. When set,
+     * it is resolved from the container and called with the current user,
+     * overriding the default `admin_role` check.
+     */
+    'panel_gate' => null,
+
+    /*
+     * Name of the role that owns vendors (shops).
+     * Null in the standalone package; set by the multivendor package.
+     */
+    'vendor_owner_role' => null,
+
     'default_currency' => 'USD',
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',

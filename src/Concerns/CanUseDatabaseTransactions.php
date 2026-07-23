@@ -3,6 +3,7 @@
 namespace Rahat1994\SparkCommerce\Concerns;
 
 use Closure;
+use Filament\Exceptions\NoDefaultPanelSetException;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
 
@@ -12,7 +13,17 @@ trait CanUseDatabaseTransactions
 
     public function hasDatabaseTransactions(): bool
     {
-        return $this->hasDatabaseTransactions ?? Filament::getCurrentOrDefaultPanel()->hasDatabaseTransactions();
+        if ($this->hasDatabaseTransactions !== null) {
+            return $this->hasDatabaseTransactions;
+        }
+
+        try {
+            return Filament::getCurrentOrDefaultPanel()?->hasDatabaseTransactions() ?? false;
+        } catch (NoDefaultPanelSetException) {
+            // No panel is registered (e.g. a non-panel consumer such as a
+            // REST route): default to no transactions instead of throwing.
+            return false;
+        }
     }
 
     protected function beginDatabaseTransaction(): void

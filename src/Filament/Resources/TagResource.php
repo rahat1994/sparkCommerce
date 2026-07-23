@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages\CreateTag;
 use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages\EditTag;
 use Rahat1994\SparkCommerce\Filament\Resources\TagResource\Pages\ListTags;
@@ -16,6 +17,8 @@ use Rahat1994\SparkCommerce\Models\SCTag;
 
 class TagResource extends Resource
 {
+    use HasSparkCommercePanelAccess;
+
     protected static ?string $model = SCTag::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';

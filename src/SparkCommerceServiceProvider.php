@@ -8,8 +8,11 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Features\SupportTesting\Testable;
+use Rahat1994\SparkCommerce\Commands\SCPublishRolesCommand;
 use Rahat1994\SparkCommerce\Commands\SparkCommercePublishMigrations;
 use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -62,6 +65,8 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        $this->registerPanelAccessGate();
+
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
@@ -89,6 +94,37 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
         Testable::mixin(new TestsSparkCommerce);
     }
 
+    /**
+     * Gate deciding who may operate the SparkCommerce admin resources.
+     *
+     * Resolution order: an invokable `sparkcommerce.panel_gate` class-string
+     * overrides everything; otherwise the user must hold the
+     * `sparkcommerce.admin_role` role. A user model without roles support is
+     * denied by default (secure default).
+     */
+    protected function registerPanelAccessGate(): void
+    {
+        Gate::define('access-sparkcommerce-admin', function (?Authenticatable $user = null): bool {
+            $panelGate = config('sparkcommerce.panel_gate');
+
+            if (is_string($panelGate) && class_exists($panelGate)) {
+                return (bool) app($panelGate)($user);
+            }
+
+            $adminRole = config('sparkcommerce.admin_role');
+
+            if (! is_string($adminRole) || $adminRole === '') {
+                return false;
+            }
+
+            if ($user === null || ! method_exists($user, 'hasRole')) {
+                return false;
+            }
+
+            return $user->hasRole($adminRole);
+        });
+    }
+
     protected function getAssetPackageName(): ?string
     {
         return 'rahat1994/sparkcommerce';
@@ -113,6 +149,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
     {
         return [
             SparkCommercePublishMigrations::class,
+            SCPublishRolesCommand::class,
         ];
     }
 

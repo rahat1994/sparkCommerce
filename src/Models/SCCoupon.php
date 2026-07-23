@@ -2,7 +2,6 @@
 
 namespace Rahat1994\SparkCommerce\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,7 +46,7 @@ class SCCoupon extends Model
     {
         $tableName = config('sparkcommerce.table_prefix') . config('sparkcommerce.coupon_user_table_name');
 
-        return $this->belongsToMany(config('auth.providers.users.model', User::class), $tableName)
+        return $this->belongsToMany(config('auth.providers.users.model'), $tableName)
             ->withPivot('usage_count', 'used_at', 'meta')
             ->withTimestamps();
     }

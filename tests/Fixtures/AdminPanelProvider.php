@@ -14,6 +14,12 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Rahat1994\SparkCommerce\Filament\Resources\CategoryResource;
+use Rahat1994\SparkCommerce\Filament\Resources\CouponResource;
+use Rahat1994\SparkCommerce\Filament\Resources\OrderResource;
+use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource;
+use Rahat1994\SparkCommerce\Filament\Resources\UserResource;
 use Rahat1994\SparkCommerce\SparkCommercePlugin;
 
 class AdminPanelProvider extends PanelProvider
@@ -26,7 +32,14 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->plugins([
-                SparkCommercePlugin::make(),
+                SparkCommercePlugin::make([
+                    ProductResource::class,
+                    CategoryResource::class,
+                    ReviewResource::class,
+                    OrderResource::class,
+                    CouponResource::class,
+                    UserResource::class,
+                ]),
             ])
             ->middleware([
                 EncryptCookies::class,

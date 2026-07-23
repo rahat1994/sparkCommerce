@@ -7,6 +7,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 use Rahat1994\SparkCommerce\SparkCommerceServiceProvider;
 use Rahat1994\SparkCommerce\Tests\Fixtures\AdminPanelProvider;
 use Rahat1994\SparkCommerce\Tests\Fixtures\User;
+use Spatie\Permission\Models\Role;
 
 class TestCase extends Orchestra
 {
@@ -43,6 +44,7 @@ class TestCase extends Orchestra
         $this->runMigrationStubs([
             __DIR__ . '/../vendor/spatie/laravel-medialibrary/database/migrations/create_media_table.php.stub',
             __DIR__ . '/../vendor/spatie/laravel-tags/database/migrations/create_tag_tables.php.stub',
+            __DIR__ . '/../vendor/spatie/laravel-permission/database/migrations/create_permission_tables.php.stub',
         ]);
 
         $provider = $this->app->getProvider(SparkCommerceServiceProvider::class);
@@ -50,6 +52,27 @@ class TestCase extends Orchestra
         foreach ($provider->getMigrations() as $name) {
             $this->runMigrationStubs([__DIR__ . '/../database/migrations/' . $name . '.php.stub']);
         }
+    }
+
+    /**
+     * Create a user holding the SparkCommerce admin role.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    protected function createAdminUser(array $attributes = []): User
+    {
+        $user = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
+            ...$attributes,
+        ]);
+
+        Role::firstOrCreate(['name' => config('sparkcommerce.admin_role', 'sc_admin')]);
+
+        $user->assignRole(config('sparkcommerce.admin_role', 'sc_admin'));
+
+        return $user;
     }
 
     /**

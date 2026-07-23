@@ -25,6 +25,7 @@ use Rahat1994\SparkCommerce\Concerns\HasDimension;
 use Rahat1994\SparkCommerce\Concerns\HasInventory;
 use Rahat1994\SparkCommerce\Concerns\HasPrice;
 use Rahat1994\SparkCommerce\Concerns\HasVariation;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -39,6 +40,7 @@ class ProductResource extends Resource
     use HasDimension;
     use HasInventory;
     use HasPrice;
+    use HasSparkCommercePanelAccess;
     use HasVariation;
 
     protected static ?string $model = SCProduct::class;

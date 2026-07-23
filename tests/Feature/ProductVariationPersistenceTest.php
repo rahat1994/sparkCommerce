@@ -6,7 +6,6 @@ use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProdu
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkCommerce\Models\SCProductVariation;
-use Rahat1994\SparkCommerce\Tests\Fixtures\User;
 
 it('uses the product variations table', function () {
     expect((new SCProductVariation)->getTable())->toBe('sc_product_variations');
@@ -26,11 +25,7 @@ it('adds the missing variation columns idempotently via the corrective migration
 });
 
 it('persists variations to the variations table when creating a variable product', function () {
-    $this->actingAs(User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => bcrypt('password'),
-    ]));
+    $this->actingAs($this->createAdminUser());
 
     Livewire::test(CreateProduct::class)
         ->fillForm([
@@ -86,11 +81,7 @@ it('persists variations to the variations table when creating a variable product
 });
 
 it('reloads variations into the edit form and keeps them on save', function () {
-    $this->actingAs(User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => bcrypt('password'),
-    ]));
+    $this->actingAs($this->createAdminUser());
 
     $product = SCProduct::factory()->variable()->create();
 

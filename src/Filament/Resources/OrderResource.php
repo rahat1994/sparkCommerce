@@ -13,6 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\EditOrder;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\ListOrders;
@@ -21,6 +22,7 @@ use Rahat1994\SparkCommerce\Models\SCOrder;
 class OrderResource extends Resource
 {
     use CanInteractWithTenant;
+    use HasSparkCommercePanelAccess;
 
     protected static ?string $model = SCOrder::class;
 

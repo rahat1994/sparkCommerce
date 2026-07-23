@@ -18,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages\CreateCoupon;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages\EditCoupon;
 use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages\ListCoupons;
@@ -25,6 +26,8 @@ use Rahat1994\SparkCommerce\Models\SCCoupon;
 
 class CouponResource extends Resource
 {
+    use HasSparkCommercePanelAccess;
+
     protected static ?string $model = SCCoupon::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-4';
