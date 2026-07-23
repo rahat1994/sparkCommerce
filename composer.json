@@ -73,10 +73,7 @@
         "laravel": {
             "providers": [
                 "Rahat1994\\SparkCommerce\\SparkCommerceServiceProvider"
-            ],
-            "aliases": {
-                "SparkCommerce": "Rahat1994\\SparkCommerce\\Facades\\SparkCommerce"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

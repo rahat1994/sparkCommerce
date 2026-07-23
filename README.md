@@ -41,13 +41,6 @@ return [
 ];
 ```
 
-## Usage
-
-```php
-$sparkCommerce = new Rahat1994\SparkCommerce();
-echo $sparkCommerce->echoPhrase('Hello, Rahat1994!');
-```
-
 ## Testing
 
 ```bash

@@ -5,7 +5,6 @@ namespace Rahat1994\SparkCommerce\Filament\Resources;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -20,7 +19,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Concerns\HasAttributes;
 use Rahat1994\SparkCommerce\Concerns\HasDimension;
@@ -102,11 +100,6 @@ class ProductResource extends Resource
                     self::getProductDataSection(),
                 ])->columnSpan(3),
                 Group::make([
-                    // Section::make('Publish')->schema([
-                    //     Placeholder::make('Status'),
-                    //     Placeholder::make('Visibility'),
-                    //     Placeholder::make('Publish immediately'),
-                    // ])->grow(false),
                     Section::make('Product Image')->schema([
                         SpatieMediaLibraryFileUpload::make('product_image')
                             ->collection('product_image')
@@ -166,11 +159,8 @@ class ProductResource extends Resource
                 self::getGeneralTab(),
                 self::getInventoryTab(),
                 self::getShippingTab(),
-                self::getLinkedProductsTab(),
                 self::getAttributesTab(),
                 self::getVariationsTab(),
-                self::getAdvancedTab(),
-                self::getMoreOptionsTab(),
             ]);
     }
 
@@ -181,42 +171,6 @@ class ProductResource extends Resource
                 ->hiddenLabel()
                 ->categories(self::getShopCategories()),
         ]);
-    }
-
-    public static function getMoreOptionsTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.more_option'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
-    }
-
-    public static function getAdvancedTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.advanced'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
-    }
-
-    public static function getPricingTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.pricing'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
-    }
-
-    public static function getLinkedProductsTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.linked_products'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
     }
 
     public static function getShippingTab(): Tab
