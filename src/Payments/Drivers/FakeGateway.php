@@ -12,6 +12,7 @@ use Rahat1994\SparkCommerce\Jobs\HandleRefundFailed;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Payments\Contracts\PaymentGateway;
 use Rahat1994\SparkCommerce\Payments\Exceptions\PaymentCancellationRefused;
+use Rahat1994\SparkCommerce\Payments\Exceptions\RefundDeclined;
 use Rahat1994\SparkCommerce\Payments\PaymentSession;
 use Rahat1994\SparkCommerce\Payments\RefundResult;
 use RuntimeException;
@@ -36,8 +37,11 @@ class FakeGateway implements PaymentGateway
     /** @var array<string, string|null> payment status keyed by reference */
     protected static array $scriptedStatuses = [];
 
-    /** Scripted refusal reason for refund calls; null = refunds succeed. */
+    /** Scripted DEFINITIVE-decline reason for refund calls; null = refunds succeed. */
     protected static ?string $refundFailureReason = null;
+
+    /** Scripted AMBIGUOUS (timeout/transport) reason for refund calls; null = none. */
+    protected static ?string $refundTimeoutReason = null;
 
     public function createPayment(SCOrder $order): PaymentSession
     {
@@ -67,6 +71,13 @@ class FakeGateway implements PaymentGateway
             'reference' => $order->transaction_id,
         ];
 
+        // Idempotent, mirroring the real driver: an already-canceled intent
+        // is a no-op success — even when cancellation would otherwise be
+        // refused — so an expiry/cancel path never loops on a stale charge.
+        if ((static::$scriptedStatuses[$order->transaction_id] ?? null) === 'canceled') {
+            return;
+        }
+
         if (static::$refuseCancellation) {
             throw PaymentCancellationRefused::forOrder($order->getKey());
         }
@@ -82,8 +93,17 @@ class FakeGateway implements PaymentGateway
             'idempotency_key' => $idempotencyKey,
         ];
 
+        // An ambiguous transport error (timeout): the caller cannot know
+        // whether the money moved. Thrown as a plain runtime exception so the
+        // service leaves the refund row Pending.
+        if (static::$refundTimeoutReason !== null) {
+            throw new RuntimeException(static::$refundTimeoutReason);
+        }
+
+        // A DEFINITIVE decline: the gateway confirmed the refund did not
+        // happen, so the service is safe to mark the row Failed.
         if (static::$refundFailureReason !== null) {
-            throw new RuntimeException(static::$refundFailureReason);
+            throw new RefundDeclined(static::$refundFailureReason);
         }
 
         // Real gateways return a distinct id per refund; the idempotency key
@@ -141,6 +161,7 @@ class FakeGateway implements PaymentGateway
         static::$refuseCancellation = false;
         static::$scriptedStatuses = [];
         static::$refundFailureReason = null;
+        static::$refundTimeoutReason = null;
     }
 
     /**
@@ -171,12 +192,25 @@ class FakeGateway implements PaymentGateway
     }
 
     /**
-     * Script every subsequent refund call to throw with the given reason
-     * (the call is still recorded first). Pass null to succeed again.
+     * Script every subsequent refund call to DEFINITIVELY decline with the
+     * given reason (the call is still recorded first). Pass null to succeed
+     * again. Modelled as a {@see RefundDeclined}, so the service marks the
+     * row Failed.
      */
     public static function failRefunds(?string $reason = 'refund_failed'): void
     {
         static::$refundFailureReason = $reason;
+    }
+
+    /**
+     * Script every subsequent refund call to fail AMBIGUOUSLY (a network
+     * timeout / transport error where the outcome is unknown). Modelled as a
+     * plain runtime exception, so the service leaves the row Pending for the
+     * webhook to reconcile. Pass null to stop.
+     */
+    public static function timeoutRefunds(?string $reason = 'gateway_timeout'): void
+    {
+        static::$refundTimeoutReason = $reason;
     }
 
     protected static function idempotencyKeyFor(SCOrder $order): string

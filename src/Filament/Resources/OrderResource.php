@@ -28,6 +28,8 @@ use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\EditOrder;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\ListOrders;
 use Rahat1994\SparkCommerce\Models\SCOrder;
+use Rahat1994\SparkCommerce\Payments\Exceptions\PaymentCancellationRefused;
+use Rahat1994\SparkCommerce\Payments\PaymentGatewayManager;
 use Rahat1994\SparkCommerce\Services\OrderTransitionService;
 use Rahat1994\SparkCommerce\Services\RefundService;
 
@@ -124,7 +126,12 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn (SCOrder $order) => static::transitionOrder($order, OrderStatus::Cancelled)),
+                    // Only an awaiting-payment order may be cancelled here: a
+                    // Paid order is money that must be REFUNDED (which
+                    // auto-cancels via the refund -> Refunded path), never
+                    // stranded in Cancelled where Refund is hidden.
+                    ->visible(fn (SCOrder $record): bool => $record->status === OrderStatus::AwaitingPayment)
+                    ->action(fn (SCOrder $order) => static::cancelOrder($order)),
                 static::getRefundAction(),
             ])
             ->defaultSort('created_at', 'desc')
@@ -133,6 +140,35 @@ class OrderResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Cancel an awaiting-payment order. The outstanding gateway payment is
+     * cancelled FIRST, so a live PaymentIntent is never orphaned by the
+     * order moving to Cancelled. A processor that refuses (e.g. the payment
+     * is already processing) surfaces a danger notification and the order is
+     * LEFT alone — never cancel an order whose charge could not be cancelled.
+     * Free orders (no gateway) skip the gateway entirely.
+     */
+    public static function cancelOrder(SCOrder $order): void
+    {
+        if ($order->payment_gateway !== null) {
+            try {
+                app(PaymentGatewayManager::class)
+                    ->driver((string) $order->payment_gateway)
+                    ->cancelPayment($order);
+            } catch (PaymentCancellationRefused $exception) {
+                Notification::make()
+                    ->title('Order was not cancelled')
+                    ->body($exception->getMessage())
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
+        static::transitionOrder($order, OrderStatus::Cancelled);
     }
 
     /**

@@ -6,6 +6,7 @@ use Illuminate\Support\Manager;
 use Rahat1994\SparkCommerce\Payments\Contracts\PaymentGateway;
 use Rahat1994\SparkCommerce\Payments\Drivers\FakeGateway;
 use Rahat1994\SparkCommerce\Payments\Drivers\StripeGateway;
+use RuntimeException;
 
 /**
  * Laravel Manager for payment gateways (R13). Bound as a singleton and
@@ -27,6 +28,17 @@ class PaymentGatewayManager extends Manager
 
     protected function createFakeDriver(): PaymentGateway
     {
+        // The fake driver is a test double. It must never be resolvable in
+        // production: its webhook handler authenticates on a static shared
+        // secret (not an HMAC over the body), so a misconfigured secret in
+        // production would let a forged event mark orders paid. Restrict it
+        // to non-production environments.
+        if (! app()->environment(['testing', 'local'])) {
+            throw new RuntimeException(
+                'The "fake" payment gateway is a test double and cannot be used outside the testing/local environments.'
+            );
+        }
+
         return new FakeGateway;
     }
 

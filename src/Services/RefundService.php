@@ -13,6 +13,7 @@ use Rahat1994\SparkCommerce\Exceptions\RefundNotAllowed;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkCommerce\Models\SCRefund;
+use Rahat1994\SparkCommerce\Payments\Exceptions\RefundDeclined;
 use Rahat1994\SparkCommerce\Payments\PaymentGatewayManager;
 use Throwable;
 
@@ -55,11 +56,12 @@ class RefundService
      *
      * @param  int|null  $initiatedBy  acting admin user id; null = system
      * @param  bool  $restock  restore the order's snapshot quantities on success
-     * @param  bool  $allowExpired  permit refunding an Expired order (the
-     *                              late-payment auto-refund path only)
+     * @param  bool  $allowExpired  permit refunding a terminally-closed order
+     *                              (Expired or Cancelled) — the late-payment
+     *                              auto-refund path only
      *
      * @throws RefundNotAllowed when validation rejects the request
-     * @throws RefundGatewayFailed when the gateway refuses the refund
+     * @throws RefundGatewayFailed when the gateway declines or errors on the refund
      */
     public function refund(SCOrder $order, int $amountCents, ?int $initiatedBy = null, bool $restock = true, bool $allowExpired = false): SCRefund
     {
@@ -90,13 +92,30 @@ class RefundService
             $result = $this->paymentGatewayManager
                 ->driver((string) $order->payment_gateway)
                 ->refund($order, $amountCents, "refund-{$refund->getKey()}");
-        } catch (Throwable $exception) {
+        } catch (RefundDeclined $exception) {
+            // DEFINITIVE decline: the gateway positively confirmed the refund
+            // did NOT happen. Only now is it safe to mark the row Failed —
+            // which frees the amount in the over-refund guard and drops the
+            // row out of the charge.refunded fallback (it matches Pending).
             $refund->forceFill([
                 'status' => RefundStatus::Failed,
                 'failure_reason' => $exception->getMessage(),
             ])->save();
 
             event(new RefundFailed($refund));
+
+            throw RefundGatewayFailed::forRefund($refund->getKey(), $exception);
+        } catch (Throwable $exception) {
+            // AMBIGUOUS error (network / timeout, or any driver that cannot
+            // prove the refund did not happen): the money MAY have moved. Do
+            // NOT mark the row Failed — leaving it Pending keeps the
+            // over-refund guard counting it (so a retry for the same amount
+            // is rejected instead of issuing a SECOND real refund) and keeps
+            // it visible to the charge.refunded webhook, which reconciles it.
+            // Record the reason and rethrow.
+            $refund->forceFill([
+                'failure_reason' => $exception->getMessage(),
+            ])->save();
 
             throw RefundGatewayFailed::forRefund($refund->getKey(), $exception);
         }
@@ -213,7 +232,11 @@ class RefundService
         $refundableStates = [OrderStatus::Paid, OrderStatus::Processing];
 
         if ($allowExpired) {
+            // The late-payment auto-refund path: a payment landed on an
+            // already-closed order (Expired or Cancelled). The order stays
+            // closed; only its payment_status ends at Refunded.
             $refundableStates[] = OrderStatus::Expired;
+            $refundableStates[] = OrderStatus::Cancelled;
         }
 
         if (! in_array($locked->status, $refundableStates, true)) {

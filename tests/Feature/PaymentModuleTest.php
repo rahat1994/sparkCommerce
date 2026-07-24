@@ -1,6 +1,7 @@
 <?php
 
 use Binafy\LaravelCart\Models\Cart;
+use Binafy\LaravelCart\Models\CartItem;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,7 @@ use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentSucceeded;
 use Rahat1994\SparkCommerce\Jobs\PrunePaymentEvents;
 use Rahat1994\SparkCommerce\Jobs\ReconcileStuckPayments;
 use Rahat1994\SparkCommerce\Models\SCOrder;
+use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkCommerce\Payments\Contracts\PaymentGateway;
 use Rahat1994\SparkCommerce\Payments\Drivers\FakeGateway;
 use Rahat1994\SparkCommerce\Payments\Drivers\StripeGateway;
@@ -51,6 +53,46 @@ function paymentModuleOrder(array $attributes = []): SCOrder
 function paymentEventsTable(): string
 {
     return config('sparkcommerce.table_prefix') . config('sparkcommerce.payment_events_table_name');
+}
+
+/**
+ * A signed-equivalent paid webhook event for the given intent + event id.
+ *
+ * @return array<string, mixed>
+ */
+function paidWebhookEvent(string $intentId, string $eventId): array
+{
+    return [
+        'id' => $eventId,
+        'type' => 'payment_intent.succeeded',
+        'data' => ['object' => [
+            'id' => $intentId,
+            'amount_received' => 1999,
+            'currency' => 'usd',
+        ]],
+    ];
+}
+
+/**
+ * Recompute the checkout cart fingerprint exactly as the base package does
+ * (product id + quantity, sorted, plus the coupon code), so a test can
+ * store the matching fingerprint on an order's meta.
+ */
+function paymentModuleCartFingerprint(Cart $cart, ?string $couponCode): string
+{
+    $lines = $cart->items
+        ->map(fn ($cartItem): array => [
+            'product_id' => (int) $cartItem->itemable_id,
+            'quantity' => (int) $cartItem->quantity,
+        ])
+        ->sortBy('product_id')
+        ->values()
+        ->all();
+
+    return hash('sha256', json_encode([
+        'items' => $lines,
+        'coupon_code' => filled($couponCode) ? (string) $couponCode : null,
+    ]));
 }
 
 /**
@@ -327,4 +369,114 @@ it('deletes the shopper cart only when the paid webhook lands', function () {
 
     expect($order->fresh()->status)->toBe(OrderStatus::Paid)
         ->and(Cart::query()->where('user_id', $user->id)->exists())->toBeFalse();
+});
+
+it('treats cancelling an already-canceled intent as an idempotent success', function () {
+    $order = paymentModuleOrder(['transaction_id' => 'fake_pi_gone', 'payment_gateway' => 'fake']);
+
+    $driver = $this->app->make(PaymentGatewayManager::class)->driver('fake');
+
+    // The intent is already canceled at the processor, and the driver is
+    // otherwise scripted to refuse — the already-canceled short-circuit wins,
+    // so the cancel is a no-op success instead of a refusal.
+    FakeGateway::scriptStatus('fake_pi_gone', 'canceled');
+    FakeGateway::refuseCancellation();
+
+    $driver->cancelPayment($order);
+
+    expect(FakeGateway::calls('cancelPayment'))->toHaveCount(1);
+});
+
+it('lets an order with an already-canceled intent expire and release its stock instead of looping', function () {
+    $product = SCProduct::factory()->managedStock(3)->create();
+
+    $order = paymentModuleOrder([
+        'transaction_id' => 'fake_pi_expire_canceled',
+        'payment_gateway' => 'fake',
+        'expires_at' => now()->subHour(),
+        'items' => [[
+            'itemable_type' => SCProduct::class,
+            'itemable_id' => $product->id,
+            'quantity' => 2,
+            'unit_amount' => 1000,
+            'name' => $product->name,
+        ]],
+    ]);
+
+    FakeGateway::scriptStatus('fake_pi_expire_canceled', 'canceled');
+    FakeGateway::refuseCancellation();
+
+    // The expiry sweep cancels the gateway payment first (idempotent success
+    // here), then transitions the order.
+    $this->app->make(PaymentGatewayManager::class)->driver('fake')->cancelPayment($order);
+
+    app(OrderTransitionService::class)->transition($order, OrderStatus::Expired);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Expired)
+        // The Expired transition released the 2 reserved units (3 -> 5).
+        ->and($product->fresh()->stock_quantity)->toBe(5);
+});
+
+it('deletes an unchanged cart but preserves a cart changed after checkout on paid', function () {
+    // --- unchanged cart: deleted on paid ---
+    $userA = paymentModuleUser();
+    $productA = SCProduct::factory()->create();
+
+    $cartA = Cart::query()->create(['user_id' => $userA->id]);
+    $cartA->items()->save(new CartItem([
+        'itemable_id' => $productA->id,
+        'itemable_type' => SCProduct::class,
+        'quantity' => 1,
+    ]));
+
+    $orderA = paymentModuleOrder([
+        'user_id' => $userA->id,
+        'transaction_id' => 'fake_pi_cart_same',
+        'payment_gateway' => 'fake',
+        'meta' => ['cart_fingerprint' => paymentModuleCartFingerprint(
+            Cart::query()->where('user_id', $userA->id)->first(),
+            null
+        )],
+    ]);
+
+    // --- cart changed after checkout: preserved on paid ---
+    $userB = paymentModuleUser();
+    $productB1 = SCProduct::factory()->create();
+    $productB2 = SCProduct::factory()->create();
+
+    $cartB = Cart::query()->create(['user_id' => $userB->id]);
+    $cartB->items()->save(new CartItem([
+        'itemable_id' => $productB1->id,
+        'itemable_type' => SCProduct::class,
+        'quantity' => 1,
+    ]));
+
+    $orderB = paymentModuleOrder([
+        'user_id' => $userB->id,
+        'transaction_id' => 'fake_pi_cart_changed',
+        'payment_gateway' => 'fake',
+        'meta' => ['cart_fingerprint' => paymentModuleCartFingerprint(
+            Cart::query()->where('user_id', $userB->id)->first(),
+            null
+        )],
+    ]);
+
+    // The shopper adds another line AFTER checkout snapshotted the order.
+    $cartB->items()->save(new CartItem([
+        'itemable_id' => $productB2->id,
+        'itemable_type' => SCProduct::class,
+        'quantity' => 1,
+    ]));
+
+    (new HandlePaymentIntentSucceeded('fake', paidWebhookEvent('fake_pi_cart_same', 'evt_cart_same')))
+        ->handle($this->app->make(OrderTransitionService::class));
+    (new HandlePaymentIntentSucceeded('fake', paidWebhookEvent('fake_pi_cart_changed', 'evt_cart_changed')))
+        ->handle($this->app->make(OrderTransitionService::class));
+
+    expect($orderA->fresh()->status)->toBe(OrderStatus::Paid)
+        // The unchanged cart is deleted.
+        ->and(Cart::query()->where('user_id', $userA->id)->exists())->toBeFalse()
+        ->and($orderB->fresh()->status)->toBe(OrderStatus::Paid)
+        // The changed cart (an extra line added after checkout) is left intact.
+        ->and(Cart::query()->where('user_id', $userB->id)->exists())->toBeTrue();
 });

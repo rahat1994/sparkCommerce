@@ -92,9 +92,17 @@ class StripeGateway implements PaymentGateway
             $this->client->paymentIntents->cancel($order->transaction_id);
         } catch (ApiErrorException $exception) {
             // `payment_intent_unexpected_state` covers every "cannot cancel
-            // from here" case, including an intent that already succeeded:
-            // the caller must keep the order instead of orphaning a charge.
+            // from here" case — but that INCLUDES an intent that is already
+            // canceled. Retrieve it: an already-canceled intent is an
+            // idempotent SUCCESS (there is nothing to orphan), so return
+            // normally and let the order proceed. Only a genuinely
+            // un-cancelable intent (processing / already succeeded) is a real
+            // refusal the caller must respect.
             if ($exception->getStripeCode() === 'payment_intent_unexpected_state') {
+                if ($this->retrievePaymentStatus($order) === 'canceled') {
+                    return;
+                }
+
                 throw PaymentCancellationRefused::forOrder($order->getKey(), $exception);
             }
 

@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Rahat1994\SparkCommerce\Events\RefundFailed;
+use Rahat1994\SparkCommerce\Jobs\Concerns\AlertsAdminOnFailure;
 use Rahat1994\SparkCommerce\Models\SCRefund;
 use Rahat1994\SparkCommerce\Payments\PaymentEventClaims;
 use Rahat1994\SparkCommerce\Services\RefundService;
@@ -21,6 +22,7 @@ use Rahat1994\SparkCommerce\Services\RefundService;
  */
 class HandleRefundFailed implements ShouldQueue
 {
+    use AlertsAdminOnFailure;
     use Dispatchable;
     use Queueable;
 

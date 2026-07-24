@@ -130,6 +130,33 @@ it('rejects duplicate coupon codes once the unique index exists', function () {
         ->toThrow(QueryException::class);
 });
 
+it('backfills usage_count from the sc_coupon_user redemption history', function () {
+    rebuildLegacyCouponsTable();
+
+    $couponId = insertLegacyCouponRow(['coupon_code' => 'BACKFILL']);
+    $untouchedId = insertLegacyCouponRow(['coupon_code' => 'NOHISTORY']);
+
+    $pivotTable = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.coupon_user_table_name'));
+
+    // Real redemption history in the pivot for two different users.
+    DB::table($pivotTable)->insert([
+        ['coupon_id' => $couponId, 'user_id' => 1, 'usage_count' => 2, 'created_at' => now(), 'updated_at' => now()],
+        ['coupon_id' => $couponId, 'user_id' => 2, 'usage_count' => 3, 'created_at' => now(), 'updated_at' => now()],
+    ]);
+
+    runCouponSchemaCompletion();
+
+    // usage_count equals the SUM of the pivot rows (2 + 3), not the default 0.
+    expect((int) DB::table(couponSchemaTable())->where('id', $couponId)->value('usage_count'))->toBe(5)
+        // A coupon with no redemption history stays at 0.
+        ->and((int) DB::table(couponSchemaTable())->where('id', $untouchedId)->value('usage_count'))->toBe(0);
+
+    // Idempotent: a second run must not double-count the history.
+    runCouponSchemaCompletion();
+
+    expect((int) DB::table(couponSchemaTable())->where('id', $couponId)->value('usage_count'))->toBe(5);
+});
+
 it('is a no-op when run a second time', function () {
     rebuildLegacyCouponsTable();
 

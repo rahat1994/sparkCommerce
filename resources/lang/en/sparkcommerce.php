@@ -55,6 +55,10 @@ return [
                 'subject' => 'Free order :order_number placed',
                 'body' => 'Order :order_number completed with a zero total (after discounts and shipping) and was marked paid without a payment.',
             ],
+            'job_failed' => [
+                'subject' => 'A payment job failed: :job',
+                'body' => 'The :job payment job failed after exhausting its retries (:exception). Please check the queue worker and reconcile any affected payment.',
+            ],
         ],
     ],
     'resource' => [

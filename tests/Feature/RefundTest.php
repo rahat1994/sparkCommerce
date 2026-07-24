@@ -2,8 +2,10 @@
 
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
+use Illuminate\Events\CallQueuedListener;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Enums\PaymentStatus;
@@ -18,6 +20,7 @@ use Rahat1994\SparkCommerce\Jobs\HandleChargeRefunded;
 use Rahat1994\SparkCommerce\Jobs\HandleDisputeCreated;
 use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentSucceeded;
 use Rahat1994\SparkCommerce\Jobs\HandleRefundFailed;
+use Rahat1994\SparkCommerce\Listeners\AutoRefundLatePayment;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkCommerce\Models\SCRefund;
@@ -350,6 +353,121 @@ it('automatically refunds a payment that succeeds after the order expired, witho
     Event::assertDispatched(
         OrderAutoRefunded::class,
         fn (OrderAutoRefunded $event): bool => $event->order->is($order) && $event->refund->is($refund)
+    );
+});
+
+it('leaves the refund row pending and keeps the amount counted on an ambiguous gateway timeout', function () {
+    $product = SCProduct::factory()->managedStock(5)->create();
+    $order = refundOrder($product);
+
+    // A network timeout: the caller cannot know whether the money moved.
+    FakeGateway::timeoutRefunds('gateway_timeout');
+
+    expect(fn () => refundService()->refund($order, 2000, initiatedBy: null, restock: false))
+        ->toThrow(RefundGatewayFailed::class);
+
+    $refund = SCRefund::query()->where('order_id', $order->getKey())->sole();
+
+    // Ambiguous error: the row stays PENDING so the webhook reconciles it,
+    // and the amount is NOT freed (no double payout on a retry).
+    expect($refund->status)->toBe(RefundStatus::Pending)
+        ->and($refund->failure_reason)->toBe('gateway_timeout')
+        ->and($product->fresh()->stock_quantity)->toBe(5)
+        ->and($order->fresh()->status)->toBe(OrderStatus::Paid)
+        ->and($order->fresh()->payment_status)->toBe(PaymentStatus::Paid);
+
+    // The pending amount still counts against the over-refund guard: a retry
+    // for the full remaining balance is rejected before touching the gateway.
+    FakeGateway::timeoutRefunds(null);
+
+    expect(fn () => refundService()->refund($order, 2000, initiatedBy: null, restock: false))
+        ->toThrow(RefundNotAllowed::class);
+
+    expect(FakeGateway::calls('refund'))->toHaveCount(1);
+});
+
+it('marks the refund failed only on a definitive gateway decline', function () {
+    $product = SCProduct::factory()->managedStock(5)->create();
+    $order = refundOrder($product);
+
+    // A definitive decline (the card network rejected the refund).
+    FakeGateway::failRefunds('card_network_declined');
+
+    expect(fn () => refundService()->refund($order, 2000, initiatedBy: null, restock: false))
+        ->toThrow(RefundGatewayFailed::class);
+
+    $refund = SCRefund::query()->where('order_id', $order->getKey())->sole();
+
+    // A definitive decline frees the amount: the row is Failed, so a fresh
+    // full refund is allowed.
+    expect($refund->status)->toBe(RefundStatus::Failed)
+        ->and($refund->failure_reason)->toBe('card_network_declined')
+        ->and(refundService()->remainingRefundableCents($order->fresh()))->toBe(2000);
+});
+
+it('automatically refunds a payment that succeeds after the order was cancelled, without restocking again', function () {
+    // The cancel already released the reservation: 7 on hand.
+    $product = SCProduct::factory()->managedStock(7)->create();
+    $order = refundOrder($product, [
+        'status' => OrderStatus::Cancelled,
+        'payment_status' => PaymentStatus::Pending,
+        'transaction_id' => 'fake_pi_late_cancel',
+    ]);
+
+    (new HandlePaymentIntentSucceeded('fake', [
+        'id' => 'evt_fake_late_cancel_1',
+        'type' => 'payment_intent.succeeded',
+        'data' => ['object' => [
+            'id' => 'fake_pi_late_cancel',
+            'amount_received' => 2000,
+            'currency' => 'usd',
+        ]],
+    ]))->handle(app(OrderTransitionService::class));
+
+    $refund = SCRefund::query()->where('order_id', $order->getKey())->sole();
+
+    expect($refund->status)->toBe(RefundStatus::Succeeded)
+        ->and((int) $refund->getRawOriginal('amount_cents'))->toBe(2000)
+        ->and($refund->restocked)->toBeFalse()
+        ->and($product->fresh()->stock_quantity)->toBe(7)
+        // The order stays Cancelled; only its payment_status ends at Refunded.
+        ->and($order->fresh()->status)->toBe(OrderStatus::Cancelled)
+        ->and($order->fresh()->payment_status)->toBe(PaymentStatus::Refunded)
+        ->and($order->fresh()->meta['payment_flag'] ?? null)->toBe('paid_after_cancel')
+        ->and(FakeGateway::calls('refund'))->toHaveCount(1);
+});
+
+it('defers the late-payment auto-refund to the queue instead of running it inside the webhook transaction', function () {
+    Queue::fake();
+
+    $product = SCProduct::factory()->managedStock(7)->create();
+    $order = refundOrder($product, [
+        'status' => OrderStatus::Expired,
+        'payment_status' => PaymentStatus::Pending,
+        'transaction_id' => 'fake_pi_late_queue',
+        'expires_at' => now()->subHour(),
+    ]);
+
+    (new HandlePaymentIntentSucceeded('fake', [
+        'id' => 'evt_fake_late_queue_1',
+        'type' => 'payment_intent.succeeded',
+        'data' => ['object' => [
+            'id' => 'fake_pi_late_queue',
+            'amount_received' => 2000,
+            'currency' => 'usd',
+        ]],
+    ]))->handle(app(OrderTransitionService::class));
+
+    // The order is flagged synchronously inside the webhook transaction, but
+    // the live refund runs LATER on the queue — never as a savepoint of the
+    // row-locked webhook transaction.
+    expect($order->fresh()->meta['payment_flag'] ?? null)->toBe('paid_after_expiry')
+        ->and(SCRefund::query()->count())->toBe(0)
+        ->and(FakeGateway::calls('refund'))->toHaveCount(0);
+
+    Queue::assertPushed(
+        CallQueuedListener::class,
+        fn (CallQueuedListener $job): bool => $job->class === AutoRefundLatePayment::class
     );
 });
 

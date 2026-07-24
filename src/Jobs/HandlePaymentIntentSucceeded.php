@@ -13,6 +13,7 @@ use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Enums\PaymentStatus;
 use Rahat1994\SparkCommerce\Events\LatePaymentReceived;
 use Rahat1994\SparkCommerce\Events\PaymentAmountMismatch;
+use Rahat1994\SparkCommerce\Jobs\Concerns\AlertsAdminOnFailure;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Payments\Concerns\InteractsWithPaymentIntentEvents;
@@ -33,6 +34,7 @@ use Rahat1994\SparkCommerce\Services\OrderTransitionService;
  */
 class HandlePaymentIntentSucceeded implements ShouldQueue
 {
+    use AlertsAdminOnFailure;
     use Dispatchable;
     use InteractsWithPaymentIntentEvents;
     use Queueable;
@@ -99,10 +101,15 @@ class HandlePaymentIntentSucceeded implements ShouldQueue
                 return;
             }
 
-            if ($locked->status === OrderStatus::Expired) {
-                // Reservations are long released; never resurrect. U13's
-                // auto-refund listens on this event.
-                $this->flagOrder($locked, 'paid_after_expiry');
+            if ($locked->status === OrderStatus::Expired || $locked->status === OrderStatus::Cancelled) {
+                // The order is already closed and its stock/coupon
+                // reservations are long released; never resurrect it. A late
+                // payment on an Expired OR Cancelled order is flagged and
+                // handed to U13's auto-refund, which listens on this event.
+                $this->flagOrder(
+                    $locked,
+                    $locked->status === OrderStatus::Expired ? 'paid_after_expiry' : 'paid_after_cancel',
+                );
 
                 event(new LatePaymentReceived($locked, $amountReceived));
 
@@ -158,6 +165,12 @@ class HandlePaymentIntentSucceeded implements ShouldQueue
      * here, when the order is actually paid. Checkout reads the cart as
      * `Cart::query()->firstOrCreate(['user_id' => $user->id])`, so the
      * user's Cart row (with its items) is exactly what gets deleted.
+     *
+     * Guard (KTD17): only delete the cart the order was placed FROM. If the
+     * order carries the `meta.cart_fingerprint` checkout stored and the
+     * current cart no longer matches it — the shopper added or changed lines
+     * after checkout — the newer cart is left intact. Orders without a stored
+     * fingerprint (legacy / non-fingerprinted paths) keep the old behaviour.
      */
     protected function deleteCustomerCart(SCOrder $order): void
     {
@@ -171,7 +184,38 @@ class HandlePaymentIntentSucceeded implements ShouldQueue
             return;
         }
 
+        $storedFingerprint = data_get($order->meta, 'cart_fingerprint');
+
+        if ($storedFingerprint !== null
+            && $this->cartFingerprint($cart, data_get($order->discount, 'coupon_code')) !== (string) $storedFingerprint) {
+            return;
+        }
+
         $cart->items()->delete();
         $cart->delete();
+    }
+
+    /**
+     * Recompute the checkout cart fingerprint (KTD17) INLINE and kept
+     * byte-identical to the rest-routes checkout helper: each cart line's
+     * product id + quantity (sorted by product id so line order never
+     * changes the hash) plus the applied coupon code. Unchanged carts match
+     * the stored fingerprint; changed carts do not.
+     */
+    protected function cartFingerprint(Cart $cart, ?string $couponCode): string
+    {
+        $lines = $cart->items
+            ->map(fn ($cartItem): array => [
+                'product_id' => (int) $cartItem->itemable_id,
+                'quantity' => (int) $cartItem->quantity,
+            ])
+            ->sortBy('product_id')
+            ->values()
+            ->all();
+
+        return hash('sha256', json_encode([
+            'items' => $lines,
+            'coupon_code' => filled($couponCode) ? (string) $couponCode : null,
+        ]));
     }
 }

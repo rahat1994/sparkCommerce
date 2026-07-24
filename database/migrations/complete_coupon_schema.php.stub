@@ -11,7 +11,10 @@ return new class extends Migration
      * Complete the coupons schema so redemption limits are enforceable (R10):
      *
      * - `usage_count` unsignedInteger default 0 — the global redemption
-     *   counter the guarded claim/release increments operate on.
+     *   counter the guarded claim/release increments operate on. It is
+     *   backfilled from the real redemption history in sc_coupon_user
+     *   (SUM(usage_count) grouped by coupon_id), so existing redemptions are
+     *   not discarded. Idempotent: only rows still at 0 are filled.
      * - unique index on `coupon_code` — duplicate survey first, abort
      *   listing offenders (codes are customer-held, never rewritten here).
      * - `usage_limit` / `usage_limit_per_user`: legacy string columns become
@@ -76,6 +79,7 @@ return new class extends Migration
         $this->backfillSpendCents($table, 'min_spend', 'min_spend_cents');
         $this->backfillSpendCents($table, 'max_spend', 'max_spend_cents');
         $this->normalizeCouponAmount($table);
+        $this->backfillUsageCountFromPivot($table);
     }
 
     public function down()
@@ -213,6 +217,35 @@ return new class extends Migration
                     ]);
                 }
             });
+    }
+
+    /**
+     * Backfill the global `usage_count` from the real redemption history in
+     * the sc_coupon_user pivot: SUM(usage_count) grouped by coupon_id. Only
+     * rows still at 0 are filled, so a coupon that already carries a count is
+     * never touched and a re-run cannot double it. Skipped entirely when the
+     * pivot table or its usage_count column is absent.
+     */
+    protected function backfillUsageCountFromPivot(string $table): void
+    {
+        $pivotTable = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.coupon_user_table_name'));
+
+        if (! Schema::hasTable($pivotTable) || ! Schema::hasColumn($pivotTable, 'usage_count')) {
+            return;
+        }
+
+        $sums = DB::table($pivotTable)
+            ->select('coupon_id', DB::raw('SUM(usage_count) as total'))
+            ->groupBy('coupon_id')
+            ->havingRaw('SUM(usage_count) > 0')
+            ->pluck('total', 'coupon_id');
+
+        foreach ($sums as $couponId => $total) {
+            DB::table($table)
+                ->where('id', $couponId)
+                ->where('usage_count', 0)
+                ->update(['usage_count' => (int) $total]);
+        }
     }
 
     /**

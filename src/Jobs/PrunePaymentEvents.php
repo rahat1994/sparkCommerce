@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\DB;
+use Rahat1994\SparkCommerce\Jobs\Concerns\AlertsAdminOnFailure;
 use Rahat1994\SparkCommerce\Payments\PaymentEventClaims;
 
 /**
@@ -17,6 +18,7 @@ use Rahat1994\SparkCommerce\Payments\PaymentEventClaims;
  */
 class PrunePaymentEvents implements ShouldQueue
 {
+    use AlertsAdminOnFailure;
     use Dispatchable;
     use Queueable;
 

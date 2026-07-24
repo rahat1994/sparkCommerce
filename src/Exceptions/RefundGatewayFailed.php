@@ -6,9 +6,12 @@ use RuntimeException;
 use Throwable;
 
 /**
- * The payment processor refused or errored on a refund call. The local
- * refund row has already been marked failed (with the gateway's reason)
- * when this is thrown; the order itself is untouched.
+ * The payment processor declined or errored on a refund call. When this is
+ * thrown the local refund row records the gateway's reason; its status
+ * depends on whether the failure was definitive — a definitive decline
+ * marks the row Failed (the amount is freed), while an ambiguous/transport
+ * error LEAVES it Pending for the webhook to reconcile (so a retry can never
+ * issue a second real refund). The order's fulfillment status is untouched.
  */
 class RefundGatewayFailed extends RuntimeException
 {

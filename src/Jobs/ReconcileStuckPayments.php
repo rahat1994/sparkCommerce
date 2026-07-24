@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Events\PaymentNeedsReconciliation;
+use Rahat1994\SparkCommerce\Jobs\Concerns\AlertsAdminOnFailure;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Payments\PaymentGatewayManager;
 use Throwable;
@@ -26,6 +27,7 @@ use Throwable;
  */
 class ReconcileStuckPayments implements ShouldQueue
 {
+    use AlertsAdminOnFailure;
     use Dispatchable;
     use Queueable;
 

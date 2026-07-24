@@ -336,8 +336,18 @@
                 $discount = is_string($order->discount) ? json_decode($order->discount, true) : $order->discount;
             }
             $discountAmount = 0;
-            if ($discount && isset($discount['discount'])) {
-                $discountAmount = $discount['discount'];
+            if ($discount) {
+                $rawDiscount = $discount['discount'] ?? null;
+
+                if (is_numeric($rawDiscount)) {
+                    // Cart-wide coupon: a plain numeric major-unit discount.
+                    $discountAmount = (float) $rawDiscount;
+                } elseif (isset($discount['amount_cents']) && is_numeric($discount['amount_cents'])) {
+                    // Product-specific coupons store a breakdown ARRAY in
+                    // `discount`; read the integer-cents field checkout always
+                    // records instead of crashing number_format() on the array.
+                    $discountAmount = ((int) $discount['amount_cents']) / 100;
+                }
             }
 
             // Parse shipping fee from meta property
@@ -373,10 +383,10 @@
                <span>Amount after Discount:</span>
                <span>{{ $currency }}{{ number_format(($subtotal - $discountAmount), 2) }}</span>
            </div>
-           @if($discount && isset($discount['total_amount']))
+           @if($discount && isset($discount['total_amount']) && is_numeric($discount['total_amount']))
            <div class="total-row">
                <span>Final Total (from discount breakdown):</span>
-               <span>{{ $currency }}{{ number_format($discount['total_amount'], 2) }}</span>
+               <span>{{ $currency }}{{ number_format((float) $discount['total_amount'], 2) }}</span>
            </div>
            @endif
         @endif

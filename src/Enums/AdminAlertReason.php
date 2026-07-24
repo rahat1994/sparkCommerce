@@ -19,4 +19,5 @@ enum AdminAlertReason: string
     case WebhookSignatureFailing = 'webhook_signature_failing';
     case NeedsReconciliation = 'needs_reconciliation';
     case FreeOrderPlaced = 'free_order_placed';
+    case JobFailed = 'job_failed';
 }

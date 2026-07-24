@@ -15,6 +15,7 @@ use Rahat1994\SparkCommerce\Events\ProductBackordered;
 use Rahat1994\SparkCommerce\Events\RefundFailed;
 use Rahat1994\SparkCommerce\Events\WebhookSignatureFailing;
 use Rahat1994\SparkCommerce\Exceptions\RefundGatewayFailed;
+use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentSucceeded;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Models\SCProduct;
 use Rahat1994\SparkCommerce\Models\SCRefund;
@@ -300,6 +301,22 @@ it('mails a free order exactly like a paid order plus one free-order admin alert
     );
     Notification::assertSentOnDemandTimes(AdminPaymentAlert::class, 1);
     Notification::assertCount(3);
+});
+
+it('alerts the admin when a payment webhook job fails after its retries', function () {
+    Notification::fake();
+
+    // The queue worker gave up after the job exhausted its retries.
+    (new HandlePaymentIntentSucceeded('stripe', ['id' => 'evt_boom']))
+        ->failed(new RuntimeException('queue worker gave up'));
+
+    Notification::assertSentOnDemand(
+        AdminPaymentAlert::class,
+        fn (AdminPaymentAlert $alert, array $channels, object $notifiable): bool => wasRoutedToAdmin($notifiable)
+            && $alert->reason === AdminAlertReason::JobFailed
+    );
+
+    Notification::assertCount(1);
 });
 
 it('renders every mailable with a non-empty subject and body', function () {
