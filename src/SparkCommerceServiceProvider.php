@@ -10,10 +10,13 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Features\SupportTesting\Testable;
 use Rahat1994\SparkCommerce\Commands\SCPublishRolesCommand;
 use Rahat1994\SparkCommerce\Commands\SparkCommercePublishMigrations;
+use Rahat1994\SparkCommerce\Events\OrderTransitioned;
+use Rahat1994\SparkCommerce\Listeners\ReleaseReservedStock;
 use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -66,6 +69,9 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->registerPanelAccessGate();
+
+        // Stock released on cancellation/expiry of unpaid orders (R9).
+        Event::listen(OrderTransitioned::class, ReleaseReservedStock::class);
 
         // Asset Registration
         FilamentAsset::register(
@@ -195,6 +201,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
             'create_sc_coupons_table',
             'create_sc_coupon_user_table',
             'create_sc_coupon_included_products_table',
+            'convert_stock_quantity_to_integer',
         ];
     }
 }

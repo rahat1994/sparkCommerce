@@ -35,4 +35,16 @@ class SCProductFactory extends Factory
             'regular_price' => null,
         ]);
     }
+
+    /**
+     * Stock management turned on with a known on-hand quantity. The base
+     * definition leaves `manage_product_stock` to the DB default (off).
+     */
+    public function managedStock(int $quantity = 10): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'manage_product_stock' => true,
+            'stock_quantity' => $quantity,
+        ]);
+    }
 }

@@ -1,0 +1,82 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Convert `stock_quantity` from the legacy decimal(8,2) to a SIGNED
+     * integer. Signed on purpose: backorder-allowing policies decrement
+     * without a floor, so negative values are meaningful backorder depth —
+     * an unsigned column would make MySQL strict mode error on the first
+     * backorder. Non-negativity for `do_not_allow` products is enforced by
+     * the guarded atomic decrement, not by the column type.
+     *
+     * Abort-safe: pass 1 surveys the data and throws BEFORE any schema
+     * write when a row holds a fractional or negative stock value — the
+     * site decides how to round those, never this migration.
+     *
+     * Idempotent: when the column already reports an integer type the
+     * migration is a no-op, so a re-published stub under a new timestamp
+     * is harmless.
+     */
+    public function up()
+    {
+        $table = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.products_table_name'));
+
+        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, 'stock_quantity')) {
+            return;
+        }
+
+        // Already converted (fresh installs land here too once the create
+        // stub ships integers): nothing to survey, nothing to change.
+        if (str_contains(strtolower(Schema::getColumnType($table, 'stock_quantity')), 'int')) {
+            return;
+        }
+
+        // Pass 1: survey only — abort before anything is written.
+        $this->assertStockQuantitiesAreWholeAndNonNegative($table);
+
+        // Pass 2: type change. Laravel's native change() handles sqlite via
+        // table recreation; no data pass is needed because every remaining
+        // value is a whole non-negative number.
+        Schema::table($table, function (Blueprint $blueprint) {
+            $blueprint->integer('stock_quantity')->nullable()->change();
+        });
+    }
+
+    public function down()
+    {
+        // Expand/contract: whole-number stock reads back identically from
+        // the decimal column, so there is nothing to restore.
+    }
+
+    /**
+     * Abort listing every row whose legacy stock value is fractional or
+     * negative (pre-conversion negatives are data errors, not backorder
+     * depth — backorder decrements only exist after this release).
+     * Nothing is written first.
+     */
+    protected function assertStockQuantitiesAreWholeAndNonNegative(string $table): void
+    {
+        $offenders = DB::table($table)
+            ->whereNotNull('stock_quantity')
+            ->get(['id', 'stock_quantity'])
+            ->filter(fn ($row) => ! is_numeric($row->stock_quantity)
+                || (float) $row->stock_quantity < 0
+                || fmod((float) $row->stock_quantity, 1.0) !== 0.0)
+            ->map(fn ($row) => $row->id . ' (stock_quantity=' . $row->stock_quantity . ')')
+            ->values();
+
+        if ($offenders->isNotEmpty()) {
+            throw new RuntimeException(
+                'Stock quantity conversion aborted: fractional or negative stock_quantity on product rows ['
+                . $offenders->implode(', ')
+                . ']. Decide the rounding on the site and re-run. Nothing was changed.'
+            );
+        }
+    }
+};
