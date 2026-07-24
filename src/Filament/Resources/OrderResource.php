@@ -73,7 +73,13 @@ class OrderResource extends Resource
             TextColumn::make('tracking_number')
                 ->label('Tracking Number'),
             TextColumn::make('total_amount')
-                ->label('Order Value')->money($currency),
+                ->label('Order Value')
+                // Prefer the integer-cent column; legacy rows without a
+                // cents value fall back to the untouched major-unit column.
+                ->state(fn (SCOrder $record): mixed => $record->total_amount_cents !== null
+                    ? ((int) $record->total_amount_cents->getAmount()) / 100
+                    : $record->total_amount)
+                ->money(fn (SCOrder $record) => $record->currency ?? $currency),
             TextColumn::make('shipping_status')
                 ->label('Shipping Status'),
             TextColumn::make('payment_status')
@@ -179,23 +185,42 @@ class OrderResource extends Resource
     {
         $items = [];
 
-        foreach ($order->items as $item) {
+        foreach ($order->items ?? [] as $item) {
+            // Orders created after the snapshot change carry the purchase
+            // data inline; read it instead of the live product so deleted
+            // products cannot break (or rewrite) history.
+            if (isset($item['unit_amount']) || isset($item['name'])) {
+                $items[] = [
+                    'id' => $item['itemable_id'] ?? null,
+                    'name' => $item['name'] ?? null,
+                    'quantity' => $item['quantity'] ?? 1,
+                    'regular_price' => isset($item['unit_amount']) ? $item['unit_amount'] / 100 : null,
+                    'sale_price' => null,
+                ];
+
+                continue;
+            }
+
             $productType = $item['itemable_type'];
             $instance = $productType::find($item['itemable_id']);
 
             $items[] = [
-                'id' => $instance->id,
-                'name' => $instance->name,
+                'id' => $instance?->id ?? ($item['itemable_id'] ?? null),
+                'name' => $instance?->name,
                 'quantity' => $item['quantity'],
-                'regular_price' => $instance->regular_price,
-                'sale_price' => $instance->sale_price,
+                'regular_price' => $instance?->regular_price,
+                'sale_price' => $instance?->sale_price,
             ];
         }
 
         return [
             'id' => $order->id,
             'tracking_number' => $order->tracking_number,
-            'total_amount' => $order->total_amount,
+            // Cents column first; legacy rows fall back to the major-unit
+            // decimal.
+            'total_amount' => $order->total_amount_cents !== null
+                ? ((int) $order->total_amount_cents->getAmount()) / 100
+                : $order->total_amount,
             'items' => $items,
         ];
     }

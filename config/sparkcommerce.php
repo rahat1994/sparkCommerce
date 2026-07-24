@@ -29,7 +29,13 @@ return [
      */
     'vendor_owner_role' => null,
 
+    /*
+     * ISO 4217 currency code stamped onto new orders at write time
+     * (checkout and the payment-columns backfill). The schema itself never
+     * hard-codes a currency default.
+     */
     'default_currency' => 'USD',
+
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',
