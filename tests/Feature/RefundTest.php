@@ -72,7 +72,7 @@ it('refunds a paid order in full with a row-derived idempotency key, restock, an
         ->and(FakeGateway::calls('refund')[0]['idempotency_key'])->toBe("refund-{$refund->getKey()}")
         ->and(FakeGateway::calls('refund')[0]['amount_cents'])->toBe(2000)
         ->and($refund->status)->toBe(RefundStatus::Succeeded)
-        ->and($refund->gateway_refund_id)->toBe('fake_re_' . $order->getKey())
+        ->and($refund->gateway_refund_id)->toBe("fake_re_refund-{$refund->getKey()}")
         ->and($refund->restocked)->toBeTrue()
         ->and($refund->initiated_by)->toBe($admin->id)
         // The two snapshot units go back on the shelf.

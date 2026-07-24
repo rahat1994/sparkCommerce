@@ -86,8 +86,11 @@ class FakeGateway implements PaymentGateway
             throw new RuntimeException(static::$refundFailureReason);
         }
 
+        // Real gateways return a distinct id per refund; the idempotency key
+        // is unique per local refund row, so it keeps the fake honest against
+        // the unique gateway_refund_id index.
         return new RefundResult(
-            reference: 'fake_re_' . $order->getKey(),
+            reference: 'fake_re_' . $idempotencyKey,
             status: 'succeeded',
         );
     }
