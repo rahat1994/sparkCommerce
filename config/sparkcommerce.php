@@ -99,6 +99,16 @@ return [
         'restock_by_default' => true,
     ],
 
+    /*
+     * Mail address of the store operator (U14). It receives the
+     * new-order mail and every operational payment alert (amount
+     * mismatch, dispute, refund failure, failing webhook signatures,
+     * reconciliation flags, late-payment auto-refunds, free orders) via
+     * an on-demand mail route. Null (the default) disables all admin
+     * mails — the listeners skip silently; customer mails are unaffected.
+     */
+    'admin_email' => env('SPARKCOMMERCE_ADMIN_EMAIL'),
+
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',

@@ -16,13 +16,26 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Features\SupportTesting\Testable;
 use Rahat1994\SparkCommerce\Commands\SCPublishRolesCommand;
 use Rahat1994\SparkCommerce\Commands\SparkCommercePublishMigrations;
+use Rahat1994\SparkCommerce\Events\DisputeCreated;
+use Rahat1994\SparkCommerce\Events\FreeOrderPlaced;
 use Rahat1994\SparkCommerce\Events\LatePaymentReceived;
+use Rahat1994\SparkCommerce\Events\OrderAutoRefunded;
+use Rahat1994\SparkCommerce\Events\OrderRefunded;
 use Rahat1994\SparkCommerce\Events\OrderTransitioned;
+use Rahat1994\SparkCommerce\Events\PaymentAmountMismatch;
+use Rahat1994\SparkCommerce\Events\PaymentNeedsReconciliation;
+use Rahat1994\SparkCommerce\Events\ProductBackordered;
+use Rahat1994\SparkCommerce\Events\RefundFailed;
+use Rahat1994\SparkCommerce\Events\WebhookSignatureFailing;
 use Rahat1994\SparkCommerce\Jobs\PrunePaymentEvents;
 use Rahat1994\SparkCommerce\Jobs\ReconcileStuckPayments;
 use Rahat1994\SparkCommerce\Listeners\AutoRefundLatePayment;
 use Rahat1994\SparkCommerce\Listeners\ReleaseCouponReservation;
 use Rahat1994\SparkCommerce\Listeners\ReleaseReservedStock;
+use Rahat1994\SparkCommerce\Listeners\SendAdminPaymentAlert;
+use Rahat1994\SparkCommerce\Listeners\SendBackorderNotification;
+use Rahat1994\SparkCommerce\Listeners\SendOrderPaidNotifications;
+use Rahat1994\SparkCommerce\Listeners\SendOrderRefundedNotification;
 use Rahat1994\SparkCommerce\Payments\PaymentGatewayManager;
 use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -97,6 +110,27 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
         // A payment landing on an expired order is returned automatically
         // (KTD13, U13) — never restocking, since expiry already released it.
         Event::listen(LatePaymentReceived::class, AutoRefundLatePayment::class);
+
+        // Transactional mails (R15, U14): every notification is queued and
+        // afterCommit. Order mails hang on the paid transition (never on
+        // creation, expiry, or cancellation of unpaid orders); the refund
+        // mail on the refund-succeeded seam; every operational payment
+        // event maps to the one parameterized admin alert.
+        Event::listen(OrderTransitioned::class, SendOrderPaidNotifications::class);
+        Event::listen(OrderRefunded::class, SendOrderRefundedNotification::class);
+        Event::listen(ProductBackordered::class, SendBackorderNotification::class);
+
+        foreach ([
+            PaymentAmountMismatch::class,
+            OrderAutoRefunded::class,
+            DisputeCreated::class,
+            RefundFailed::class,
+            WebhookSignatureFailing::class,
+            PaymentNeedsReconciliation::class,
+            FreeOrderPlaced::class,
+        ] as $operationalEvent) {
+            Event::listen($operationalEvent, SendAdminPaymentAlert::class);
+        }
 
         // Asset Registration
         FilamentAsset::register(

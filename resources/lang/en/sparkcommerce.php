@@ -2,6 +2,61 @@
 
 // translations for Rahat1994/SparkCommerce
 return [
+    'mail' => [
+        'order_confirmation' => [
+            'subject' => 'Order :order_number is confirmed',
+            'body' => 'Thank you for your order! We have received your payment for order :order_number.',
+            'total' => 'Order total: :amount.',
+            'outro' => 'We will let you know as soon as your order ships.',
+        ],
+        'new_order_received' => [
+            'subject' => 'New paid order :order_number',
+            'body' => 'A new order :order_number has been paid and is ready to process.',
+            'total' => 'Order total: :amount.',
+            'customer' => 'Customer: :email.',
+            'outro' => 'Sign in to the admin panel to process it.',
+        ],
+        'order_refunded' => [
+            'subject' => 'Your refund for order :order_number',
+            'body' => 'A refund of :amount has been issued for your order :order_number.',
+            'outro' => 'Depending on your bank, it can take a few days to appear on your statement.',
+        ],
+        'backorder' => [
+            'subject' => ':product is on backorder',
+            'body' => 'You ordered :quantity x :product, which is currently out of stock. The missing units are on backorder.',
+            'outro' => 'We will ship them to you as soon as they are back in stock.',
+        ],
+        'admin_alert' => [
+            'amount_mismatch' => [
+                'subject' => 'Payment amount mismatch on order :order_number',
+                'body' => 'Order :order_number received a payment of :amount :currency but expected :expected :currency. The order was flagged and NOT transitioned — please review it.',
+            ],
+            'late_payment_refunded' => [
+                'subject' => 'Late payment on expired order :order_number refunded',
+                'body' => 'Order :order_number was paid after it had already expired. The payment of :amount :currency was refunded automatically; the order stays expired.',
+            ],
+            'dispute_created' => [
+                'subject' => 'Dispute opened against order :order_number',
+                'body' => 'The payment processor opened a dispute (chargeback) against the charge of order :order_number. Please respond to it in the processor dashboard.',
+            ],
+            'refund_failed' => [
+                'subject' => 'Refund failed for order :order_number',
+                'body' => 'A refund of :amount :currency for order :order_number failed: :failure_reason. The money has NOT been returned — please retry or resolve it with the processor.',
+            ],
+            'webhook_signature_failing' => [
+                'subject' => 'Webhook signature failures on the :gateway gateway',
+                'body' => 'The :gateway webhook signature failed verification :failures times within the last hour. Payment notifications are being dropped — check the configured webhook secret.',
+            ],
+            'needs_reconciliation' => [
+                'subject' => 'Order :order_number needs payment reconciliation',
+                'body' => 'Order :order_number expired, but its gateway payment actually succeeded — the paid webhook was never processed. Please review and reconcile it.',
+            ],
+            'free_order_placed' => [
+                'subject' => 'Free order :order_number placed',
+                'body' => 'Order :order_number completed with a zero total (after discounts and shipping) and was marked paid without a payment.',
+            ],
+        ],
+    ],
     'resource' => [
         'product' => [
             'model_label' => 'Product',

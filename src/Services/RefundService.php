@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Enums\PaymentStatus;
 use Rahat1994\SparkCommerce\Enums\RefundStatus;
+use Rahat1994\SparkCommerce\Events\OrderRefunded;
 use Rahat1994\SparkCommerce\Events\RefundFailed;
 use Rahat1994\SparkCommerce\Exceptions\RefundGatewayFailed;
 use Rahat1994\SparkCommerce\Exceptions\RefundNotAllowed;
@@ -115,6 +116,13 @@ class RefundService
 
             $this->deriveOrderPaymentState($locked);
 
+            // Refund-succeeded seam (U14): announced only once the success
+            // row is durable, so the customer mail can never precede a
+            // rolled-back refund.
+            DB::afterCommit(function () use ($locked, $refund): void {
+                event(new OrderRefunded($locked, $refund));
+            });
+
             return $refund;
         });
     }
@@ -147,6 +155,14 @@ class RefundService
             $lockedRefund->save();
 
             $this->deriveOrderPaymentState($lockedOrder);
+
+            // Same refund-succeeded seam as the synchronous path (U14).
+            // Exactly once per row: this branch is only reached when the
+            // row was still pending, and the guard above no-ops the
+            // redelivered (or already synchronously handled) case.
+            DB::afterCommit(function () use ($lockedOrder, $lockedRefund): void {
+                event(new OrderRefunded($lockedOrder, $lockedRefund));
+            });
         });
     }
 
