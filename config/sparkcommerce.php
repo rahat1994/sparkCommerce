@@ -45,6 +45,24 @@ return [
      */
     'allow_free_orders' => true,
 
+    /*
+     * Minutes an awaiting_payment order stays payable before the expiry
+     * sweep transitions it to Expired (releasing its stock and coupon
+     * reservations). The TTL is deliberately short: an unpaid order locks
+     * up reserved stock, keeps a window open for card-testing abuse, and
+     * must stay well inside the 24h horizon Stripe keeps idempotency keys
+     * around for, so a retried payment can never target a vanished order.
+     */
+    'order_ttl' => 90,
+
+    /*
+     * Maximum number of awaiting_payment orders one user may hold open at
+     * the same time. Checkout rejects with a validation error beyond this
+     * cap. It bounds how much stock a single user can lock up through
+     * repeated checkouts before paying for any of them.
+     */
+    'max_open_orders' => 5,
+
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',
