@@ -2,8 +2,12 @@
 
 namespace Rahat1994\SparkCommerce\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Rahat1994\SparkCommerce\Enums\OrderStatus;
+use Rahat1994\SparkCommerce\Enums\PaymentStatus;
+use Rahat1994\SparkCommerce\Services\OrderTransitionService;
 use RuntimeException;
 
 class SCOrder extends Model
@@ -23,7 +27,6 @@ class SCOrder extends Model
         'order_number',
         'status',
         'payment_status',
-        'shipping_status',
         'payment_method',
         'vendor_id',
         'meta',
@@ -33,6 +36,8 @@ class SCOrder extends Model
         'items' => 'array',
         'discount' => 'array',
         'meta' => 'array',
+        'status' => OrderStatus::class,
+        'payment_status' => PaymentStatus::class,
     ];
 
     /**
@@ -43,6 +48,17 @@ class SCOrder extends Model
     public function getTable()
     {
         return config('sparkcommerce.table_prefix') . config('sparkcommerce.orders_table_name');
+    }
+
+    /**
+     * Shipping progress is derived from `status` — the legacy
+     * `shipping_status` column stays for now but is shadowed by this
+     * read-through accessor and must never be written again. Status writes
+     * go through {@see OrderTransitionService}.
+     */
+    protected function shippingStatus(): Attribute
+    {
+        return Attribute::get(fn (): ?OrderStatus => $this->status);
     }
 
     /**

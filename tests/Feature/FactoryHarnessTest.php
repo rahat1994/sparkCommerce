@@ -1,5 +1,6 @@
 <?php
 
+use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Models\SCCategory;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
 use Rahat1994\SparkCommerce\Models\SCOrder;
@@ -20,7 +21,7 @@ it('creates every base model via its factory', function () {
         ->and(SCCategory::factory()->create())->toBeInstanceOf(SCCategory::class)
         ->and(SCOrder::factory()->awaitingPayment()->create())
         ->toBeInstanceOf(SCOrder::class)
-        ->status->toBe('awaiting_payment')
+        ->status->toBe(OrderStatus::AwaitingPayment)
         ->and(SCCoupon::factory()->expired()->create())->toBeInstanceOf(SCCoupon::class)
         ->and(SCReview::factory()->create())->toBeInstanceOf(SCReview::class);
 });

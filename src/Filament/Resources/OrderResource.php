@@ -7,17 +7,22 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
+use Rahat1994\SparkCommerce\Enums\OrderStatus;
+use Rahat1994\SparkCommerce\Enums\PaymentStatus;
+use Rahat1994\SparkCommerce\Exceptions\IllegalOrderTransition;
 use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\EditOrder;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\ListOrders;
 use Rahat1994\SparkCommerce\Models\SCOrder;
+use Rahat1994\SparkCommerce\Services\OrderTransitionService;
 
 class OrderResource extends Resource
 {
@@ -72,9 +77,11 @@ class OrderResource extends Resource
             TextColumn::make('shipping_status')
                 ->label('Shipping Status'),
             TextColumn::make('payment_status')
-                ->label('Payment Status'),
+                ->label('Payment Status')
+                ->badge(),
             TextColumn::make('status')
-                ->label('Status'),
+                ->label('Status')
+                ->badge(),
             TextColumn::make('transaction_id')
                 ->label('Transaction ID'),
         ];
@@ -104,10 +111,7 @@ class OrderResource extends Resource
                     ->label('Cancel Order')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn (SCOrder $order) => $order->update([
-                        'shipping_status' => 'Cancelled',
-                        'status' => 'Cancelled',
-                    ])),
+                    ->action(fn (SCOrder $order) => static::transitionOrder($order, OrderStatus::Cancelled)),
             ])
             ->defaultSort('created_at', 'desc')
             ->toolbarActions([
@@ -117,23 +121,39 @@ class OrderResource extends Resource
             ]);
     }
 
+    /**
+     * Route an order through the transition service, surfacing illegal
+     * moves as a Filament notification instead of a crash.
+     *
+     * @param  array{payment_status?: PaymentStatus|string|null}  $context
+     */
+    public static function transitionOrder(SCOrder $order, OrderStatus $to, array $context = []): void
+    {
+        try {
+            app(OrderTransitionService::class)->transition($order, $to, $context);
+        } catch (IllegalOrderTransition $exception) {
+            Notification::make()
+                ->title('Order status was not changed')
+                ->body($exception->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
     public static function getOrderConfirmActionModal()
     {
         return Action::make('Confirm Order')
             ->schema([
-                Select::make('shipping_status')
-                    ->label('Shipping Status')
+                Select::make('status')
+                    ->label('New Status')
                     ->options([
-                        'Processing' => 'Processing',
-                        'Shipped' => 'Shipped',
+                        OrderStatus::Processing->value => OrderStatus::Processing->getLabel(),
+                        OrderStatus::Shipped->value => OrderStatus::Shipped->getLabel(),
                     ])
                     ->required(),
             ])
             ->action(function (array $data, SCOrder $record): void {
-                $record->update([
-                    'shipping_status' => $data['shipping_status'],
-                    'status' => $data['shipping_status'],
-                ]);
+                static::transitionOrder($record, OrderStatus::from($data['status']));
             })
             ->icon('heroicon-o-information-circle')
             ->label('Accept Order')

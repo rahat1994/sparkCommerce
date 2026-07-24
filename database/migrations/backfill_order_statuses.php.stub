@@ -1,0 +1,158 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Backfill historical order rows onto the OrderStatus / PaymentStatus
+     * enum values.
+     *
+     * Abort-safe: a first pass surveys ALL status and payment_status values
+     * and throws BEFORE anything is written when a value cannot be mapped
+     * (unknown value or NULL status). Unknowns are never defaulted.
+     *
+     * Idempotent: rows already in canonical form are skipped, and the
+     * original (status, payment_status, shipping_status) triple is preserved
+     * once in `meta->legacy_status` — never overwritten on later runs.
+     */
+    public function up()
+    {
+        $table = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.orders_table_name'));
+
+        $statusMap = $this->statusMap();
+        $paymentStatusMap = $this->paymentStatusMap();
+
+        // Pass 1: survey only — abort before any write when the data cannot
+        // be mapped safely.
+        $nullStatusIds = DB::table($table)->whereNull('status')->pluck('id');
+
+        if ($nullStatusIds->isNotEmpty()) {
+            throw new RuntimeException(
+                'Order status backfill aborted: NULL status on order rows ['
+                . $nullStatusIds->implode(', ')
+                . ']. Nothing was changed.'
+            );
+        }
+
+        $unknownStatuses = DB::table($table)
+            ->distinct()
+            ->pluck('status')
+            ->reject(fn ($value) => array_key_exists(strtolower((string) $value), $statusMap))
+            ->values();
+
+        if ($unknownStatuses->isNotEmpty()) {
+            throw new RuntimeException(
+                'Order status backfill aborted: unknown status values ['
+                . $unknownStatuses->implode(', ')
+                . ']. Nothing was changed.'
+            );
+        }
+
+        $unknownPaymentStatuses = DB::table($table)
+            ->whereNotNull('payment_status')
+            ->distinct()
+            ->pluck('payment_status')
+            ->reject(fn ($value) => array_key_exists(strtolower((string) $value), $paymentStatusMap))
+            ->values();
+
+        if ($unknownPaymentStatuses->isNotEmpty()) {
+            throw new RuntimeException(
+                'Order status backfill aborted: unknown payment_status values ['
+                . $unknownPaymentStatuses->implode(', ')
+                . ']. Nothing was changed.'
+            );
+        }
+
+        $rowCountBefore = DB::table($table)->count();
+
+        // Pass 2: map the rows inside one transaction.
+        DB::transaction(function () use ($table, $statusMap, $paymentStatusMap) {
+            DB::table($table)->orderBy('id')->chunkById(200, function ($rows) use ($table, $statusMap, $paymentStatusMap) {
+                foreach ($rows as $row) {
+                    $mappedStatus = $statusMap[strtolower((string) $row->status)];
+                    $mappedPaymentStatus = $row->payment_status === null
+                        ? null
+                        : $paymentStatusMap[strtolower((string) $row->payment_status)];
+
+                    // Idempotency guard: rows already in canonical form are
+                    // left completely untouched.
+                    if ($row->status === $mappedStatus && $row->payment_status === $mappedPaymentStatus) {
+                        continue;
+                    }
+
+                    $meta = json_decode($row->meta ?? '', true);
+                    $meta = is_array($meta) ? $meta : [];
+
+                    if (! array_key_exists('legacy_status', $meta)) {
+                        $meta['legacy_status'] = [
+                            'status' => $row->status,
+                            'payment_status' => $row->payment_status,
+                            'shipping_status' => $row->shipping_status,
+                        ];
+                    }
+
+                    DB::table($table)->where('id', $row->id)->update([
+                        'status' => $mappedStatus,
+                        'payment_status' => $mappedPaymentStatus,
+                        'meta' => json_encode($meta),
+                    ]);
+                }
+            });
+        });
+
+        $rowCountAfter = DB::table($table)->count();
+
+        if ($rowCountBefore !== $rowCountAfter) {
+            throw new RuntimeException(
+                "Order status backfill row count changed from {$rowCountBefore} to {$rowCountAfter}."
+            );
+        }
+    }
+
+    public function down()
+    {
+        // Data backfill is not reversed: the original values stay available
+        // in each row's meta->legacy_status.
+    }
+
+    /**
+     * Legacy status values (lowercased) to canonical OrderStatus values.
+     * Values already equal to an enum value pass through unchanged.
+     *
+     * @return array<string, string>
+     */
+    protected function statusMap(): array
+    {
+        return [
+            'pending' => 'awaiting_payment',
+            'processing' => 'processing',
+            'shipped' => 'shipped',
+            'delivered' => 'delivered',
+            'cancelled' => 'cancelled',
+            'canceled' => 'cancelled',
+            'awaiting_payment' => 'awaiting_payment',
+            'paid' => 'paid',
+            'expired' => 'expired',
+            'refunded' => 'refunded',
+        ];
+    }
+
+    /**
+     * Legacy payment_status values (lowercased) to canonical PaymentStatus
+     * values. NULL stays NULL; unknown values abort the backfill.
+     *
+     * @return array<string, string>
+     */
+    protected function paymentStatusMap(): array
+    {
+        return [
+            'pending' => 'pending',
+            'paid' => 'paid',
+            'failed' => 'failed',
+            'refunded' => 'refunded',
+            'partially_refunded' => 'partially_refunded',
+        ];
+    }
+};

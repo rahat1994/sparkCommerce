@@ -142,11 +142,11 @@
         </div>
         <div class="info-row">
             <span class="info-label">Status:</span>
-            <span class="info-value">{{ ucfirst($order->status ?? 'Pending') }}</span>
+            <span class="info-value">{{ $order->status?->getLabel() ?? 'Pending' }}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Payment Status:</span>
-            <span class="info-value">{{ ucfirst($order->payment_status ?? 'Pending') }}</span>
+            <span class="info-value">{{ $order->payment_status?->getLabel() ?? 'Pending' }}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Payment Method:</span>
