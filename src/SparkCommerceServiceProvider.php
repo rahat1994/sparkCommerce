@@ -16,6 +16,7 @@ use Livewire\Features\SupportTesting\Testable;
 use Rahat1994\SparkCommerce\Commands\SCPublishRolesCommand;
 use Rahat1994\SparkCommerce\Commands\SparkCommercePublishMigrations;
 use Rahat1994\SparkCommerce\Events\OrderTransitioned;
+use Rahat1994\SparkCommerce\Listeners\ReleaseCouponReservation;
 use Rahat1994\SparkCommerce\Listeners\ReleaseReservedStock;
 use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -72,6 +73,9 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
 
         // Stock released on cancellation/expiry of unpaid orders (R9).
         Event::listen(OrderTransitioned::class, ReleaseReservedStock::class);
+
+        // Reserved single-use coupons released on the same transitions (R10).
+        Event::listen(OrderTransitioned::class, ReleaseCouponReservation::class);
 
         // Asset Registration
         FilamentAsset::register(
@@ -202,6 +206,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
             'create_sc_coupon_user_table',
             'create_sc_coupon_included_products_table',
             'convert_stock_quantity_to_integer',
+            'complete_coupon_schema',
         ];
     }
 }

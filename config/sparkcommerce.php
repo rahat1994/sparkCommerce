@@ -36,6 +36,15 @@ return [
      */
     'default_currency' => 'USD',
 
+    /*
+     * Whether a checkout whose grand total is zero (after discounts and
+     * shipping) may complete without a payment. When true, such orders are
+     * created as usual and immediately transitioned to Paid, and a
+     * FreeOrderPlaced event is dispatched. When false, zero-total checkouts
+     * are rejected with a validation error.
+     */
+    'allow_free_orders' => true,
+
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',

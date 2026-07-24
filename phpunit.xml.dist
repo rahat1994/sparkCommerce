@@ -15,6 +15,12 @@
     cacheDirectory=".phpunit.cache"
     backupStaticProperties="false"
 >
+    <php>
+        <!-- The suite boots a full Filament app per test; the 128M CLI
+             default is right at the suite's peak and OOMs on some random
+             orders. -->
+        <ini name="memory_limit" value="512M"/>
+    </php>
     <testsuites>
         <testsuite name="Rahat1994 Test Suite">
             <directory>tests</directory>

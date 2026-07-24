@@ -1,0 +1,248 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Complete the coupons schema so redemption limits are enforceable (R10):
+     *
+     * - `usage_count` unsignedInteger default 0 — the global redemption
+     *   counter the guarded claim/release increments operate on.
+     * - unique index on `coupon_code` — duplicate survey first, abort
+     *   listing offenders (codes are customer-held, never rewritten here).
+     * - `usage_limit` / `usage_limit_per_user`: legacy string columns become
+     *   nullable unsigned integers; empty string means "no limit" and is
+     *   nulled; non-numeric or fractional values abort listing offenders.
+     * - `min_spend` / `max_spend`: expand/contract — new nullable
+     *   `min_spend_cents` / `max_spend_cents` unsignedBigInteger columns are
+     *   backfilled once (x100, rounded) from the legacy strings; the legacy
+     *   columns are never mutated; readers switch to the cents columns.
+     *
+     * `coupon_amount` decision (verified in SCCoupon::booted()): the model
+     * multiplies by `sparkcommerce.decimal_value` (100) on create/update and
+     * divides on retrieval, so the stored value is ALREADY integer cents
+     * held in a string column. No x100 backfill happens here — this stub
+     * only rounds away float noise the x100 save event can leave behind
+     * (e.g. "1999.0000000000002") and contracts the column type to
+     * unsignedBigInteger.
+     *
+     * Abort-safe: pass 1 surveys the data and throws BEFORE any schema or
+     * data write. Idempotent: every column/index addition is guarded and the
+     * conversions skip columns that already report an integer type, so a
+     * re-published stub under a new timestamp is harmless.
+     */
+    public function up()
+    {
+        $table = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.coupons_table_name'));
+
+        if (! Schema::hasTable($table)) {
+            return;
+        }
+
+        // Pass 1: survey only — abort before anything is written.
+        $this->assertCouponCodesAreUnique($table);
+        $this->assertColumnHoldsWholeNonNegativeNumbers($table, 'usage_limit');
+        $this->assertColumnHoldsWholeNonNegativeNumbers($table, 'usage_limit_per_user');
+        $this->assertColumnIsNonNegativeNumericWhenFilled($table, 'min_spend');
+        $this->assertColumnIsNonNegativeNumericWhenFilled($table, 'max_spend');
+        $this->assertColumnIsNonNegativeNumericWhenFilled($table, 'coupon_amount');
+
+        // Pass 2: schema additions, each guarded for idempotency.
+        Schema::table($table, function (Blueprint $blueprint) use ($table) {
+            if (! Schema::hasColumn($table, 'usage_count')) {
+                $blueprint->unsignedInteger('usage_count')->default(0);
+            }
+
+            foreach (['min_spend_cents', 'max_spend_cents'] as $centsColumn) {
+                if (! Schema::hasColumn($table, $centsColumn)) {
+                    $blueprint->unsignedBigInteger($centsColumn)->nullable();
+                }
+            }
+        });
+
+        if (! Schema::hasIndex($table, ['coupon_code'], 'unique')) {
+            Schema::table($table, function (Blueprint $blueprint) {
+                $blueprint->unique('coupon_code');
+            });
+        }
+
+        // Pass 3: data conversion and type contraction.
+        $this->convertUsageLimitColumn($table, 'usage_limit');
+        $this->convertUsageLimitColumn($table, 'usage_limit_per_user');
+        $this->backfillSpendCents($table, 'min_spend', 'min_spend_cents');
+        $this->backfillSpendCents($table, 'max_spend', 'max_spend_cents');
+        $this->normalizeCouponAmount($table);
+    }
+
+    public function down()
+    {
+        // Expand/contract: the legacy min_spend / max_spend / coupon_amount
+        // values were never mutated (only rounded float noise), so there is
+        // nothing to restore.
+    }
+
+    /**
+     * Abort when duplicate coupon codes exist, listing them. Codes are
+     * customer-held values and are never rewritten by a migration, so
+     * duplicates must be resolved by hand before the unique index can land.
+     */
+    protected function assertCouponCodesAreUnique(string $table): void
+    {
+        if (Schema::hasIndex($table, ['coupon_code'], 'unique')) {
+            // The index already enforces uniqueness; nothing to survey.
+            return;
+        }
+
+        $duplicates = DB::table($table)
+            ->select('coupon_code')
+            ->whereNotNull('coupon_code')
+            ->groupBy('coupon_code')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('coupon_code');
+
+        if ($duplicates->isNotEmpty()) {
+            throw new RuntimeException(
+                'Coupon schema completion aborted: duplicate coupon_code values ['
+                . $duplicates->implode(', ')
+                . ']. Deduplicate the coupons on the site and re-run. Nothing was changed.'
+            );
+        }
+    }
+
+    /**
+     * Abort listing every row whose value in a limit column is not a whole
+     * non-negative number. Empty strings pass — they mean "no limit" and
+     * become NULL during conversion. Nothing is written first.
+     */
+    protected function assertColumnHoldsWholeNonNegativeNumbers(string $table, string $column): void
+    {
+        if (! Schema::hasColumn($table, $column)
+            || str_contains(strtolower(Schema::getColumnType($table, $column)), 'int')) {
+            return;
+        }
+
+        $offenders = DB::table($table)
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->get(['id', $column])
+            ->filter(fn ($row) => ! is_numeric($row->{$column})
+                || (float) $row->{$column} < 0
+                || fmod((float) $row->{$column}, 1.0) !== 0.0)
+            ->map(fn ($row) => $row->id . ' (' . $column . '=' . $row->{$column} . ')')
+            ->values();
+
+        if ($offenders->isNotEmpty()) {
+            throw new RuntimeException(
+                'Coupon schema completion aborted: non-numeric, negative or fractional '
+                . $column . ' on coupon rows [' . $offenders->implode(', ')
+                . ']. Fix the values on the site and re-run. Nothing was changed.'
+            );
+        }
+    }
+
+    /**
+     * Abort listing every row whose filled value is not a non-negative
+     * number. Empty strings pass — they mean "unset". Nothing is written
+     * first.
+     */
+    protected function assertColumnIsNonNegativeNumericWhenFilled(string $table, string $column): void
+    {
+        if (! Schema::hasColumn($table, $column)
+            || str_contains(strtolower(Schema::getColumnType($table, $column)), 'int')) {
+            return;
+        }
+
+        $offenders = DB::table($table)
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->get(['id', $column])
+            ->filter(fn ($row) => ! is_numeric($row->{$column}) || (float) $row->{$column} < 0)
+            ->map(fn ($row) => $row->id . ' (' . $column . '=' . $row->{$column} . ')')
+            ->values();
+
+        if ($offenders->isNotEmpty()) {
+            throw new RuntimeException(
+                'Coupon schema completion aborted: non-numeric or negative '
+                . $column . ' on coupon rows [' . $offenders->implode(', ')
+                . ']. Fix the values on the site and re-run. Nothing was changed.'
+            );
+        }
+    }
+
+    /**
+     * String limit column -> nullable unsigned integer. Empty strings mean
+     * "no limit" and become NULL before the type change. Skipped entirely
+     * when the column already reports an integer type (fresh installs and
+     * re-runs land here).
+     */
+    protected function convertUsageLimitColumn(string $table, string $column): void
+    {
+        if (! Schema::hasColumn($table, $column)
+            || str_contains(strtolower(Schema::getColumnType($table, $column)), 'int')) {
+            return;
+        }
+
+        DB::table($table)->where($column, '')->update([$column => null]);
+
+        Schema::table($table, function (Blueprint $blueprint) use ($column) {
+            $blueprint->unsignedInteger($column)->nullable()->change();
+        });
+    }
+
+    /**
+     * Money conversion boundary for legacy spend limits: the legacy columns
+     * hold MAJOR units, so cents = round(value * 100). Only rows whose cents
+     * column is still NULL are filled, which makes re-runs no-ops. The
+     * legacy columns are never mutated.
+     */
+    protected function backfillSpendCents(string $table, string $legacyColumn, string $centsColumn): void
+    {
+        DB::table($table)
+            ->whereNull($centsColumn)
+            ->whereNotNull($legacyColumn)
+            ->where($legacyColumn, '!=', '')
+            ->orderBy('id')
+            ->chunkById(200, function ($rows) use ($table, $legacyColumn, $centsColumn) {
+                foreach ($rows as $row) {
+                    DB::table($table)->where('id', $row->id)->update([
+                        $centsColumn => (int) round(((float) $row->{$legacyColumn}) * 100),
+                    ]);
+                }
+            });
+    }
+
+    /**
+     * `coupon_amount` already stores cents (see the class PHPDoc): round
+     * away the float noise the legacy x100 save event can leave behind and
+     * contract the column type to unsignedBigInteger. Skipped when the
+     * column already reports an integer type.
+     */
+    protected function normalizeCouponAmount(string $table): void
+    {
+        if (str_contains(strtolower(Schema::getColumnType($table, 'coupon_amount')), 'int')) {
+            return;
+        }
+
+        DB::table($table)
+            ->orderBy('id')
+            ->chunkById(200, function ($rows) use ($table) {
+                foreach ($rows as $row) {
+                    $normalized = (string) ((int) round((float) $row->coupon_amount));
+
+                    if ((string) $row->coupon_amount !== $normalized) {
+                        DB::table($table)->where('id', $row->id)->update([
+                            'coupon_amount' => $normalized,
+                        ]);
+                    }
+                }
+            });
+
+        Schema::table($table, function (Blueprint $blueprint) {
+            $blueprint->unsignedBigInteger('coupon_amount')->change();
+        });
+    }
+};
