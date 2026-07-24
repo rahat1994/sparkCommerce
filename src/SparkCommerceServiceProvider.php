@@ -8,6 +8,7 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Event;
@@ -16,8 +17,11 @@ use Livewire\Features\SupportTesting\Testable;
 use Rahat1994\SparkCommerce\Commands\SCPublishRolesCommand;
 use Rahat1994\SparkCommerce\Commands\SparkCommercePublishMigrations;
 use Rahat1994\SparkCommerce\Events\OrderTransitioned;
+use Rahat1994\SparkCommerce\Jobs\PrunePaymentEvents;
+use Rahat1994\SparkCommerce\Jobs\ReconcileStuckPayments;
 use Rahat1994\SparkCommerce\Listeners\ReleaseCouponReservation;
 use Rahat1994\SparkCommerce\Listeners\ReleaseReservedStock;
+use Rahat1994\SparkCommerce\Payments\PaymentGatewayManager;
 use Rahat1994\SparkCommerce\Testing\TestsSparkCommerce;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -38,6 +42,10 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
          */
         $package->name(static::$name)
             ->hasCommands($this->getCommands())
+            // Gateway notification entry. package-tools loads route files
+            // via loadRoutesFrom, OUTSIDE every middleware group — so no
+            // CSRF/session applies to processor POSTs (verified by test).
+            ->hasRoutes('webhooks')
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
@@ -65,11 +73,18 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        // Payment gateway module (R13): one manager instance app-wide, so
+        // adopter ->extend() registrations are seen by every consumer.
+        $this->app->singleton(PaymentGatewayManager::class, fn ($app) => new PaymentGatewayManager($app));
+        $this->app->alias(PaymentGatewayManager::class, 'sparkcommerce.payments');
+    }
 
     public function packageBooted(): void
     {
         $this->registerPanelAccessGate();
+        $this->registerScheduledJobs();
 
         // Stock released on cancellation/expiry of unpaid orders (R9).
         Event::listen(OrderTransitioned::class, ReleaseReservedStock::class);
@@ -102,6 +117,20 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
 
         // Testing
         Testable::mixin(new TestsSparkCommerce);
+    }
+
+    /**
+     * Payment upkeep tasks (U12), registered lazily so the Schedule is only
+     * touched when the host actually resolves it: reconciliation every
+     * thirty minutes (catches dropped paid-webhooks) and a daily prune of
+     * webhook claim rows older than thirty days.
+     */
+    protected function registerScheduledJobs(): void
+    {
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->job(new ReconcileStuckPayments)->everyThirtyMinutes();
+            $schedule->job(new PrunePaymentEvents)->daily();
+        });
     }
 
     /**
@@ -207,6 +236,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
             'create_sc_coupon_included_products_table',
             'convert_stock_quantity_to_integer',
             'complete_coupon_schema',
+            'create_sc_payment_events_table',
         ];
     }
 }

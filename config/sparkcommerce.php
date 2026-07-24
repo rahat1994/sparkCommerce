@@ -63,6 +63,31 @@ return [
      */
     'max_open_orders' => 5,
 
+    /*
+     * Payment gateway module (R13). `default` names the driver checkout
+     * uses; 'stripe' ships with the package and 'fake' backs the test
+     * suites. Adopters register additional drivers from their own service
+     * providers: app('sparkcommerce.payments')->extend('name', fn () => ...).
+     */
+    'payments' => [
+        'default' => 'stripe',
+
+        'gateways' => [
+            'stripe' => [
+                'secret_key' => env('SPARKCOMMERCE_STRIPE_SECRET_KEY'),
+                'webhook_secret' => env('SPARKCOMMERCE_STRIPE_WEBHOOK_SECRET'),
+            ],
+
+            /*
+             * The fake driver's shared webhook secret is only ever set by
+             * test environments; without it every fake webhook is denied.
+             */
+            'fake' => [
+                'webhook_secret' => env('SPARKCOMMERCE_FAKE_WEBHOOK_SECRET'),
+            ],
+        ],
+    ],
+
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',
@@ -78,4 +103,5 @@ return [
     'coupon_excluded_products_table_name' => 'coupon_excluded_products',
     'coupon_included_categories_table_name' => 'coupon_included_categories',
     'coupon_excluded_categories_table_name' => 'coupon_excluded_categories',
+    'payment_events_table_name' => 'payment_events',
 ];
