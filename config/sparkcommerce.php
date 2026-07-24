@@ -88,6 +88,17 @@ return [
         ],
     ],
 
+    /*
+     * Refunds (U13). `restock_by_default` controls whether the Filament
+     * refund form pre-checks its "restock" checkbox (for a full refund of
+     * the remaining balance). Restocking itself always remains an explicit
+     * per-refund choice; the automatic late-payment refund NEVER restocks,
+     * because the expiry transition already released the reservations.
+     */
+    'refunds' => [
+        'restock_by_default' => true,
+    ],
+
     'table_prefix' => 'sc_',
     'products_table_name' => 'products',
     'product_variants_table_name' => 'product_variations',
@@ -104,4 +115,5 @@ return [
     'coupon_included_categories_table_name' => 'coupon_included_categories',
     'coupon_excluded_categories_table_name' => 'coupon_excluded_categories',
     'payment_events_table_name' => 'payment_events',
+    'refunds_table_name' => 'refunds',
 ];

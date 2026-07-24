@@ -8,12 +8,16 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Enums\PaymentStatus;
+use Rahat1994\SparkCommerce\Enums\RefundStatus;
+use Rahat1994\SparkCommerce\Events\DisputeCreated;
 use Rahat1994\SparkCommerce\Events\LatePaymentReceived;
 use Rahat1994\SparkCommerce\Events\PaymentAmountMismatch;
+use Rahat1994\SparkCommerce\Events\RefundFailed;
 use Rahat1994\SparkCommerce\Events\WebhookSignatureFailing;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Models\SCProduct;
+use Rahat1994\SparkCommerce\Models\SCRefund;
 use Rahat1994\SparkCommerce\Tests\Fixtures\User;
 
 function stripeWebhookUser(): User
@@ -326,10 +330,108 @@ it('acks event types it does not handle', function () {
     $user = stripeWebhookUser();
     $order = stripeWebhookOrder($user);
 
-    postStripeWebhook(stripeWebhookEvent('charge.refunded', stripePaymentIntent($order)))
+    postStripeWebhook(stripeWebhookEvent('customer.created', stripePaymentIntent($order)))
         ->assertSuccessful();
 
     expect($order->fresh()->status)->toBe(OrderStatus::AwaitingPayment);
+});
+
+it('confirms a pending refund and derives the order statuses on a signed charge.refunded', function () {
+    $user = stripeWebhookUser();
+    $order = stripeWebhookOrder($user, [
+        'status' => OrderStatus::Paid,
+        'payment_status' => PaymentStatus::Paid,
+    ]);
+
+    // The synchronous path recorded the refund but died before the gateway
+    // answer came back; the webhook confirmation completes it.
+    $refund = SCRefund::factory()->create([
+        'order_id' => $order->getKey(),
+        'gateway' => 'stripe',
+        'gateway_refund_id' => 're_test_1',
+        'amount_cents' => 1999,
+        'currency' => 'USD',
+        'status' => RefundStatus::Pending,
+    ]);
+
+    postStripeWebhook(stripeWebhookEvent('charge.refunded', [
+        'id' => 'ch_test_1',
+        'object' => 'charge',
+        'payment_intent' => $order->transaction_id,
+        'amount_refunded' => 1999,
+        'refunds' => ['object' => 'list', 'data' => [
+            ['id' => 're_test_1', 'object' => 'refund', 'status' => 'succeeded'],
+        ]],
+    ], 'evt_charge_refunded_1'))->assertSuccessful();
+
+    expect($refund->fresh()->status)->toBe(RefundStatus::Succeeded)
+        // The webhook path NEVER restocks; only the synchronous path does.
+        ->and($refund->fresh()->restocked)->toBeFalse()
+        ->and($order->fresh()->status)->toBe(OrderStatus::Refunded)
+        ->and($order->fresh()->payment_status)->toBe(PaymentStatus::Refunded)
+        ->and(DB::table(stripeWebhookEventsTable())->where('event_id', 'evt_charge_refunded_1')->count())->toBe(1);
+});
+
+it('marks the matching refund failed on a signed refund.failed', function () {
+    Event::fake([RefundFailed::class]);
+
+    $user = stripeWebhookUser();
+    $order = stripeWebhookOrder($user, [
+        'status' => OrderStatus::Paid,
+        'payment_status' => PaymentStatus::Paid,
+    ]);
+
+    $refund = SCRefund::factory()->create([
+        'order_id' => $order->getKey(),
+        'gateway' => 'stripe',
+        'gateway_refund_id' => 're_test_failed_1',
+        'amount_cents' => 1999,
+        'currency' => 'USD',
+        'status' => RefundStatus::Pending,
+    ]);
+
+    postStripeWebhook(stripeWebhookEvent('refund.failed', [
+        'id' => 're_test_failed_1',
+        'object' => 'refund',
+        'status' => 'failed',
+        'failure_reason' => 'expired_or_canceled_card',
+        'payment_intent' => $order->transaction_id,
+    ], 'evt_refund_failed_1'))->assertSuccessful();
+
+    expect($refund->fresh()->status)->toBe(RefundStatus::Failed)
+        ->and($refund->fresh()->failure_reason)->toBe('expired_or_canceled_card')
+        ->and($order->fresh()->status)->toBe(OrderStatus::Paid);
+
+    Event::assertDispatched(
+        RefundFailed::class,
+        fn (RefundFailed $event): bool => $event->refund->is($refund)
+    );
+});
+
+it('flags the order and dispatches DisputeCreated on a signed charge.dispute.created', function () {
+    Event::fake([DisputeCreated::class]);
+
+    $user = stripeWebhookUser();
+    $order = stripeWebhookOrder($user, [
+        'status' => OrderStatus::Paid,
+        'payment_status' => PaymentStatus::Paid,
+    ]);
+
+    postStripeWebhook(stripeWebhookEvent('charge.dispute.created', [
+        'id' => 'dp_test_1',
+        'object' => 'dispute',
+        'payment_intent' => $order->transaction_id,
+        'reason' => 'fraudulent',
+    ], 'evt_dispute_1'))->assertSuccessful();
+
+    expect($order->fresh()->meta['payment_flag'] ?? null)->toBe('disputed')
+        ->and($order->fresh()->status)->toBe(OrderStatus::Paid)
+        ->and(DB::table(stripeWebhookEventsTable())->where('event_id', 'evt_dispute_1')->count())->toBe(1);
+
+    Event::assertDispatched(
+        DisputeCreated::class,
+        fn (DisputeCreated $event): bool => $event->order->is($order) && ($event->dispute['id'] ?? null) === 'dp_test_1'
+    );
 });
 
 it('answers 404 for an unknown gateway url', function () {

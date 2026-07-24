@@ -5,8 +5,11 @@ namespace Rahat1994\SparkCommerce\Payments\Drivers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Rahat1994\SparkCommerce\Events\WebhookSignatureFailing;
+use Rahat1994\SparkCommerce\Jobs\HandleChargeRefunded;
+use Rahat1994\SparkCommerce\Jobs\HandleDisputeCreated;
 use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentFailed;
 use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentSucceeded;
+use Rahat1994\SparkCommerce\Jobs\HandleRefundFailed;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Payments\Contracts\PaymentGateway;
 use Rahat1994\SparkCommerce\Payments\Exceptions\PaymentCancellationRefused;
@@ -171,6 +174,9 @@ class StripeGateway implements PaymentGateway
         match ($event->type) {
             'payment_intent.succeeded' => HandlePaymentIntentSucceeded::dispatch('stripe', $eventPayload),
             'payment_intent.payment_failed' => HandlePaymentIntentFailed::dispatch('stripe', $eventPayload),
+            'charge.refunded' => HandleChargeRefunded::dispatch('stripe', $eventPayload),
+            'refund.failed' => HandleRefundFailed::dispatch('stripe', $eventPayload),
+            'charge.dispute.created' => HandleDisputeCreated::dispatch('stripe', $eventPayload),
             default => null,
         };
 

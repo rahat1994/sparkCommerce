@@ -6,23 +6,30 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Enums\OrderStatus;
 use Rahat1994\SparkCommerce\Enums\PaymentStatus;
 use Rahat1994\SparkCommerce\Exceptions\IllegalOrderTransition;
+use Rahat1994\SparkCommerce\Exceptions\RefundGatewayFailed;
+use Rahat1994\SparkCommerce\Exceptions\RefundNotAllowed;
 use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\EditOrder;
 use Rahat1994\SparkCommerce\Filament\Resources\OrderResource\Pages\ListOrders;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Services\OrderTransitionService;
+use Rahat1994\SparkCommerce\Services\RefundService;
 
 class OrderResource extends Resource
 {
@@ -118,6 +125,7 @@ class OrderResource extends Resource
                     ->color('danger')
                     ->requiresConfirmation()
                     ->action(fn (SCOrder $order) => static::transitionOrder($order, OrderStatus::Cancelled)),
+                static::getRefundAction(),
             ])
             ->defaultSort('created_at', 'desc')
             ->toolbarActions([
@@ -144,6 +152,86 @@ class OrderResource extends Resource
                 ->danger()
                 ->send();
         }
+    }
+
+    /**
+     * Admin refund (R14): full or partial, routed through the RefundService
+     * (which owns the over-refund guard, the gateway call and the derived
+     * statuses). Visible for orders holding refundable money — Paid or
+     * Processing, including a PartiallyRefunded payment state with a
+     * remaining balance (partial refunds leave `status` at Paid/Processing).
+     *
+     * KTD18: visibility is NOT authorization — the action is both
+     * `->authorize`d on the panel gate and the gate is re-checked inside
+     * the handler before any money moves.
+     */
+    public static function getRefundAction(): Action
+    {
+        $restockByDefault = fn (): bool => (bool) config('sparkcommerce.refunds.restock_by_default', true);
+
+        return Action::make('refund')
+            ->label('Refund')
+            ->icon('heroicon-o-receipt-refund')
+            ->color('warning')
+            ->visible(fn (SCOrder $record): bool => in_array($record->status, [OrderStatus::Paid, OrderStatus::Processing], true))
+            ->authorize(fn (): bool => Gate::allows('access-sparkcommerce-admin'))
+            ->schema([
+                TextInput::make('amount')
+                    ->label('Amount to refund')
+                    ->helperText('In major units, e.g. 19.99. Defaults to the remaining refundable balance.')
+                    ->numeric()
+                    ->required()
+                    ->minValue(0.01)
+                    ->maxValue(fn (SCOrder $record): float => static::remainingRefundableCents($record) / 100)
+                    ->default(fn (SCOrder $record): float => static::remainingRefundableCents($record) / 100)
+                    ->suffix(fn (SCOrder $record): string => (string) $record->currency)
+                    ->live(onBlur: true)
+                    // Restocking only makes sense when the WHOLE remaining
+                    // balance goes back: an edited (partial) amount unchecks
+                    // the restock default.
+                    ->afterStateUpdated(function (mixed $state, Set $set, SCOrder $record) use ($restockByDefault): void {
+                        $set('restock', $restockByDefault()
+                            && (int) round(((float) $state) * 100) === static::remainingRefundableCents($record));
+                    }),
+                Checkbox::make('restock')
+                    ->label('Restock the order items')
+                    ->default($restockByDefault),
+            ])
+            ->action(function (array $data, SCOrder $record): void {
+                // Visibility is not authorization (KTD18): re-check at the
+                // execution boundary.
+                Gate::authorize('access-sparkcommerce-admin');
+
+                try {
+                    app(RefundService::class)->refund(
+                        $record,
+                        (int) round(((float) $data['amount']) * 100),
+                        initiatedBy: auth()->id() !== null ? (int) auth()->id() : null,
+                        restock: (bool) ($data['restock'] ?? false),
+                    );
+
+                    Notification::make()
+                        ->title('Refund processed')
+                        ->success()
+                        ->send();
+                } catch (RefundGatewayFailed | RefundNotAllowed $exception) {
+                    Notification::make()
+                        ->title('Refund was not processed')
+                        ->body($exception->getMessage())
+                        ->danger()
+                        ->send();
+                }
+            });
+    }
+
+    /**
+     * Cents still refundable, pending refunds included (delegated to the
+     * RefundService so the form default/max and the service guard can
+     * never disagree).
+     */
+    public static function remainingRefundableCents(SCOrder $order): int
+    {
+        return app(RefundService::class)->remainingRefundableCents($order);
     }
 
     public static function getOrderConfirmActionModal()

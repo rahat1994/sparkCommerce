@@ -16,9 +16,11 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Features\SupportTesting\Testable;
 use Rahat1994\SparkCommerce\Commands\SCPublishRolesCommand;
 use Rahat1994\SparkCommerce\Commands\SparkCommercePublishMigrations;
+use Rahat1994\SparkCommerce\Events\LatePaymentReceived;
 use Rahat1994\SparkCommerce\Events\OrderTransitioned;
 use Rahat1994\SparkCommerce\Jobs\PrunePaymentEvents;
 use Rahat1994\SparkCommerce\Jobs\ReconcileStuckPayments;
+use Rahat1994\SparkCommerce\Listeners\AutoRefundLatePayment;
 use Rahat1994\SparkCommerce\Listeners\ReleaseCouponReservation;
 use Rahat1994\SparkCommerce\Listeners\ReleaseReservedStock;
 use Rahat1994\SparkCommerce\Payments\PaymentGatewayManager;
@@ -91,6 +93,10 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
 
         // Reserved single-use coupons released on the same transitions (R10).
         Event::listen(OrderTransitioned::class, ReleaseCouponReservation::class);
+
+        // A payment landing on an expired order is returned automatically
+        // (KTD13, U13) — never restocking, since expiry already released it.
+        Event::listen(LatePaymentReceived::class, AutoRefundLatePayment::class);
 
         // Asset Registration
         FilamentAsset::register(
@@ -237,6 +243,7 @@ class SparkCommerceServiceProvider extends PackageServiceProvider
             'convert_stock_quantity_to_integer',
             'complete_coupon_schema',
             'create_sc_payment_events_table',
+            'create_sc_refunds_table',
         ];
     }
 }

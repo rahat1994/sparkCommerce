@@ -4,13 +4,17 @@ namespace Rahat1994\SparkCommerce\Payments\Drivers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Rahat1994\SparkCommerce\Jobs\HandleChargeRefunded;
+use Rahat1994\SparkCommerce\Jobs\HandleDisputeCreated;
 use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentFailed;
 use Rahat1994\SparkCommerce\Jobs\HandlePaymentIntentSucceeded;
+use Rahat1994\SparkCommerce\Jobs\HandleRefundFailed;
 use Rahat1994\SparkCommerce\Models\SCOrder;
 use Rahat1994\SparkCommerce\Payments\Contracts\PaymentGateway;
 use Rahat1994\SparkCommerce\Payments\Exceptions\PaymentCancellationRefused;
 use Rahat1994\SparkCommerce\Payments\PaymentSession;
 use Rahat1994\SparkCommerce\Payments\RefundResult;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -31,6 +35,9 @@ class FakeGateway implements PaymentGateway
 
     /** @var array<string, string|null> payment status keyed by reference */
     protected static array $scriptedStatuses = [];
+
+    /** Scripted refusal reason for refund calls; null = refunds succeed. */
+    protected static ?string $refundFailureReason = null;
 
     public function createPayment(SCOrder $order): PaymentSession
     {
@@ -75,6 +82,10 @@ class FakeGateway implements PaymentGateway
             'idempotency_key' => $idempotencyKey,
         ];
 
+        if (static::$refundFailureReason !== null) {
+            throw new RuntimeException(static::$refundFailureReason);
+        }
+
         return new RefundResult(
             reference: 'fake_re_' . $order->getKey(),
             status: 'succeeded',
@@ -111,6 +122,9 @@ class FakeGateway implements PaymentGateway
         match ($event['type'] ?? null) {
             'payment_intent.succeeded' => HandlePaymentIntentSucceeded::dispatch('fake', $event),
             'payment_intent.payment_failed' => HandlePaymentIntentFailed::dispatch('fake', $event),
+            'charge.refunded' => HandleChargeRefunded::dispatch('fake', $event),
+            'refund.failed' => HandleRefundFailed::dispatch('fake', $event),
+            'charge.dispute.created' => HandleDisputeCreated::dispatch('fake', $event),
             default => null,
         };
 
@@ -123,6 +137,7 @@ class FakeGateway implements PaymentGateway
         static::$calls = [];
         static::$refuseCancellation = false;
         static::$scriptedStatuses = [];
+        static::$refundFailureReason = null;
     }
 
     /**
@@ -150,6 +165,15 @@ class FakeGateway implements PaymentGateway
     public static function scriptStatus(string $reference, ?string $status): void
     {
         static::$scriptedStatuses[$reference] = $status;
+    }
+
+    /**
+     * Script every subsequent refund call to throw with the given reason
+     * (the call is still recorded first). Pass null to succeed again.
+     */
+    public static function failRefunds(?string $reason = 'refund_failed'): void
+    {
+        static::$refundFailureReason = $reason;
     }
 
     protected static function idempotencyKeyFor(SCOrder $order): string

@@ -104,7 +104,7 @@ class HandlePaymentIntentSucceeded implements ShouldQueue
                 // auto-refund listens on this event.
                 $this->flagOrder($locked, 'paid_after_expiry');
 
-                event(new LatePaymentReceived($locked));
+                event(new LatePaymentReceived($locked, $amountReceived));
 
                 return;
             }
