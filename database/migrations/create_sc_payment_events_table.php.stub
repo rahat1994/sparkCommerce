@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Webhook event claim table (U12): one row per handled
+     * (gateway, event_id) pair. The unique index is the arbiter that makes
+     * redelivered gateway events exactly-once — the claim INSERT happens in
+     * the same transaction as the event's side effects. Rows older than 30
+     * days are pruned by the scheduled PrunePaymentEvents job.
+     */
+    public function up()
+    {
+        $paymentEventsTableName = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.payment_events_table_name'));
+
+        Schema::create($paymentEventsTableName, function (Blueprint $table) {
+            $table->id();
+            $table->string('gateway');
+            $table->string('event_id');
+            $table->timestamp('created_at')->nullable();
+
+            $table->unique(['gateway', 'event_id']);
+        });
+    }
+
+    public function down()
+    {
+        $paymentEventsTableName = strval(config('sparkcommerce.table_prefix')) . strval(config('sparkcommerce.payment_events_table_name'));
+
+        Schema::dropIfExists($paymentEventsTableName);
+    }
+};

@@ -2,7 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource;
@@ -18,7 +18,7 @@ class ListProducts extends ListRecords
         }
 
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 

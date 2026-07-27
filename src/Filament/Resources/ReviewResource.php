@@ -2,18 +2,25 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use Filament\Forms\Form;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages\CreateReview;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages\EditReview;
+use Rahat1994\SparkCommerce\Filament\Resources\ReviewResource\Pages\ListReviews;
 use Rahat1994\SparkCommerce\Models\SCReview;
 
 class ReviewResource extends Resource
 {
+    use HasSparkCommercePanelAccess;
+
     protected static ?string $model = SCReview::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-star';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-star';
 
     public static function getModelLabel(): string
     {
@@ -39,10 +46,10 @@ class ReviewResource extends Resource
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 //
             ]);
     }
@@ -56,12 +63,12 @@ class ReviewResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -76,9 +83,9 @@ class ReviewResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListReviews::route('/'),
-            'create' => Pages\CreateReview::route('/create'),
-            'edit' => Pages\EditReview::route('/{record}/edit'),
+            'index' => ListReviews::route('/'),
+            'create' => CreateReview::route('/create'),
+            'edit' => EditReview::route('/{record}/edit'),
         ];
     }
 }

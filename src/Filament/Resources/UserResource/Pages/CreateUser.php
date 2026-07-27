@@ -30,10 +30,20 @@ class CreateUser extends CreateRecord
         }
 
         $user = $this->record;
-        $user->assignRole($this->roleName);
 
-        if ($this->roleName === config('sparkcommerce-multivendor.vendor_owner_role')) {
+        if (method_exists($user, 'assignRole')) {
+            $user->assignRole($this->roleName);
+        }
+
+        if ($this->isVendorOwnerRole() && method_exists($user, 'vendors')) {
             $user->vendors()->syncWithoutDetaching($this->vendorIds);
         }
+    }
+
+    protected function isVendorOwnerRole(): bool
+    {
+        return UserResource::isMultivendorInstalled()
+            && filled(config('sparkcommerce.vendor_owner_role'))
+            && $this->roleName === config('sparkcommerce.vendor_owner_role');
     }
 }

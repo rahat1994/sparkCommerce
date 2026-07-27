@@ -2,31 +2,30 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\SpatieTagsInput;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\HtmlString;
 use Rahat1994\SparkCommerce\Concerns\CanInteractWithTenant;
 use Rahat1994\SparkCommerce\Concerns\HasAttributes;
 use Rahat1994\SparkCommerce\Concerns\HasDimension;
 use Rahat1994\SparkCommerce\Concerns\HasInventory;
 use Rahat1994\SparkCommerce\Concerns\HasPrice;
 use Rahat1994\SparkCommerce\Concerns\HasVariation;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\CreateProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\EditProduct;
 use Rahat1994\SparkCommerce\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -41,11 +40,12 @@ class ProductResource extends Resource
     use HasDimension;
     use HasInventory;
     use HasPrice;
+    use HasSparkCommercePanelAccess;
     use HasVariation;
 
     protected static ?string $model = SCProduct::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-gift';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-gift';
 
     public static function table(Table $table): Table
     {
@@ -80,14 +80,14 @@ class ProductResource extends Resource
                 //
             ])
             ->searchable(true)
-            ->actions($actions)
+            ->recordActions($actions)
             ->defaultSort('created_at', 'desc');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Group::make([
                     TextInput::make('name')
                         ->required()
@@ -102,11 +102,6 @@ class ProductResource extends Resource
                     self::getProductDataSection(),
                 ])->columnSpan(3),
                 Group::make([
-                    // Section::make('Publish')->schema([
-                    //     Placeholder::make('Status'),
-                    //     Placeholder::make('Visibility'),
-                    //     Placeholder::make('Publish immediately'),
-                    // ])->grow(false),
                     Section::make('Product Image')->schema([
                         SpatieMediaLibraryFileUpload::make('product_image')
                             ->collection('product_image')
@@ -132,11 +127,22 @@ class ProductResource extends Resource
 
     public static function getShopCategories()
     {
-        if (class_exists('SparkcommerceMultivendor') && $vendorId = Filament::getTenant()) {
-            return SCCategory::where('vendor_id', $vendorId->id)->get()->toArray();
+        if (static::isMultivendorInstalled() && $tenant = Filament::getTenant()) {
+            return SCCategory::where('vendor_id', $tenant->id)->get()->toArray();
         }
 
         return SCCategory::all()->toArray();
+    }
+
+    /**
+     * Detect the multivendor package through config instead of a fragile
+     * facade-alias check: the configured vendor model must exist.
+     */
+    protected static function isMultivendorInstalled(): bool
+    {
+        $vendorModel = config('sparkcommerce.vendor_model');
+
+        return $vendorModel !== null && class_exists($vendorModel);
     }
 
     public static function getProductDimensionFields()
@@ -155,11 +161,8 @@ class ProductResource extends Resource
                 self::getGeneralTab(),
                 self::getInventoryTab(),
                 self::getShippingTab(),
-                self::getLinkedProductsTab(),
                 self::getAttributesTab(),
                 self::getVariationsTab(),
-                self::getAdvancedTab(),
-                self::getMoreOptionsTab(),
             ]);
     }
 
@@ -170,42 +173,6 @@ class ProductResource extends Resource
                 ->hiddenLabel()
                 ->categories(self::getShopCategories()),
         ]);
-    }
-
-    public static function getMoreOptionsTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.more_option'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
-    }
-
-    public static function getAdvancedTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.advanced'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
-    }
-
-    public static function getPricingTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.pricing'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
-    }
-
-    public static function getLinkedProductsTab(): Tab
-    {
-        return Tab::make(__('sparkcommerce::sparkcommerce.resource.product.creation_form.tabs_section.tabs.linked_products'))
-            ->schema([
-                Placeholder::make('Info')
-                    ->content(new HtmlString('<p>Coming Soon</p>')),
-            ]);
     }
 
     public static function getShippingTab(): Tab

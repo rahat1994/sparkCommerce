@@ -2,26 +2,35 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
-use App\Models\User;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages;
-use Rahat1994\SparkcommerceMultivendor\Models\SCMVVendor;
+use Illuminate\Database\Eloquent\Model;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
+use Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages\CreateUser;
+use Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages\EditUser;
+use Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages\ListUsers;
 use Spatie\Permission\Models\Role;
-use STS\FilamentImpersonate\Tables\Actions\Impersonate;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 class UserResource extends Resource
 {
-    protected static ?string $model = User::class;
+    use HasSparkCommercePanelAccess;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
+
+    public static function getModel(): string
+    {
+        return config('auth.providers.users.model');
+    }
 
     public static function getModelLabel(): string
     {
@@ -47,10 +56,10 @@ class UserResource extends Resource
         // return __('filament-user-activity::user-activity.resource.navigation');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema(static::getUserFields());
+        return $schema
+            ->components(static::getUserFields());
     }
 
     public static function table(Table $table): Table
@@ -67,13 +76,13 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
                 Impersonate::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -108,28 +117,49 @@ class UserResource extends Resource
             return $fields;
         }
 
-        return [
-            ...$fields,
-            Select::make('role')
-                ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.role'))
-                ->options(
-                    Role::all()->mapWithKeys(fn (Role $role): array => [$role->name => $role->name])
-                )
-                ->live()
-                ->columnSpan(2),
-            Select::make('vendor_ids')
+        $fields[] = Select::make('role')
+            ->label(__('sparkcommerce::sparkcommerce.resource.user.creation_form.role'))
+            ->options(
+                Role::all()->mapWithKeys(fn (Role $role): array => [$role->name => $role->name])
+            )
+            ->live()
+            ->columnSpan(2);
+
+        if (static::isMultivendorInstalled()) {
+            $isVendorOwnerRole = fn (Get $get): bool => filled(config('sparkcommerce.vendor_owner_role'))
+                && $get('role') === config('sparkcommerce.vendor_owner_role');
+
+            $fields[] = Select::make('vendor_ids')
                 ->label('Vendors')
                 ->multiple()
                 ->searchable()
                 ->preload()
-                ->options(fn (): array => SCMVVendor::query()
-                    ->orderBy('name')
-                    ->pluck('name', 'id')
-                    ->all())
-                ->visible(fn (Get $get): bool => $get('role') === config('sparkcommerce-multivendor.vendor_owner_role'))
-                ->required(fn (Get $get): bool => $get('role') === config('sparkcommerce-multivendor.vendor_owner_role'))
-                ->columnSpan(2),
-        ];
+                ->options(function (): array {
+                    /** @var class-string<Model> $vendorModel */
+                    $vendorModel = config('sparkcommerce.vendor_model');
+
+                    return $vendorModel::query()
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all();
+                })
+                ->visible($isVendorOwnerRole)
+                ->required($isVendorOwnerRole)
+                ->columnSpan(2);
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Detect the multivendor package through config instead of a fragile
+     * facade-alias check: the configured vendor model must exist.
+     */
+    public static function isMultivendorInstalled(): bool
+    {
+        $vendorModel = config('sparkcommerce.vendor_model');
+
+        return $vendorModel !== null && class_exists($vendorModel);
     }
 
     public static function getRelations(): array
@@ -142,9 +172,9 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

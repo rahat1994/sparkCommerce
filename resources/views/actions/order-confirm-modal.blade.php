@@ -142,11 +142,11 @@
         </div>
         <div class="info-row">
             <span class="info-label">Status:</span>
-            <span class="info-value">{{ ucfirst($order->status ?? 'Pending') }}</span>
+            <span class="info-value">{{ $order->status?->getLabel() ?? 'Pending' }}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Payment Status:</span>
-            <span class="info-value">{{ ucfirst($order->payment_status ?? 'Pending') }}</span>
+            <span class="info-value">{{ $order->payment_status?->getLabel() ?? 'Pending' }}</span>
         </div>
         <div class="info-row">
             <span class="info-label">Payment Method:</span>
@@ -279,21 +279,28 @@
                                 }
                             }
                             $quantity = $item['quantity'] ?? 1;
-                            $salePrice = $product->sale_price ?? null;
-                            $regularPrice = $product->regular_price ?? ($item['regular_price'] ?? 0);
+                            // Snapshot orders store the paid unit price in
+                            // integer cents; prefer it over the live product
+                            // so history survives product edits/deletion.
+                            $snapshotUnitPrice = isset($item['unit_amount']) ? $item['unit_amount'] / 100 : null;
+                            $salePrice = $snapshotUnitPrice !== null ? null : ($product->sale_price ?? null);
+                            $regularPrice = $snapshotUnitPrice ?? $product->regular_price ?? ($item['regular_price'] ?? 0);
                             $price = $salePrice ?? $regularPrice;
                             $itemTotal = $price * $quantity;
                             $subtotal += $itemTotal;
                         @endphp
                         <tr>
                             <td>
-                                @if($product)
+                                @if(isset($item['name']))
+                                    {{-- Name captured at purchase time. --}}
+                                    <strong>{{ $item['name'] }}</strong>
+                                @elseif($product)
                                     <strong>{{ $product->name }}</strong>
                                     @if($product->sku)
                                         <br><small>SKU: {{ $product->sku }}</small>
                                     @endif
                                 @else
-                                    {{ $item['name'] ?? ('Product ID: ' . ($item['itemable_id'] ?? 'Unknown')) }}
+                                    {{ 'Product ID: ' . ($item['itemable_id'] ?? 'Unknown') }}
                                 @endif
                             </td>
                             <td>{{ $quantity }}</td>
@@ -319,14 +326,28 @@
     <div class="total-section">
         <h3>Order Summary</h3>
         @php
-            $finalTotal = $order->total_amount ?? $subtotal;
+            // Cents column first; legacy rows fall back to the major-unit
+            // decimal, then to the derived subtotal.
+            $finalTotal = $order->total_amount_cents !== null
+                ? ((int) $order->total_amount_cents->getAmount()) / 100
+                : ($order->total_amount ?? $subtotal);
             $discount = null;
             if ($order->discount) {
                 $discount = is_string($order->discount) ? json_decode($order->discount, true) : $order->discount;
             }
             $discountAmount = 0;
-            if ($discount && isset($discount['discount'])) {
-                $discountAmount = $discount['discount'];
+            if ($discount) {
+                $rawDiscount = $discount['discount'] ?? null;
+
+                if (is_numeric($rawDiscount)) {
+                    // Cart-wide coupon: a plain numeric major-unit discount.
+                    $discountAmount = (float) $rawDiscount;
+                } elseif (isset($discount['amount_cents']) && is_numeric($discount['amount_cents'])) {
+                    // Product-specific coupons store a breakdown ARRAY in
+                    // `discount`; read the integer-cents field checkout always
+                    // records instead of crashing number_format() on the array.
+                    $discountAmount = ((int) $discount['amount_cents']) / 100;
+                }
             }
 
             // Parse shipping fee from meta property
@@ -362,10 +383,10 @@
                <span>Amount after Discount:</span>
                <span>{{ $currency }}{{ number_format(($subtotal - $discountAmount), 2) }}</span>
            </div>
-           @if($discount && isset($discount['total_amount']))
+           @if($discount && isset($discount['total_amount']) && is_numeric($discount['total_amount']))
            <div class="total-row">
                <span>Final Total (from discount breakdown):</span>
-               <span>{{ $currency }}{{ number_format($discount['total_amount'], 2) }}</span>
+               <span>{{ $currency }}{{ number_format((float) $discount['total_amount'], 2) }}</span>
            </div>
            @endif
         @endif

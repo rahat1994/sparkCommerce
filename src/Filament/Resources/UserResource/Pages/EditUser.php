@@ -2,7 +2,7 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources\UserResource\Pages;
 
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Rahat1994\SparkCommerce\Filament\Resources\UserResource;
 
@@ -16,8 +16,13 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['role'] = $this->record->roles()->value('name');
-        $data['vendor_ids'] = $this->record->vendors()->pluck('sc_mv_vendors.id')->all();
+        $data['role'] = method_exists($this->record, 'roles')
+            ? $this->record->roles()->value('name')
+            : null;
+
+        $data['vendor_ids'] = $this->supportsVendors()
+            ? $this->record->vendors()->get()->pluck('id')->all()
+            : [];
 
         return $data;
     }
@@ -34,16 +39,30 @@ class EditUser extends EditRecord
 
     protected function afterSave(): void
     {
+        $supportsRoles = method_exists($this->record, 'syncRoles');
+        $supportsVendors = $this->supportsVendors();
+
         if (! $this->roleName) {
-            $this->record->syncRoles([]);
-            $this->record->vendors()->detach();
+            if ($supportsRoles) {
+                $this->record->syncRoles([]);
+            }
+
+            if ($supportsVendors) {
+                $this->record->vendors()->detach();
+            }
 
             return;
         }
 
-        $this->record->syncRoles([$this->roleName]);
+        if ($supportsRoles) {
+            $this->record->syncRoles([$this->roleName]);
+        }
 
-        if ($this->roleName === config('sparkcommerce-multivendor.vendor_owner_role')) {
+        if (! $supportsVendors) {
+            return;
+        }
+
+        if ($this->isVendorOwnerRole()) {
             $this->record->vendors()->sync($this->vendorIds);
 
             return;
@@ -52,10 +71,22 @@ class EditUser extends EditRecord
         $this->record->vendors()->detach();
     }
 
+    protected function supportsVendors(): bool
+    {
+        return UserResource::isMultivendorInstalled()
+            && method_exists($this->record, 'vendors');
+    }
+
+    protected function isVendorOwnerRole(): bool
+    {
+        return filled(config('sparkcommerce.vendor_owner_role'))
+            && $this->roleName === config('sparkcommerce.vendor_owner_role');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

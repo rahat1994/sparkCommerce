@@ -2,46 +2,55 @@
 
 namespace Rahat1994\SparkCommerce\Filament\Resources;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
-use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages;
+use Rahat1994\SparkCommerce\Filament\Concerns\HasSparkCommercePanelAccess;
+use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages\CreateCoupon;
+use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages\EditCoupon;
+use Rahat1994\SparkCommerce\Filament\Resources\CouponResource\Pages\ListCoupons;
 use Rahat1994\SparkCommerce\Models\SCCoupon;
 
 class CouponResource extends Resource
 {
+    use HasSparkCommercePanelAccess;
+
     protected static ?string $model = SCCoupon::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-bars-4';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bars-4';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('coupon_code')
                     ->label(__('sparkcommerce::sparkcommerce.resource.coupon.creation_form.name'))
                     ->required(),
                 Tabs::make('coupon_data')
                     ->label(__('sparkcommerce::sparkcommerce.resource.coupon.creation_form.coupon_data'))
                     ->tabs([
-                        Tabs\Tab::make('General')
+                        Tab::make('General')
                             ->schema(self::generalTabContent()),
-                        Tabs\Tab::make('Usage restriction')
+                        Tab::make('Usage restriction')
                             ->schema(self::usageRestrictionTabContent()),
-                        Tabs\Tab::make('Usage limits')
+                        Tab::make('Usage limits')
                             ->schema(self::usageLimitTabContent()),
-                        Tabs\Tab::make('Giveaway products')
+                        Tab::make('Giveaway products')
                             ->schema(static::giveawayProductsTabContent()),
-                        Tabs\Tab::make('Exclusions')
+                        Tab::make('Exclusions')
                             ->schema(static::exclusions()),
                     ]),
             ])->columns(1);
@@ -130,13 +139,13 @@ class CouponResource extends Resource
                 TextColumn::make('coupon_amount'),
             ])
             ->filters([])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -151,9 +160,9 @@ class CouponResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCoupons::route('/'),
-            'create' => Pages\CreateCoupon::route('/create'),
-            'edit' => Pages\EditCoupon::route('/{record}/edit'),
+            'index' => ListCoupons::route('/'),
+            'create' => CreateCoupon::route('/create'),
+            'edit' => EditCoupon::route('/{record}/edit'),
         ];
     }
 
